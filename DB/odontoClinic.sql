@@ -1,33 +1,34 @@
 CREATE DATABASE odontoClinic CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 CREATE TABLE usuarios (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  nome VARCHAR(100) NOT NULL,
-  email VARCHAR(100) NOT NULL UNIQUE,
-  senha VARCHAR(255) NOT NULL,
-  cargo INT(5) DEFAULT NULL,
-  telefone VARCHAR(15) DEFAULT NULL,
-  cep VARCHAR(9) DEFAULT NULL,
-  rua VARCHAR(100) DEFAULT NULL,
-  numero VARCHAR(10) DEFAULT NULL,
-  bairro VARCHAR(100) DEFAULT NULL,
-  cidade VARCHAR(100) DEFAULT NULL,
-  estado VARCHAR(2) DEFAULT NULL,
-  foto VARCHAR(255) DEFAULT NULL,
-  ativo TINYINT(1) DEFAULT 1,
-  data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    senha VARCHAR(255) NOT NULL,
+    cargo INT(5) DEFAULT NULL,
+    telefone VARCHAR(15) DEFAULT NULL,
+    cep VARCHAR(9) DEFAULT NULL,
+    rua VARCHAR(100) DEFAULT NULL,
+    numero VARCHAR(10) DEFAULT NULL,
+    bairro VARCHAR(100) DEFAULT NULL,
+    cidade VARCHAR(100) DEFAULT NULL,
+    estado VARCHAR(2) DEFAULT NULL,
+    foto VARCHAR(255) DEFAULT NULL,
+    ativo TINYINT(1) DEFAULT 1,
+    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
 CREATE TABLE cargos (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(50) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
-ALTER TABLE usuarios 
-ADD CONSTRAINT fk_cargo 
-FOREIGN KEY (cargo) REFERENCES cargos(id) 
-ON DELETE SET NULL 
-ON UPDATE CASCADE;
+ALTER TABLE
+    usuarios
+ADD
+    CONSTRAINT fk_cargo FOREIGN KEY (cargo) REFERENCES cargos(id) ON DELETE
+SET
+    NULL ON UPDATE CASCADE;
 
 CREATE TABLE configuracoes (
     id INT PRIMARY KEY AUTO_INCREMENT,
@@ -90,7 +91,7 @@ CREATE TABLE receber (
     id INT PRIMARY KEY AUTO_INCREMENT,
     descricao VARCHAR(100) NOT NULL,
     paciente INT DEFAULT NULL,
-    valor DECIMAL(10,2) DEFAULT NULL,
+    valor DECIMAL(10, 2) DEFAULT NULL,
     data_vencimento DATE DEFAULT NULL,
     data_pagamento DATE NOT NULL,
     data_lancamento DATE DEFAULT NULL,
@@ -100,10 +101,10 @@ CREATE TABLE receber (
     arquivo VARCHAR(100) DEFAULT NULL,
     referencia VARCHAR(30) DEFAULT NULL,
     id_referencia INT DEFAULT NULL,
-    multa DECIMAL(10,2) DEFAULT NULL,
-    juros DECIMAL(10,2) DEFAULT NULL,
-    desconto DECIMAL(10,2) DEFAULT NULL,
-    subtotal DECIMAL(10,2) DEFAULT NULL
+    multa DECIMAL(10, 2) DEFAULT NULL,
+    juros DECIMAL(10, 2) DEFAULT NULL,
+    desconto DECIMAL(10, 2) DEFAULT NULL,
+    subtotal DECIMAL(10, 2) DEFAULT NULL
 );
 
 CREATE TABLE forma_pagamento (
@@ -117,3 +118,21 @@ CREATE TABLE frequencias (
     frequencia VARCHAR(50) NOT NULL,
     dias INT DEFAULT NULL
 );
+
+ALTER TABLE
+    receber
+ADD
+    COLUMN usuario_lanc INT NULL
+AFTER
+    obs,
+ADD
+    COLUMN usuario_pgto INT NULL
+AFTER
+    usuario_lanc;
+
+ALTER TABLE
+    receber
+ADD
+    COLUMN taxa DECIMAL(10, 2) DEFAULT 0.00
+AFTER
+    desconto;

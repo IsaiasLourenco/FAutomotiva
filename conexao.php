@@ -20,10 +20,10 @@ try {
 try {
     // Verifica se a tabela existe antes de consultar
     $check_table = $pdo->query("SHOW TABLES LIKE 'configuracoes'")->fetch();
-    
+
     if ($check_table) {
         $config = $pdo->query("SELECT * FROM configuracoes LIMIT 1")->fetch(PDO::FETCH_ASSOC);
-        
+
         if ($config) {
             // Cria as variáveis a partir dos campos do banco
             extract($config);
@@ -60,4 +60,13 @@ if (!isset($nome_sistema)) {
     $icone = 'ico_padrao.png';
     $logo_rel = 'rel_padrao.jpg';
 }
+
+// | ENDEREÇO FORMATADO
+$endereco_sistema = trim(
+    $rua_sistema . ', ' .
+    $numero_sistema . ' - ' .
+    $bairro_sistema . ' - ' .
+    $cidade_sistema . '/' .
+    $estado_sistema
+);
 ?>

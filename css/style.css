@@ -1,48 +1,48 @@
 body {
-    font-family: 'Montserrat', sans-serif;
-    background: #D8D8D8;
+  font-family: 'Montserrat', sans-serif;
+  background: #D8D8D8;
 }
 
 .login {
-    width: 360px;
-    margin: auto;
-    padding: 8% 0 0;
+  width: 360px;
+  margin: auto;
+  padding: 8% 0 0;
 }
 
 .form {
-    position: relative;
-    z-index: 1;
-    background: #fff;
-    max-width: 360px;
-    margin: 0 auto 100px;
-    padding: 45px;
-    text-align: center;
-    box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgb(0, 0, 0, 0.24);
+  position: relative;
+  z-index: 1;
+  background: #fff;
+  max-width: 360px;
+  margin: 0 auto 100px;
+  padding: 45px;
+  text-align: center;
+  box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgb(0, 0, 0, 0.24);
 }
 
 .form input {
-    outline: 0;
-    width: 100%;
-    border: 0;
-    background-color: #d8d8d8;
-    margin: 0 0 15px;
-    padding: 15px;
-    box-sizing: border-box;
-    font-size: 14px;
+  outline: 0;
+  width: 100%;
+  border: 0;
+  background-color: #d8d8d8;
+  margin: 0 0 15px;
+  padding: 15px;
+  box-sizing: border-box;
+  font-size: 14px;
 }
 
 .form button {
-    text-transform: uppercase;
-    outline: 0;
-    background: #cacaca;
-    width: 100%;
-    border: 0;
-    padding: 15px;
-    font-size: 14px;
-    font-weight: bold;
-    -webkit-transition: all 0.3 ease;
-    transition: all 0.3 ease;
-    cursor: pointer;
+  text-transform: uppercase;
+  outline: 0;
+  background: #cacaca;
+  width: 100%;
+  border: 0;
+  padding: 15px;
+  font-size: 14px;
+  font-weight: bold;
+  -webkit-transition: all 0.3 ease;
+  transition: all 0.3 ease;
+  cursor: pointer;
 }
 
 .logo-img {
@@ -54,50 +54,50 @@ body {
 }
 
 .form button:hover {
-    background: #bab9b9;
+  background: #bab9b9;
 }
 
 .registro {
-    color: #333;
-    font-weight: bold;
+  color: #333;
+  font-weight: bold;
 }
 
 .userLogin {
-    margin-bottom: 20px;
+  margin-bottom: 20px;
 }
 
 .table-primary {
-    padding: 15px;
+  padding: 15px;
 }
 
 .mt-22 {
-    margin-top: 22px;
+  margin-top: 22px;
 }
 
 .ocultar {
-    display: none !important;
+  display: none !important;
 }
 
 .absolute-right {
-    position: absolute;
-    right: 35px;    
+  position: absolute;
+  right: 35px;
 }
 
 .font-permissoes {
-    font-size: 13px;
+  font-size: 13px;
 }
 
 .recuperar a {
-    font-size: 13px;
-    text-align: center;
-    text-decoration: none;
-    color: #333;
-    font-weight: bold;
+  font-size: 13px;
+  text-align: center;
+  text-decoration: none;
+  color: #333;
+  font-weight: bold;
 }
 
 .recuperar {
-    margin-top: 25px;
-    text-align: center;
+  margin-top: 25px;
+  text-align: center;
 }
 
 .centro-pequeno {
@@ -110,4 +110,42 @@ body {
   display: block;
   text-align: center;
   margin-top: 22px;
+}
+
+.conta-nao-paga {
+  background-color: #ffebee !important;
+  border-left: 4px solid #f44336 !important;
+}
+
+.conta-paga {
+  background-color: #e8f5e9 !important;
+  border-left: 4px solid #4caf50 !important;
+}
+
+.conta-nao-paga:hover,
+  .conta-paga:hover {
+  filter: brightness(0.95);
+}
+
+.conta-vencida {
+    background-color: #ffcdd2 !important;  /* Vermelho mais forte */
+    border-left: 4px solid #d32f2f !important;
+    font-weight: 600;
+}
+
+.rodape {
+  width: 100%;
+  padding: 10px;
+  background: #ededed;
+  text-align: center;
+  font-size: 10px;
+  font-weight: bold;
+  color: #363636;
+}
+
+/* ✅ Fonte para mobile */
+@media (max-width: 768px) {
+  .rodape {
+    font-size: 14px;
+  }
 }

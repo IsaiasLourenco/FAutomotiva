@@ -1,3 +1,4 @@
+<link rel="stylesheet" href="../css/style.css">
 <div class="main-page">
 	<div class="col_3">
 		<div class="col-md-3 widget widget1">

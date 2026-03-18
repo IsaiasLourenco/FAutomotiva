@@ -4,6 +4,16 @@
     require_once("verificar.php");
 
     $data_atual = date('Y-m-d');
+    $mes_atual = date('m');
+    $ano_atual = date('Y');
+
+    // ✅ Início e fim do mês atual (considera ano bissexto)
+    $data_inicio_mes = $ano_atual . '-' . $mes_atual . '-01';
+    $data_final_mes = date('Y-m-t', strtotime($data_inicio_mes));
+
+    // ✅ Início e fim do ano atual
+    $data_inicio_ano = $ano_atual . '-01-01';
+    $data_final_ano = $ano_atual . '-12-31';
 
     // Valores padrão: Admin vê tudo
     $home = '';
@@ -382,7 +392,10 @@
                 require_once('paginas/' . $pagina . '.php');
                 ?>
             </div> -->
-
+            <!--footer-->
+            <div class="footer rodape">
+                <?php require_once("footer.php"); ?>
+            </div>
         </div>
 
         <!-- new added graphs chart js-->
@@ -740,7 +753,7 @@
             }
         }
     </script>
-    
+
     <script type="text/javascript">
         function carregarImgPaciente() {
             var target = document.getElementById('target-paciente');
@@ -756,7 +769,7 @@
             }
         }
     </script>
-    
+
     <script type="text/javascript">
         function carregarImgReceber() {
             var target = document.getElementById('target-arquivo');

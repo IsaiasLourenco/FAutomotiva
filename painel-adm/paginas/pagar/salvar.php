@@ -9,14 +9,11 @@ if (!isset($_SESSION['id_user'])) {
     exit;
 }
 
-// ✅ ID do usuário logado
-$id_usuario_logado = $_SESSION['id_user'];
-
 // ✅ Recebe e sanitiza os dados do formulário
 $id                 = @$_POST['id'] ?? 0;
 $descricao          = $_POST['descricao'] ?? '';
 $paciente           = $_POST['paciente'] ?? 0;
-$valor_bruto        = $_POST['valor'] ?? '0';
+$valor_bruto        = $_POST['valor'] ?? '0';  // Ex: "R$ 1.234,56"
 $vencimento         = $_POST['vencimento'] ?? '';
 $data_pagamento     = $_POST['pagamento'] ?? '';
 $forma_pagamento    = $_POST['forma_pagamento'] ?? 0;
@@ -25,21 +22,22 @@ $obs                = $_POST['obs'] ?? '';
 
 // ✅ Converte valor formatado "R$ 1.234,56" → 1234.56 (float para banco)
 $valor_limpo = str_replace(['R$', '.', ','], ['', '', '.'], $valor_bruto);
-$valor_base = floatval($valor_limpo);
+$valor = floatval($valor_limpo);
 
 // ✅ Validações básicas
-if (empty($descricao) || empty($valor_base) || empty($vencimento)) {
+if (empty($descricao) || empty($valor) || empty($vencimento)) {
     echo "Preencha os campos obrigatórios!";
     exit;
 }
 
-// ✅ Upload do arquivo
+// ✅ Upload do arquivo (se enviado)
 $arquivo_nome = '';
 if (isset($_FILES['arquivo']) && $_FILES['arquivo']['error'] === UPLOAD_ERR_OK && !empty($_FILES['arquivo']['name'])) {
-    $extensoes_permitidas = ['jpg', 'jpeg', 'png', 'gif', 'pdf', 'rar', 'zip', 'doc', 'docx', 'webp'];
+    $extensoes_permitidas = ['jpg', 'jpeg', 'png', 'gif', 'pdf'];
     $extensao = strtolower(pathinfo($_FILES['arquivo']['name'], PATHINFO_EXTENSION));
 
     if (in_array($extensao, $extensoes_permitidas)) {
+        // Nome único: evita conflito entre registros
         $arquivo_nome = 'receber_' . time() . '_' . bin2hex(random_bytes(4)) . '.' . $extensao;
         $pasta_destino = realpath(__DIR__ . '/../../images/receber/');
 
@@ -59,56 +57,17 @@ if (isset($_FILES['arquivo']) && $_FILES['arquivo']['error'] === UPLOAD_ERR_OK &
     }
 }
 
-// ✅ CÁLCULO AUTOMÁTICO: multa, juros, desconto e taxa
-$hoje = date('Y-m-d');
-$multa_auto = 0;
-$juros_auto = 0;
-$desconto_auto = 0;
-$taxa_auto = 2.50;  // Taxa fixa padrão (pode ser configurável depois)
-
-// 🔹 MULTA: 2% se vencido e não pago
-if (empty($data_pagamento) && !empty($vencimento) && $vencimento < $hoje) {
-    $multa_auto = $valor_base * 0.02;  // 2% de multa
-}
-
-// 🔹 JUROS: 0,33% ao dia de atraso (máx. 30 dias)
-if (empty($data_pagamento) && !empty($vencimento) && $vencimento < $hoje) {
-    $dias_atraso = max(0, (strtotime($hoje) - strtotime($vencimento)) / 86400);
-    $dias_calculo = min($dias_atraso, 30);  // Limita a 30 dias
-    $juros_auto = $valor_base * 0.0033 * $dias_calculo;  // 0,33% ao dia
-}
-
-// 🔹 DESCONTO: 5% se pago antes do vencimento
-if (!empty($data_pagamento) && !empty($vencimento) && $data_pagamento <= $vencimento) {
-    $desconto_auto = $valor_base * 0.05;  // 5% de desconto
-}
-
-// 🔹 OVERRIDE MANUAL: se o usuário enviou valores, usa eles (prioridade)
-function parseMoeda($valor) {
-    if (empty($valor)) return null;
-    return floatval(str_replace(['R$', '.', ','], ['', '', '.'], $valor));
-}
-
-$multa_final = isset($_POST['multa']) && $_POST['multa'] !== '' ? parseMoeda($_POST['multa']) : $multa_auto;
-$juros_final = isset($_POST['juros']) && $_POST['juros'] !== '' ? parseMoeda($_POST['juros']) : $juros_auto;
-$desconto_final = isset($_POST['desconto']) && $_POST['desconto'] !== '' ? parseMoeda($_POST['desconto']) : $desconto_auto;
-$taxa_final = isset($_POST['taxa']) && $_POST['taxa'] !== '' ? parseMoeda($_POST['taxa']) : $taxa_auto;
-
-// ✅ Subtotal calculado
-$subtotal_final = $valor_base + ($multa_final ?? 0) + ($juros_final ?? 0) + ($taxa_final ?? 0) - ($desconto_final ?? 0);
-
 try {
     if (!empty($id) && $id != 0) {
         // ✅ UPDATE: Atualizar conta existente
         
+        // Monta parte dinâmica: só atualiza data_pagamento se foi preenchida
         $extra_fields = '';
         $extra_binds = [];
         
-        // Atualiza data_pagamento E usuario_pgto SOMENTE se data_pagamento foi preenchida
         if (!empty($data_pagamento)) {
-            $extra_fields .= ", data_pagamento = :data_pagamento, usuario_pgto = :usuario_pgto";
+            $extra_fields .= ", data_pagamento = :data_pagamento";
             $extra_binds[':data_pagamento'] = $data_pagamento;
-            $extra_binds[':usuario_pgto'] = $id_usuario_logado;
         }
         
         if (!empty($arquivo_nome)) {
@@ -123,12 +82,7 @@ try {
             data_vencimento = :data_vencimento,
             forma_pagamento = :forma_pagamento,
             frequencia = :frequencia,
-            obs = :obs,
-            multa = :multa,
-            juros = :juros,
-            desconto = :desconto,
-            taxa = :taxa,
-            subtotal = :subtotal
+            obs = :obs
             $extra_fields
             WHERE id = :id");
         
@@ -136,18 +90,11 @@ try {
         $query->bindValue(":id", $id, PDO::PARAM_INT);
         $query->bindValue(":descricao", $descricao);
         $query->bindValue(":paciente", $paciente, PDO::PARAM_INT);
-        $query->bindValue(":valor", $valor_base, PDO::PARAM_STR);
+        $query->bindValue(":valor", $valor, PDO::PARAM_STR);
         $query->bindValue(":data_vencimento", $vencimento);
         $query->bindValue(":forma_pagamento", $forma_pagamento, PDO::PARAM_INT);
         $query->bindValue(":frequencia", $frequencia, PDO::PARAM_INT);
         $query->bindValue(":obs", $obs);
-        
-        // Bind dos campos financeiros calculados
-        $query->bindValue(":multa", $multa_final, PDO::PARAM_STR);
-        $query->bindValue(":juros", $juros_final, PDO::PARAM_STR);
-        $query->bindValue(":desconto", $desconto_final, PDO::PARAM_STR);
-        $query->bindValue(":taxa", $taxa_final, PDO::PARAM_STR);
-        $query->bindValue(":subtotal", $subtotal_final, PDO::PARAM_STR);
         
         // Bind dos campos opcionais
         foreach ($extra_binds as $key => $value) {
@@ -155,40 +102,27 @@ try {
         }
         
     } else {
-        // ✅ INSERT: Cadastrar nova conta (sempre grava usuario_lanc)
+        // ✅ INSERT: Cadastrar nova conta
         
         $arquivo_final = empty($arquivo_nome) ? "sem-foto.png" : $arquivo_nome;
         
         $query = $pdo->prepare("INSERT INTO $tabela (
             descricao, paciente, valor, data_vencimento, data_lancamento, 
-            data_pagamento, forma_pagamento, frequencia, obs, arquivo,
-            usuario_lanc, usuario_pgto,
-            multa, juros, desconto, taxa, subtotal
+            data_pagamento, forma_pagamento, frequencia, obs, arquivo
         ) VALUES (
             :descricao, :paciente, :valor, :data_vencimento, CURDATE(),
-            :data_pagamento, :forma_pagamento, :frequencia, :obs, :arquivo,
-            :usuario_lanc, :usuario_pgto,
-            :multa, :juros, :desconto, :taxa, :subtotal
+            :data_pagamento, :forma_pagamento, :frequencia, :obs, :arquivo
         )");
         
         $query->bindValue(":descricao", $descricao);
         $query->bindValue(":paciente", $paciente, PDO::PARAM_INT);
-        $query->bindValue(":valor", $valor_base, PDO::PARAM_STR);
+        $query->bindValue(":valor", $valor, PDO::PARAM_STR);
         $query->bindValue(":data_vencimento", $vencimento);
         $query->bindValue(":data_pagamento", !empty($data_pagamento) ? $data_pagamento : '');
         $query->bindValue(":forma_pagamento", $forma_pagamento, PDO::PARAM_INT);
         $query->bindValue(":frequencia", $frequencia, PDO::PARAM_INT);
         $query->bindValue(":obs", $obs);
         $query->bindValue(":arquivo", $arquivo_final);
-        $query->bindValue(":usuario_lanc", $id_usuario_logado, PDO::PARAM_INT);
-        $query->bindValue(":usuario_pgto", !empty($data_pagamento) ? $id_usuario_logado : null, PDO::PARAM_INT);
-        
-        // Bind dos campos financeiros
-        $query->bindValue(":multa", $multa_final, PDO::PARAM_STR);
-        $query->bindValue(":juros", $juros_final, PDO::PARAM_STR);
-        $query->bindValue(":desconto", $desconto_final, PDO::PARAM_STR);
-        $query->bindValue(":taxa", $taxa_final, PDO::PARAM_STR);
-        $query->bindValue(":subtotal", $subtotal_final, PDO::PARAM_STR);
     }
 
     $query->execute();

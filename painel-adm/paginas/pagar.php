@@ -2,7 +2,7 @@
 require_once('../conexao.php');
 require_once('verificar.php');
 
-$pag = 'receber';
+$pag = 'pagar';
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -107,108 +107,29 @@ $pag = 'receber';
 </head>
 
 <body>
-    <!-- ✅ Cabeçalho: Botões + Filtros de Data -->
-    <div class="row mb-3 align-items-center">
 
-        <!-- Botões de Ação (Esquerda) -->
-        <div class="col-md-4 col-sm-12 mb-2 mb-md-0">
-            <!-- Botão Inserir -->
-            <a onclick="inserir()" href="#" class="btn btn-primary mr-3 btn-sm">
-                <span class="fa fa-plus"></span> Conta
-            </a>
+    <a onclick="inserir()" href="#" type="button" class="btn btn-primary">
+        <span class="fa fa-plus"></span>
+        Conta
+    </a>
 
-            <!-- Botão Excluir (dropdown) -->
-            <li class="dropdown head-dpdn2" style="display: inline-block;" id="btn-deletar">
-                <a href="#" class="btn btn-danger dropdown-toggle btn-sm" data-toggle="dropdown">
-                    <span class="fa-solid fa-trash-can"></span>
-                    Excluir Conta
-                </a>
-                <ul class="dropdown-menu">
-                    <li>
-                        <div class="notification_desc2">
-                            <p class="mb-1">Confirmar Exclusão?</p>
-                            <a href="#" onclick="deletarSel()" class="btn btn-danger btn-xs">
-                                <span class="fa fa-check"></span> Sim, Excluir
-                            </a>
-                        </div>
-                    </li>
-                </ul>
+    <li class="dropdown head-dpdn2" style="display: inline-block;" id="btn-deletar">
+        <a href="#" class="btn btn-danger dropdown-toggle" data-toggle="dropdown">
+            <span class="fa-solid fa-trash-can text-whiter"></span>
+            Excluir Conta
+        </a>
+        <ul class="dropdown-menu">
+            <li>
+                <div class="notification_desc2">
+                    <p>Confirmar Exclusão?
+                        <a href="#" onclick="deletarSel()">
+                            <span class="text-danger">Sim</span>
+                        </a>
+                    </p>
+                </div>
             </li>
-        </div>
-
-        <!-- Filtros de Data (Direita) -->
-        <div class="col-md-8 col-sm-12">
-            <div class="row align-items-end">
-                <div class="col-md-3 col-sm-6 mb-2 mb-md-0 btn-sm">
-                    <label class="small text-muted mb-1">De:</label>
-                    <input type="date" name="dataInicial" id="dataInicial" class="form-control" value="<?php echo $data_inicio_mes?>">
-                </div>
-                <div class="col-md-3 col-sm-6 mb-2 mb-md-0 btn-sm">
-                    <label class="small text-muted mb-1">Até:</label>
-                    <input type="date" name="dataFinal" id="dataFinal" class="form-control" value="<?php echo $data_final_mes?>">
-                </div>
-                <div class="col-md-3 col-sm-12 mb-2 mb-md-0 btn-sm">
-                    <label class="small text-muted mb-1">Status:</label>
-                    <select name="pago" id="pago" class="form-control form-control-sm">
-                        <option value="">Todas</option>
-                        <option value="Sim">Pagas</option>
-                        <option value="Não">Pendentes</option>
-                    </select>
-                </div>
-                <div class="col-md-3 col-sm-12 mb-2 mb-md-0">
-                    <label class="small text-muted mb-1">&nbsp;</label>
-                    <button type="button" class="btn btn-primary btn-sm btn-block" onclick="filtrarPorData()">
-                        <span class="fa fa-filter">&nbsp;Filtrar</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-
-    </div>
-
-    <!-- ✅ Script para filtrar por data -->
-    <script type="text/javascript">
-        function filtrarPorData() {
-            var dataDe = $('#filtro-data-de').val();
-            var dataAte = $('#filtro-data-ate').val();
-
-            // Chama a função listar() do ajax.js passando os filtros
-            // Se sua função listar() aceitar parâmetros, use:
-            listar(dataDe, dataAte);
-
-            // Se NÃO aceitar, você pode recarregar a tabela via AJAX customizado:
-            /*
-            $.ajax({
-                url: 'paginas/' + pag + "/listar.php",
-                method: 'POST',
-                data: { data_de: dataDe, data_ate: dataAte },
-                dataType: "html",
-                success: function(result) {
-                    $("#listar").html(result);
-                    // Reinicializa DataTable se necessário
-                    if ($.fn.DataTable.isDataTable('#tabela')) {
-                        $('#tabela').DataTable().destroy();
-                    }
-                    $('#tabela').DataTable({
-                        "ordering": false,
-                        "stateSave": true,
-                        "language": { "url": "https://cdn.datatables.net/plug-ins/1.13.4/i18n/pt-BR.json" },
-                        "columnDefs": [{ "className": "dt-center", "targets": "_all" }]
-                    });
-                    $('#tabela_wrapper').addClass('tabela-pequena');
-                }
-            });
-            */
-        }
-
-        // Opcional: Filtrar ao pressionar Enter nos campos de data
-        $('#filtro-data-de, #filtro-data-ate').on('keypress', function(e) {
-            if (e.which === 13) {
-                e.preventDefault();
-                filtrarPorData();
-            }
-        });
-    </script>
+        </ul>
+    </li>
 
     <div class="bs-example widget-shadow table-primary" id="listar"></div>
 
@@ -223,7 +144,7 @@ $pag = 'receber';
 
 </html>
 
-<!-- Modal Inserir/Editar-->
+<!-- Modal Inserir-->
 <div class="modal fade" id="modalForm" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
@@ -235,7 +156,6 @@ $pag = 'receber';
             </div>
             <form id="form" enctype="multipart/form-data">
                 <div class="modal-body">
-                    <!-- Dados Principais -->
                     <div class="row">
                         <div class="col-md-5">
                             <label for="descricao">Descrição</label>
@@ -261,11 +181,9 @@ $pag = 'receber';
                         </div>
                         <div class="col-md-3">
                             <label for="valor">Valor</label>
-                            <input type="text" class="form-control moeda" id="valor-conta" name="valor" required>
+                            <input type="text" class="form-control" id="valor-conta" name="valor" required>
                         </div>
                     </div>
-
-                    <!-- Datas e Formas -->
                     <div class="row">
                         <div class="col-md-3">
                             <label for="vencimento">Vencimento</label>
@@ -312,8 +230,6 @@ $pag = 'receber';
                             </select>
                         </div>
                     </div>
-
-                    <!-- Observações e Arquivo -->
                     <div class="row">
                         <div class="col-md-5">
                             <label for="obs">Observações</label>
@@ -328,28 +244,6 @@ $pag = 'receber';
                         </div>
                         <input type="hidden" name="id" id="id">
                     </div>
-
-                    <!-- ✅ Ajustes Financeiros (Override Manual) -->
-                    <div class="row mt-3 p-3 bg-light rounded">
-                        <div class="col-12"><b>Ajustes Financeiros (Opcional)</b></div>
-                        <div class="col-md-3 mt-2">
-                            <label>Multa</label>
-                            <input type="text" class="form-control moeda" name="multa" id="multa-perfil" placeholder="Auto">
-                        </div>
-                        <div class="col-md-3 mt-2">
-                            <label>Juros</label>
-                            <input type="text" class="form-control moeda" name="juros" id="juros-perfil" placeholder="Auto">
-                        </div>
-                        <div class="col-md-3 mt-2">
-                            <label>Desconto</label>
-                            <input type="text" class="form-control moeda" name="desconto" id="desconto-perfil" placeholder="Auto">
-                        </div>
-                        <div class="col-md-3 mt-2">
-                            <label>Taxa</label>
-                            <input type="text" class="form-control moeda" name="taxa" id="taxa-perfil" placeholder="R$ 2,50">
-                        </div>
-                    </div>
-
                     <div id="mensagem" class="centro-pequeno"></div>
                 </div>
                 <div class="modal-footer centro">
@@ -359,7 +253,7 @@ $pag = 'receber';
         </div>
     </div>
 </div>
-<!-- Fim Modal Inserir/Editar-->
+<!-- Fim Modal Inserir-->
 
 <!-- Modal Dados (Visualizar)-->
 <div class="modal fade" id="modalDados" tabindex="-1" role="dialog" aria-hidden="true">
@@ -432,12 +326,12 @@ $pag = 'receber';
                         <a id="link-arquivo-dados" href="#" target="_blank" class="btn btn-sm btn-outline-primary mt-1">
                             <i class="fa fa-eye"></i> Visualizar Arquivo
                         </a>
-                        <img id="target-arquivo-dados" src="./images/receber/sem-foto.png"
+                        <img id="target-arquivo-dados" src="images/receber/sem-foto.png"
                             alt="Comprovante" class="mt-2" style="max-width: 200px; border-radius: 4px;">
                     </div>
                 </div>
 
-                <!-- Dados Financeiros (Multa/Juros/Desconto/Taxa) -->
+                <!-- Dados Financeiros (Multa/Juros/Desconto) -->
                 <div class="row bg-light p-2 rounded">
                     <div class="col-md-3">
                         <small class="text-muted">Multa</small><br>
@@ -452,27 +346,8 @@ $pag = 'receber';
                         <span id="desconto_dados-cli" class="font-weight-bold"></span>
                     </div>
                     <div class="col-md-3">
-                        <small class="text-muted">Taxa</small><br>
-                        <span id="taxa_dados-cli" class="font-weight-bold"></span>
-                    </div>
-                </div>
-
-                <!-- Subtotal (destacado) -->
-                <div class="row mt-2 bg-success text-white p-2 rounded text-center">
-                    <div class="col-12">
-                        <b>Subtotal:</b> <span id="subtotal_dados-cli" class="font-weight-bold"></span>
-                    </div>
-                </div>
-
-                <!-- Usuários (Lançamento e Pagamento) -->
-                <div class="row bg-light p-2 rounded mt-2">
-                    <div class="col-md-6">
-                        <small class="text-muted">Lançado por:</small><br>
-                        <span id="usuario_lanc_dados-cli" class="font-weight-bold"></span>
-                    </div>
-                    <div class="col-md-6">
-                        <small class="text-muted">Baixa por:</small><br>
-                        <span id="usuario_pgto_dados-cli" class="font-weight-bold"></span>
+                        <small class="text-muted">Subtotal</small><br>
+                        <span id="subtotal_dados-cli" class="font-weight-bold text-success"></span>
                     </div>
                 </div>
 
@@ -496,7 +371,7 @@ $pag = 'receber';
 
 <script src="../js/ajax.js"></script>
 
-<!-- ✅ Função para formatar moeda brasileira -->
+<!-- Função para formatar o valor para moeda brasileira -->
 <script>
     function formatarMoedaInput(input) {
         let valor = input.value.replace(/\D/g, ""); // só números
@@ -506,23 +381,9 @@ $pag = 'receber';
         input.value = "R$ " + valor;
     }
 
-    // Aplicar formatação ao campo principal
-    document.getElementById("valor-conta")?.addEventListener("input", function() {
+    // Aplicar nos inputs
+    document.getElementById("valor-conta").addEventListener("input", function() {
         formatarMoedaInput(this);
     });
-
-    // ✅ Aplicar formatação a TODOS os inputs com classe "moeda"
-    document.addEventListener("DOMContentLoaded", function() {
-        document.querySelectorAll(".moeda").forEach(input => {
-            input.addEventListener("input", function() {
-                formatarMoedaInput(this);
-            });
-            // Formata também ao perder o foco (blur)
-            input.addEventListener("blur", function() {
-                if (this.value.trim() === "" || this.value === "R$ ") {
-                    this.value = "R$ 0,00";
-                }
-            });
-        });
-    });
 </script>
+<!-- Fim Função para formatar o valor para moeda brasileira -->

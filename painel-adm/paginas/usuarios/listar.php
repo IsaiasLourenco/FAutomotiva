@@ -16,9 +16,9 @@ if ($linhas > 0) {
 	        <tr> 
 
 	            <th>Nome</th>	
-	            <th class="esc">Telefone</th>	    
+	            <th>Telefone</th>	    
 	            <th class="esc">Email</th>	
-	            <th class="esc">Nível</th>	
+	            <th>Nível</th>	
 	            <th class="esc">Foto</th>	
 	            <th>Ações</th>
 
@@ -81,9 +81,9 @@ HTML;
                     <input type="checkbox" id="seletor-{$id}" class="form-check-input" onchange="selecionar('{$id}')">
                         {$nome}
                 </td>
-                <td class="esc">{$telefone}</td>
+                <td>{$telefone}</td>
                 <td class="esc">{$email}</td>
-                <td class="esc">{$cargo_nome}</td>
+                <td>{$cargo_nome}</td>
                 <td class="esc"><img src="images/perfil/{$foto}" width="25px"></td>
                 <td>
 	                <a href="#" onclick="editar('{$id}',

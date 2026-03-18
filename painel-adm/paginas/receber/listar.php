@@ -2,161 +2,225 @@
 $tabela = 'receber';
 require_once("../../../conexao.php");
 
+// ✅ Função para escapar strings para uso em onclick do JavaScript
+function js_escape($str) {
+    if ($str === null) return '';
+    return str_replace(["'", "\\", "\n", "\r", '"'], ["\\'", "\\\\", "\\n", "\\r", '\"'], (string)$str);
+}
+
 $query = $pdo->query("SELECT * FROM $tabela ORDER BY id DESC");
 $res = $query->fetchAll(PDO::FETCH_ASSOC);
 $linhas = @count($res);
+
 if ($linhas > 0) {
-
     echo <<<HTML
-
-	<table class="table table-hover tabela-pequena" id="tabela">
-
-	    <thead> 
-
-	        <tr> 
-
-	            <th>Descrição</th>	
-	            <th class="esc">Paciente</th>	    
-	            <th class="esc">Data Lançamento</th>	
-	            <th class="esc">Data Pagmento</th>	
-	            <th class="esc">Valor</th>	
-	            <th class="esc">Arquivo</th>	
-	            <th>Ações</th>
-
-	        </tr> 
-
-	    </thead> 
-
-	    <tbody>	
-
+    <table class="table table-hover tabela-pequena" id="tabela">
+        <thead> 
+            <tr> 
+                <th>Descrição</th>	
+                <th>Paciente</th>	    
+                <th>Data Lançamento</th>	
+                <th class="esc">Data Pagamento</th>	
+                <th>Valor</th>	
+                <th class="esc">Arquivo</th>	
+                <th>Ações</th>
+            </tr> 
+        </thead> 
+        <tbody>	
 HTML;
 
     for ($i = 0; $i < $linhas; $i++) {
+        // Dados brutos do banco
         $id                 = $res[$i]['id'];
         $descricao          = $res[$i]['descricao'];
-        $paciente           = $res[$i]['paciente'];
+        $paciente_id        = $res[$i]['paciente'];
         $valor              = $res[$i]['valor'];
-        $valorF             = number_format('R$' . $valor, 2, ',', '.');
         $data_vencimento    = $res[$i]['data_vencimento'];
-        $data_vencimentoF   = date('d/m/Y', strtotime($data_vencimento));
         $data_lancamento    = $res[$i]['data_lancamento'];
-        $data_lancamentoF = date('d/m/Y', strtotime($data_lancamento));
         $data_pagamento     = $res[$i]['data_pagamento'];
-        $data_pagamentoF    = date('d/m/Y', strtotime($data_pagamento));
-        $forma_pagamento    = $res[$i]['forma_pagamento'];
-        $frequencia         = $res[$i]['frequencia'];
+        $forma_pagamento_id = $res[$i]['forma_pagamento'];
+        $frequencia_id      = $res[$i]['frequencia'];
         $obs                = $res[$i]['obs'];
         $arquivo            = $res[$i]['arquivo'];
         $referencia         = $res[$i]['referencia'];
         $id_referencia      = $res[$i]['id_referencia'];
-        $multa              = $res[$i]['multa'];
-        $juros              = $res[$i]['juros'];
-        $desconto           = $res[$i]['desconto'];
-        $subtotal           = $res[$i]['subtotal'];
+        $multa              = $res[$i]['multa'] ?? 0;
+        $juros              = $res[$i]['juros'] ?? 0;
+        $desconto           = $res[$i]['desconto'] ?? 0;
+        $taxa               = $res[$i]['taxa'] ?? 0;
+        $subtotal           = $res[$i]['subtotal'] ?? 0;
 
-        $paciente = $pdo->prepare("SELECT * FROM pacientes WHERE id = :paciente");
-        $paciente->bindValue(":id", $paciente);
-        $paciente->execute();
-        $res_paciente = $paciente->fetchAll(PDO::FETCH_ASSOC);
-        $paciente_nome = $res_paciente[0]['nome'] ?? 'Paciente Desconhecido';
+        // Formatações para exibição
+        $valorF = 'R$ ' . number_format($valor, 2, ',', '.');
+        $multaF = $multa > 0 ? 'R$ ' . number_format($multa, 2, ',', '.') : '-';
+        $jurosF = $juros > 0 ? 'R$ ' . number_format($juros, 2, ',', '.') : '-';
+        $descontoF = $desconto > 0 ? '- R$ ' . number_format($desconto, 2, ',', '.') : '-';
+        $taxaF = $taxa > 0 ? 'R$ ' . number_format($taxa, 2, ',', '.') : '-';
+        $subtotalF = 'R$ ' . number_format($subtotal, 2, ',', '.');
         
-        $consultar_nome_frequencia = $pdo->prepare("SELECT * FROM frequencias WHERE id = :frequencia");
-        $consultar_nome_frequencia->bindValue(":id", $frequencia);
-        $consultar_nome_frequencia->execute();
-        $res_frequencia = $consultar_nome_frequencia->fetchAll(PDO::FETCH_ASSOC);
-        $frequencia_nome = $res_frequencia[0]['nome'] ?? 'Frequência Desconhecida';
+        $data_vencimentoF = (!empty($data_vencimento) && $data_vencimento != '0000-00-00') 
+            ? date('d/m/Y', strtotime($data_vencimento)) : '-';
+        $data_lancamentoF = (!empty($data_lancamento) && $data_lancamento != '0000-00-00') 
+            ? date('d/m/Y', strtotime($data_lancamento)) : '-';
+        $data_pagamentoF_tabela = (!empty($data_pagamento) && $data_pagamento != '0000-00-00') 
+            ? date('d/m/Y', strtotime($data_pagamento)) : '<span class="text-muted">Não pago</span>';
+        $data_pagamentoF_js = (!empty($data_pagamento) && $data_pagamento != '0000-00-00') 
+            ? date('d/m/Y', strtotime($data_pagamento)) : 'Não pago';
         
-        $consultar_nome_forma = $pdo->prepare("SELECT * FROM forma_pagamento WHERE id = :forma_pagamento");
-        $consultar_nome_forma->bindValue(":id", $forma_pagamento);
-        $consultar_nome_forma->execute();
-        $res_forma = $consultar_nome_forma->fetchAll(PDO::FETCH_ASSOC);
-        $forma_pagamento_nome = $res_forma[0]['nome'] ?? 'Forma de Pagamento Desconhecida';
+        // Datas no formato ISO para inputs type="date"
+        $data_vencimento_iso = (!empty($data_vencimento) && $data_vencimento != '0000-00-00') 
+            ? date('Y-m-d', strtotime($data_vencimento)) : '';
+        $data_pagamento_iso = (!empty($data_pagamento) && $data_pagamento != '0000-00-00') 
+            ? date('Y-m-d', strtotime($data_pagamento)) : '';
 
+        // ✅ Define classe CSS com PRIORIDADE: vencida > não paga > paga
+        if (!empty($data_pagamento) && $data_pagamento != '0000-00-00') {
+            $classe_status = 'conta-paga';
+        } elseif (!empty($data_vencimento) && $data_vencimento < date('Y-m-d')) {
+            $classe_status = 'conta-vencida';  // ← Vermelho forte para vencidas
+        } else {
+            $classe_status = 'conta-nao-paga';  // ← Vermelho claro para em aberto
+        }
 
+        // Busca nomes das tabelas relacionadas
+        $qp = $pdo->prepare("SELECT nome FROM pacientes WHERE id = :id LIMIT 1");
+        $qp->bindValue(":id", $paciente_id, PDO::PARAM_INT);
+        $qp->execute();
+        $paciente_nome = ($rp = $qp->fetch(PDO::FETCH_ASSOC)) ? $rp['nome'] : 'Paciente Desconhecido';
+
+        $qf = $pdo->prepare("SELECT frequencia FROM frequencias WHERE id = :id LIMIT 1");
+        $qf->bindValue(":id", $frequencia_id, PDO::PARAM_INT);
+        $qf->execute();
+        $frequencia_nome = ($rf = $qf->fetch(PDO::FETCH_ASSOC)) ? $rf['frequencia'] : 'Frequência Desconhecida';
+
+        $qfp = $pdo->prepare("SELECT nome FROM forma_pagamento WHERE id = :id LIMIT 1");
+        $qfp->bindValue(":id", $forma_pagamento_id, PDO::PARAM_INT);
+        $qfp->execute();
+        $forma_pagamento_nome = ($rfp = $qfp->fetch(PDO::FETCH_ASSOC)) ? $rfp['nome'] : 'Forma de Pagamento Desconhecida';
+
+        // ✅ Busca nome do usuário que lançou
+        $usuario_lanc_id = $res[$i]['usuario_lanc'] ?? null;
+        $usuario_lanc_nome = 'Não informado';
+        if ($usuario_lanc_id) {
+            $qu = $pdo->prepare("SELECT nome FROM usuarios WHERE id = :id LIMIT 1");
+            $qu->execute([":id" => $usuario_lanc_id]);
+            $ru = $qu->fetch(PDO::FETCH_ASSOC);
+            $usuario_lanc_nome = $ru['nome'] ?? 'Não encontrado';
+        }
+
+        // ✅ Busca nome do usuário que deu baixa
+        $usuario_pgto_id = $res[$i]['usuario_pgto'] ?? null;
+        $usuario_pgto_nome = 'Não pago';
+        if ($usuario_pgto_id) {
+            $qu2 = $pdo->prepare("SELECT nome FROM usuarios WHERE id = :id LIMIT 1");
+            $qu2->execute([":id" => $usuario_pgto_id]);
+            $ru2 = $qu2->fetch(PDO::FETCH_ASSOC);
+            $usuario_pgto_nome = $ru2['nome'] ?? 'Não encontrado';
+        }
+
+        // ✅ APLICA js_escape() DEPOIS da definição (ORDEM CORRETA)
+        $e_descricao = js_escape($descricao);
+        $e_paciente_nome = js_escape($paciente_nome);
+        $e_valorF = js_escape($valorF);
+        $e_multaF = js_escape($multaF);
+        $e_jurosF = js_escape($jurosF);
+        $e_descontoF = js_escape($descontoF);
+        $e_taxaF = js_escape($taxaF);  // ← ✅ NOVO: escape da taxa
+        $e_subtotalF = js_escape($subtotalF);
+        $e_data_vencimentoF = js_escape($data_vencimentoF);
+        $e_data_lancamentoF = js_escape($data_lancamentoF);
+        $e_data_pagamentoF_js = js_escape($data_pagamentoF_js);
+        $e_data_vencimento_iso = js_escape($data_vencimento_iso);
+        $e_data_pagamento_iso = js_escape($data_pagamento_iso);
+        $e_forma_pagamento_nome = js_escape($forma_pagamento_nome);
+        $e_frequencia_nome = js_escape($frequencia_nome);
+        $e_obs = js_escape($obs);
+        $e_arquivo = js_escape($arquivo);
+        $e_referencia = js_escape($referencia);
+        $e_id_referencia = js_escape($id_referencia);
+        $e_usuario_lanc_nome = js_escape($usuario_lanc_nome);
+        $e_usuario_pgto_nome = js_escape($usuario_pgto_nome);
+
+        // Output da linha
         echo <<<HTML
-            <tr style="color:{$classe_ativo}">
+            <tr class="{$classe_status}">
                 <td>
                     <input type="checkbox" id="seletor-{$id}" class="form-check-input" onchange="selecionar('{$id}')">
-                        {$descricao}
+                    {$descricao}
                 </td>
-                <td class="esc">{$paciente_nome}</td>
-                <td class="esc">{$data_lancamentoF}</td>
-                <td class="esc">{$data_pagamentoF}</td>
-                <td class="esc">{$valorF}</td>
-                <td class="esc"><img src="images/receber/{$arquivo}" width="25px"></td>
+                <td>{$paciente_nome}</td>
+                <td>{$data_lancamentoF}</td>
+                <td class="esc">{$data_pagamentoF_tabela}</td>
+                <td>{$valorF}</td>
+                <td class="esc"><a href="images/receber/{$arquivo}" target="_blank"><img src="images/receber/{$arquivo}" width="25px"></a></td>
                 <td>
-	                <a href="#" onclick="editar('{$id}',
-                                                '{$descricao}',
-                                                '{$paciente_nome}',
-                                                '{$valorF}',
-                                                '{$data_vencimentoF}',
-                                                '{$data_lancamentoF}',
-                                                '{$data_pagamentoF}',
-                                                '{$forma_pagamento_nome}',
-                                                '{$frequencia_nome}',
-                                                '{$obs}',
-                                                '{$arquivo}',
-                                                '{$referencia}',
-                                                '{$id_referencia}',
-                                                '{$multa}',
-                                                '{$juros}',
-                                                '{$desconto}',
-                                                '{$subtotal}')" title="Editar Dados">
-                                                    <i class="fa fa-edit text-primary ico-grande"></i>
+                    <!-- Botão Editar -->
+                    <a href="#" onclick="editar(
+                        '{$id}',
+                        '{$e_descricao}',
+                        '{$paciente_id}',
+                        '{$e_valorF}',
+                        '{$e_data_vencimento_iso}',
+                        '{$e_data_lancamentoF}',
+                        '{$e_data_pagamento_iso}',
+                        '{$forma_pagamento_id}',
+                        '{$frequencia_id}',
+                        '{$e_obs}',
+                        '{$e_arquivo}',
+                        '{$e_multaF}',
+                        '{$e_jurosF}',
+                        '{$e_descontoF}',
+                        '{$e_taxaF}',
+                        '{$e_subtotalF}'
+                    )" title="Editar Dados">
+                        <i class="fa fa-edit text-primary ico-grande"></i>
                     </a>
 
-	                <li class="dropdown head-dpdn2" style="display: inline-block;">
-		                <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false" title="Excluir Registro">
+                    <!-- Botão Excluir -->
+                    <li class="dropdown head-dpdn2" style="display: inline-block;">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false" title="Excluir Registro">
                             <i class="fa-solid fa-trash-can text-danger ico-grande"></i>
                         </a>
-
-		                <ul class="dropdown-menu" style="margin-left:-230px;">
-
-		                    <li>
-		                        <div class="notification_desc2">
-		                            <p>Confirmar Exclusão? 
+                        <ul class="dropdown-menu" style="margin-left:-230px;">
+                            <li>
+                                <div class="notification_desc2">
+                                    <p>Confirmar Exclusão? 
                                         <a href="#" onclick="excluir('{$id}')">
                                             <span class="text-danger">Sim</span>
                                         </a>
                                     </p>
-		                        </div>
-		                    </li>										
-		                </ul>
+                                </div>
+                            </li>										
+                        </ul>
                     </li>
 
-                    <a href="#" onclick="mostrar('{$descricao}',
-                                                 '{$paciente_nome}',
-                                                 '{$valorF}',
-                                                 '{$data_vencimentoF}',
-                                                 '{$data_lancamentoF}',
-                                                 '{$data_pagamentoF}',
-                                                 '{$forma_pagamento_nome}',
-                                                 '{$frequencia_nome}',
-                                                 '{$obs}',
-                                                 '{$arquivo}',
-                                                 '{$referencia}',
-                                                 '{$id_referencia}',
-                                                 '{$multa}',
-                                                 '{$juros}',
-                                                 '{$desconto}',
-                                                 '{$subtotal}')" title="Mostrar Dados">
-                                                    <i class="fa fa-info-circle text-dark ico-grande"></i>
+                    <!-- Botão Mostrar -->
+                    <a href="#" onclick="mostrar(
+                        '{$e_descricao}',
+                        '{$e_paciente_nome}',
+                        '{$e_valorF}',
+                        '{$e_data_vencimentoF}',
+                        '{$e_data_lancamentoF}',
+                        '{$e_data_pagamentoF_js}',
+                        '{$e_forma_pagamento_nome}',
+                        '{$e_frequencia_nome}',
+                        '{$e_obs}',
+                        '{$e_arquivo}',
+                        '{$e_multaF}',
+                        '{$e_jurosF}',
+                        '{$e_descontoF}',
+                        '{$e_taxaF}',
+                        '{$e_subtotalF}',
+                        '{$e_usuario_lanc_nome}',
+                        '{$e_usuario_pgto_nome}'
+                    )" title="Mostrar Dados">
+                        <i class="fa fa-info-circle text-dark ico-grande"></i>
                     </a>
-
-                    <a href="#" onclick="ativar('{$id}', 
-                                                '{$acao}')" title="{$titulo_link}">
-                                                    <i class="fa {$icone} text-success ico-grande"></i>
-                    </a>
-
-                    <a class="{$mostrar_adm}" href="#" onclick="permissoes('{$id}', 
-                                                                           '{$descricao}')" title="Dar Permissões">
-                                                                                    <i class="fa fa-lock text-success ico-grande"></i>
-                    </a>
-
                 </td>
             </tr>
 HTML;
     }
+    
     echo <<<HTML
         </tbody>
         <div class="centro-pequeno" id="mensagem-excluir"></div>
@@ -166,6 +230,32 @@ HTML;
     echo 'Nenhum Registro Encontrado!';
 }
 ?>
+
+<!-- ✅ CSS com prioridade correta para status visual -->
+<style>
+    /* === Seus estilos existentes do DataTables === */
+    
+    /* ✅ Status visual das contas - PRIORIDADE: vencida > não paga > paga */
+    .conta-paga {
+        background-color: #e8f5e9 !important;      /* Verde claro */
+        border-left: 4px solid #4caf50 !important;
+    }
+    .conta-nao-paga {
+        background-color: #ffebee !important;      /* Vermelho claro */
+        border-left: 4px solid #f44336 !important;
+    }
+    .conta-vencida {
+        background-color: #ffcdd2 !important;      /* Vermelho MAIS FORTE */
+        border-left: 4px solid #d32f2f !important;
+        font-weight: 600;
+    }
+    /* Hover mantém a cor de fundo */
+    .conta-paga:hover,
+    .conta-nao-paga:hover,
+    .conta-vencida:hover {
+        filter: brightness(0.95);
+    }
+</style>
 
 <script>
     $(document).ready(function() {
@@ -181,30 +271,13 @@ HTML;
                 "targets": "_all"
             }]
         });
-
-        // ✅ Aplica a classe .tabela-pequena no wrapper do DataTables
         $('#tabela_wrapper').addClass('tabela-pequena');
     });
 </script>
-'{$descricao}',
-                                                 '{$paciente_nome}',
-                                                 '{$valorF}',
-                                                 '{$data_vencimentoF}',
-                                                 '{$data_lancamentoF}',
-                                                 '{$data_pagamentoF}',
-                                                 '{$forma_pagamento_nome}',
-                                                 '{$frequencia_nome}',
-                                                 '{$obs}',
-                                                 '{$arquivo}',
-                                                 '{$referencia}',
-                                                 '{$id_referencia}',
-                                                 '{$multa}',
-                                                 '{$juros}',
-                                                 '{$desconto}',
-                                                 '{$subtotal}'
+
 <script type="text/javascript">
-    function editar(id, descricao, paciente, valor, data_vencimento, data_lancamento, data_pagamento, forma_pagamento, frequencia, obs, arquivo, referencia, 
-                    id_referencia, multa, juros, desconto, subtotal) {
+    // ✅ Função editar() atualizada para receber "taxa"
+    function editar(id, descricao, paciente, valor, data_vencimento, data_lancamento, data_pagamento, forma_pagamento, frequencia, obs, arquivo, multa, juros, desconto, taxa, subtotal) {
         $('#mensagem').text('');
         $('#titulo_inserir').text('Editar Registro');
 
@@ -213,128 +286,105 @@ HTML;
         $('#paciente-perfil').val(paciente);
         $('#valor-conta').val(valor);
         $('#vencimento-conta').val(data_vencimento);
-        $('#lancamento-conta').val(data_lancamento);
         $('#pagamento-conta').val(data_pagamento);
         $('#forma_pagamento').val(forma_pagamento);
         $('#frequencia').val(frequencia);
         $('#obs-perfil').val(obs);
-        $('#arquivo-conta').val(arquivo);
-        $('#referencia-perfil').val(referencia);
-        $('#id-referencia-perfil').val(id_referencia);
-        $('#multa').val(multa);
-        $('#juros').val(juros);
-        $('#desconto').val(desconto);
-        $('#subtotal').val(subtotal);
+        
+        // ✅ Campos financeiros (para override manual)
+        if (typeof $('#multa-perfil').val !== 'undefined') $('#multa-perfil').val(multa !== '-' ? multa : '');
+        if (typeof $('#juros-perfil').val !== 'undefined') $('#juros-perfil').val(juros !== '-' ? juros : '');
+        if (typeof $('#desconto-perfil').val !== 'undefined') $('#desconto-perfil').val(desconto !== '-' ? desconto.replace('- R$ ', '-') : '');
+        if (typeof $('#taxa-perfil').val !== 'undefined') $('#taxa-perfil').val(taxa !== '-' ? taxa : '');
 
-        $('#target-arquivo').attr("src", "images/receber/" + arquivo);
+        if (arquivo && arquivo !== 'sem-foto.png') {
+            $('#target-arquivo').attr("src", "./images/receber/" + arquivo);
+        } else {
+            $('#target-arquivo').attr("src", "./images/receber/sem-foto.png");
+        }
 
-        // Abre o modal
-        $('#modalForm').modal('show'); // Ou $('#modalPerfil').modal('show') se for o mesmo modal
+        $('#modalForm').modal('show');
     }
 
-    function mostrar(descricao, paciente, valor, data_vencimento, data_lancamento, data_pagamento, forma_pagamento, frequencia, obs, arquivo, referencia, 
-                    id_referencia, multa, juros, desconto, subtotal) {
-
-        // Dados básicos
+    // ✅ Função mostrar() com exibição da taxa
+    function mostrar(descricao, paciente, valor, data_vencimento, data_lancamento, data_pagamento,
+        forma_pagamento, frequencia, obs, arquivo, multa, juros, desconto, taxa, subtotal, usuario_lanc, usuario_pgto) {
+        
+        $('#titulo_dados').text('Detalhes: ' + descricao);
         $('#descricao_dados-cli').text(descricao);
         $('#paciente_dados-cli').text(paciente);
         $('#valor_dados-cli').text(valor);
-        $('#vencimento_dados-cli').text(data_vencimento);
-        $('#lancamento_dados-cli').text(data_lancamento);
-        $('#pagamento_dados-cli').text(data_pagamento);
+        
+        $('#vencimento_dados-cli').text(data_vencimento && data_vencimento !== '-' ? data_vencimento : '-');
+        $('#lancamento_dados-cli').text(data_lancamento && data_lancamento !== '-' ? data_lancamento : '-');
+        $('#pagamento_dados-cli').text(data_pagamento && data_pagamento !== 'Não pago' ? data_pagamento : 'Não pago');
+        
         $('#forma_pagamento_dados-cli').text(forma_pagamento);
         $('#frequencia_dados-cli').text(frequencia);
-        $('#obs_dados-cli').text(obs);
-        $('#referencia_dados-cli').text(referencia);
+        $('#obs_dados-cli').text(obs || '-');
+        
+        // ✅ Dados financeiros no modal de visualização
         $('#multa_dados-cli').text(multa);
         $('#juros_dados-cli').text(juros);
         $('#desconto_dados-cli').text(desconto);
+        $('#taxa_dados-cli').text(taxa);  // ← ✅ Exibe a taxa
         $('#subtotal_dados-cli').text(subtotal);
-
-        // Arquivo
-        if (arquivo && arquivo !== 'sem-arquivo.jpg') {
-            $('#target-arquivo-dados').attr('src', 'images/receber/' + arquivo);
-            $('#link-arquivo-dados').attr('href', 'images/receber/' + arquivo).show();
+        
+        if (arquivo && arquivo !== 'sem-foto.png' && arquivo !== '') {
+            $('#target-arquivo-dados').attr('src', './images/receber/' + arquivo).show();
+            $('#link-arquivo-dados').attr('href', './images/receber/' + arquivo).show();
         } else {
-            $('#target_arquivo').attr('src', 'images/receber/sem-arquivo.jpg');
+            $('#target-arquivo-dados').attr('src', './images/receber/sem-foto.png');
             $('#link-arquivo-dados').hide();
         }
-
-        // Foto (opcional, se quiser exibir)
-        // ✅ Atualiza a foto
-        if (arquivo && arquivo !== 'sem-foto.png') {
-            $('#target_arquivo').attr('src', 'images/receber/' + arquivo);
-        } else {
-            $('#target_arquivo').attr('src', 'images/receber/sem-foto.jpg');
-        }
-
-        // Abre o modal CORRETO
+        
+        // ✅ Usuários (Lançamento e Pagamento)
+        $('#usuario_lanc_dados-cli').text(usuario_lanc);
+        $('#usuario_pgto_dados-cli').text(usuario_pgto);
+        
         $('#modalDados').modal('show');
     }
 
     function limparCampos() {
-        $('#id').val('');
-        $('#descricao-perfil').val('');
-        $('#paciente-perfil').val('');
-        $('#valor-conta').val('');
-        $('#vencimento-conta').val('');
-        $('#lancamento-conta').val('');
-        $('#pagamento-conta').val('');
-        $('#forma_pagamento').val('');
-        $('#frequencia').val('');
-        $('#obs-perfil').val('');
+        $('#id, #descricao-perfil, #paciente-perfil, #valor-conta, #vencimento-conta, #pagamento-conta, #forma_pagamento, #frequencia, #obs-perfil').val('');
+        if (typeof $('#multa-perfil').val !== 'undefined') $('#multa-perfil, #juros-perfil, #desconto-perfil, #taxa-perfil').val('');
         $('#arquivo-conta').val('');
-        $('#referencia-perfil').val('');
-        $('#id-referencia-perfil').val('');
-        $('#multa').val('');
-        $('#juros').val('');
-        $('#desconto').val('');
-        $('#subtotal').val('');
-
-        // Foto (reseta input file e preview)
-        $('#arquivo-conta').val('');
-        $('#target-arquivo').attr('src', 'images/receber/sem-foto.jpg');
-
-        // Mensagem de erro/sucesso
+        $('#target-arquivo').attr('src', './images/receber/sem-foto.png');
         $('#mensagem').text('').removeClass('text-danger');
     }
 
     function selecionar(id) {
-
         var ids = $('#ids').val();
-
-        if ($('#seletor-' + id).is(":checked") == true) {
-            var novo_id = ids + id + '-';
-            $('#ids').val(novo_id);
+        if ($('#seletor-' + id).is(":checked")) {
+            $('#ids').val(ids + id + '-');
         } else {
-            var retirar = ids.replace(id + '-', '');
-            $('#ids').val(retirar);
+            $('#ids').val(ids.replace(id + '-', ''));
         }
-
-        var ids_final = $('#ids').val();
-        if (ids_final == "") {
-            $('#btn-deletar').hide();
-        } else {
-            $('#btn-deletar').show();
-        }
+        $('#btn-deletar').toggle($('#ids').val() !== "");
     }
 
     function deletarSel() {
-        var ids = $('#ids').val();
-        var id = ids.split("-");
-
-        for (i = 0; i < id.length - 1; i++) {
-            excluir(id[i]);
-        }
-
+        var ids = $('#ids').val().split("-");
+        for (var i = 0; i < ids.length - 1; i++) { if (ids[i]) excluir(ids[i]); }
         limparCampos();
     }
 
-    function permissoes(id, nome) {
+    function excluir(id) {
+        $.ajax({
+            url: 'paginas/' + pag + "/excluir.php",
+            method: 'POST',
+            data: { id: id },
+            dataType: "html",
+            success: function(mensagem) {
+                if (mensagem.trim() === "Excluído com Sucesso") { listar(); } 
+                else { $('#mensagem-excluir').addClass('text-danger').text(mensagem); }
+            }
+        });
+    }
 
+    function permissoes(id, nome) {
         $('#id_permissoes').val(id);
         $('#nome_permissoes').text(nome);
-
         $('#modalPermissoes').modal('show');
         listarPermissoes(id);
     }
@@ -343,11 +393,8 @@ HTML;
         $.ajax({
             url: 'paginas/' + pag + "/listar_permissoes.php",
             method: 'POST',
-            data: {
-                id
-            },
+            data: { id: id },
             dataType: "html",
-
             success: function(result) {
                 $('#listar_permissoes').html(result);
                 $('#mensagem_permissao').text('');
@@ -359,62 +406,24 @@ HTML;
         $.ajax({
             url: 'paginas/' + pag + "/add_permissoes.php",
             method: 'POST',
-            data: {
-                id: id,
-                acesso: acesso
-            },
+            data: { id: id, acesso: acesso },
             dataType: "text",
             success: function(result) {
-                // Só recarrega a lista se a gravação confirmou
-                if (result.trim() === 'inserido' || result.trim() === 'removido') {
-                    listarPermissoes(id);
-                } else {
-                    console.log('Erro ao salvar permissão: ' + result);
-                    $('#mensagem_permissao').addClass('text-danger').text('Erro ao salvar: ' + result);
-                }
-            },
-            error: function(xhr, status, error) {
-                console.log('Erro AJAX: ' + error);
-                $('#mensagem_permissao').addClass('text-danger').text('Erro de conexão');
-            }
-        });
-    }''
-
-    function marcarTodos() {
-        var id_usuario = $('#id_permissoes').val();
-        var marcado = $('#input_todos').is(':checked'); // ← Verifica se está marcado
-
-        $.ajax({
-            url: 'paginas/' + pag + "/add_all_permissoes.php",
-            method: 'POST',
-            data: {
-                id: id_usuario,
-                acao: marcado ? 'marcar_todos' : 'desmarcar_todos' // ← Envia a ação correta
-            },
-            dataType: "html",
-            success: function(result) {
-                listarPermissoes(id_usuario);
+                if (result.trim() === 'inserido' || result.trim() === 'removido') { listarPermissoes(id); } 
+                else { $('#mensagem_permissao').addClass('text-danger').text('Erro: ' + result); }
             }
         });
     }
 
-    function excluir(id) {
+    function marcarTodos() {
+        var id_usuario = $('#id_permissoes').val();
+        var marcado = $('#input_todos').is(':checked');
         $.ajax({
-            url: 'paginas/' + pag + "/excluir.php",
+            url: 'paginas/' + pag + "/add_all_permissoes.php",
             method: 'POST',
-            data: {
-                id
-            },
+            data: { id: id_usuario, acao: marcado ? 'marcar_todos' : 'desmarcar_todos' },
             dataType: "html",
-
-            success: function(mensagem) {
-                if (mensagem.trim() == "Excluído com Sucesso") {
-                    listar();
-                } else {
-                    $('#mensagem-excluir').addClass('text-danger')
-                    $('#mensagem-excluir').text(mensagem)
-                }
-            }
+            success: function(result) { listarPermissoes(id_usuario); }
         });
     }
 </script>
