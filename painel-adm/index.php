@@ -15,6 +15,9 @@
     $data_inicio_ano = $ano_atual . '-01-01';
     $data_final_ano = $ano_atual . '-12-31';
 
+    $data_ontem = date('Y-m-d', strtotime("-1 days",strtotime($data_atual)));
+    $data_amanha = date('Y-m-d', strtotime("+1 days",strtotime($data_atual)));
+
     // Valores padrão: Admin vê tudo
     $home = '';
     $configuracoes = '';

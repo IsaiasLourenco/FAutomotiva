@@ -128,9 +128,10 @@ body {
 }
 
 .conta-vencida {
-    background-color: #ffcdd2 !important;  /* Vermelho mais forte */
-    border-left: 4px solid #d32f2f !important;
-    font-weight: 600;
+  background-color: #ffcdd2 !important;
+  /* Vermelho mais forte */
+  border-left: 4px solid #d32f2f !important;
+  font-weight: 600;
 }
 
 .rodape {
@@ -143,8 +144,46 @@ body {
   color: #363636;
 }
 
+/* ✅ Links de filtro - TODOS os estados sem sublinhado */
+.filtro-rapido a,
+.filtro-rapido a:visited,
+  .filtro-rapido a:active,
+  .filtro-rapido a:focus {
+  color: #0d6efd !important;
+  text-decoration: none !important;
+  font-weight: bold !important;
+  font-size: 10px;
+}
+
+.filtro-rapido a:hover {
+  font-weight: 900 !important;
+  font-size: 10px;
+}
+
+/* ✅ Reduz fonte dos inputs de data */
+input[type="date"].form-control-sm {
+  font-size: 11px !important;
+  /* ✅ Fonte menor */
+  padding: 0.2rem 0.4rem !important;
+  /* ✅ Padding reduzido */
+  height: 31px !important;
+  /* ✅ Altura fixa */
+}
+
+.textoFiltroData {
+  font-size: 10px;
+}
+
+/* ✅ Ajuste para mobile */
+@media (max-width:768px) {
+  input[type="date"].form-control-sm {
+    font-size: 10px !important;
+    padding: 0.15rem 0.3rem !important;
+  }
+}
+
 /* ✅ Fonte para mobile */
-@media (max-width: 768px) {
+@media (max-width:768px) {
   .rodape {
     font-size: 14px;
   }

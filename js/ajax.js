@@ -6,12 +6,31 @@ function listar(p1, p2, p3, p4, p5, p6){
     $.ajax({
         url: 'paginas/' + pag + "/listar.php",
         method: 'POST',
-        data: {p1, p2, p3, p4, p5, p6},
+        data: {p1, p2, p3, p4, p5, p6},  // ✅ ES6 shorthand (funciona)
         dataType: "html",
-
-        success:function(result){
+        success: function(result){
             $("#listar").html(result);
             $('#mensagem-excluir').text('');
+            
+            // ✅ Reinicializa DataTable após carregar novo conteúdo
+            if ($.fn.DataTable.isDataTable('#tabela')) {
+                $('#tabela').DataTable().destroy();  // Destroi instância antiga
+            }
+            $('#tabela').DataTable({
+                "ordering": false,
+                "stateSave": true,
+                "language": {
+                    "url": "https://cdn.datatables.net/plug-ins/1.13.4/i18n/pt-BR.json"
+                },
+                "columnDefs": [{
+                    "className": "dt-center",
+                    "targets": "_all"
+                }]
+            });
+            $('#tabela_wrapper').addClass('tabela-pequena');
+            
+            // ✅ Esconde botão excluir se não houver seleção
+            $('#btn-deletar').hide();
         }
     });
 }

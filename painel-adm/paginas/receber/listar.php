@@ -3,13 +3,59 @@ $tabela = 'receber';
 require_once("../../../conexao.php");
 
 // ✅ Função para escapar strings para uso em onclick do JavaScript
-function js_escape($str) {
+function js_escape($str)
+{
     if ($str === null) return '';
     return str_replace(["'", "\\", "\n", "\r", '"'], ["\\'", "\\\\", "\\n", "\\r", '\"'], (string)$str);
 }
 
-$query = $pdo->query("SELECT * FROM $tabela ORDER BY id DESC");
-$res = $query->fetchAll(PDO::FETCH_ASSOC);
+// ✅ Recebe os filtros
+$dataInicial = $_POST['p1'] ?? '';
+$dataFinal   = $_POST['p2'] ?? '';
+$pago        = $_POST['p3'] ?? '';
+$tipoData    = $_POST['p4'] ?? '';
+
+// ✅ Mapeia o tipo curto para o nome REAL da coluna no banco
+$mapaColunas = [
+    'vencimento'   => 'data_vencimento',
+    'pagamento'    => 'data_pagamento', 
+    'lancamento'   => 'data_lancamento'
+];
+
+// ✅ Obtém o nome correto da coluna (padrão: data_vencimento)
+$colunaData = $mapaColunas[$tipoData] ?? 'data_vencimento';
+
+// ✅ Monta a query base
+$query = "SELECT * FROM $tabela WHERE 1=1";
+$params = [];
+
+// 🔹 Filtro por período de VENCIMENTO
+if (!empty($dataInicial)) {
+    $query .= " AND $colunaData >= :data_inicial";  // ✅ Nome correto (era :data_inical ❌)
+    $params[':data_inicial'] = $dataInicial;
+}
+if (!empty($dataFinal)) {
+    $query .= " AND $colunaData <= :data_final";    // ✅ <= para "até" (era >= ❌)
+    $params[':data_final'] = $dataFinal;
+}
+
+// 🔹 Filtro por status (Pagas/Pendentes)
+if ($pago === 'Sim') {
+    $query .= " AND (data_pagamento IS NOT NULL AND data_pagamento != '' AND data_pagamento != '0000-00-00')";
+} elseif ($pago === 'Não') {
+    $query .= " AND (data_pagamento IS NULL OR data_pagamento = '' OR data_pagamento = '0000-00-00')";
+}
+// Se $pago == "", não filtra (mostra todas)
+
+$query .= " ORDER BY id DESC";
+
+// ✅ Executa com prepared statement
+$stmt = $pdo->prepare($query);
+foreach ($params as $key => $value) {
+    $stmt->bindValue($key, $value);
+}
+$stmt->execute();
+$res = $stmt->fetchAll(PDO::FETCH_ASSOC);
 $linhas = @count($res);
 
 if ($linhas > 0) {
@@ -57,20 +103,20 @@ HTML;
         $descontoF = $desconto > 0 ? '- R$ ' . number_format($desconto, 2, ',', '.') : '-';
         $taxaF = $taxa > 0 ? 'R$ ' . number_format($taxa, 2, ',', '.') : '-';
         $subtotalF = 'R$ ' . number_format($subtotal, 2, ',', '.');
-        
-        $data_vencimentoF = (!empty($data_vencimento) && $data_vencimento != '0000-00-00') 
+
+        $data_vencimentoF = (!empty($data_vencimento) && $data_vencimento != '0000-00-00')
             ? date('d/m/Y', strtotime($data_vencimento)) : '-';
-        $data_lancamentoF = (!empty($data_lancamento) && $data_lancamento != '0000-00-00') 
+        $data_lancamentoF = (!empty($data_lancamento) && $data_lancamento != '0000-00-00')
             ? date('d/m/Y', strtotime($data_lancamento)) : '-';
-        $data_pagamentoF_tabela = (!empty($data_pagamento) && $data_pagamento != '0000-00-00') 
+        $data_pagamentoF_tabela = (!empty($data_pagamento) && $data_pagamento != '0000-00-00')
             ? date('d/m/Y', strtotime($data_pagamento)) : '<span class="text-muted">Não pago</span>';
-        $data_pagamentoF_js = (!empty($data_pagamento) && $data_pagamento != '0000-00-00') 
+        $data_pagamentoF_js = (!empty($data_pagamento) && $data_pagamento != '0000-00-00')
             ? date('d/m/Y', strtotime($data_pagamento)) : 'Não pago';
-        
+
         // Datas no formato ISO para inputs type="date"
-        $data_vencimento_iso = (!empty($data_vencimento) && $data_vencimento != '0000-00-00') 
+        $data_vencimento_iso = (!empty($data_vencimento) && $data_vencimento != '0000-00-00')
             ? date('Y-m-d', strtotime($data_vencimento)) : '';
-        $data_pagamento_iso = (!empty($data_pagamento) && $data_pagamento != '0000-00-00') 
+        $data_pagamento_iso = (!empty($data_pagamento) && $data_pagamento != '0000-00-00')
             ? date('Y-m-d', strtotime($data_pagamento)) : '';
 
         // ✅ Define classe CSS com PRIORIDADE: vencida > não paga > paga
@@ -220,10 +266,25 @@ HTML;
             </tr>
 HTML;
     }
-    
-    echo <<<HTML
+
+echo <<<HTML
         </tbody>
         <div class="centro-pequeno" id="mensagem-excluir"></div>
+            <div class="row">
+                <!-- Links de Filtro Rápido -->
+                <div class="col-md-3 col-sm-12 mb-2 mb-md-0">
+                    <label class="small text-muted mb-1">&nbsp;</label>
+                    <span class="d-inline-flex align-items-center gap-1 text-nowrap  filtro-rapido"> <!-- ✅ MUDANÇA 2: alinha links -->
+                        <span class="textoFiltroData">Filtrar por data de:</span>
+                        <a href="#" onclick="porData('vencimento')" class="text-decoration-none small">Vencimento</a>
+                        <span class="text-muted">|</span>
+                        <a href="#" onclick="porData('pagamento')" class="text-decoration-none small">Pagamento</a>
+                        <span class="text-muted">|</span>
+                        <a href="#" onclick="porData('lancamento')" class="text-decoration-none small">Lançamento</a>
+                    </span>
+                </div>
+                <input type="hidden" name="tipoData" id="tipoData" value="vencimento">
+            </div>
     </table>
 HTML;
 } else {
@@ -234,21 +295,27 @@ HTML;
 <!-- ✅ CSS com prioridade correta para status visual -->
 <style>
     /* === Seus estilos existentes do DataTables === */
-    
+
     /* ✅ Status visual das contas - PRIORIDADE: vencida > não paga > paga */
     .conta-paga {
-        background-color: #e8f5e9 !important;      /* Verde claro */
+        background-color: #e8f5e9 !important;
+        /* Verde claro */
         border-left: 4px solid #4caf50 !important;
     }
+
     .conta-nao-paga {
-        background-color: #ffebee !important;      /* Vermelho claro */
+        background-color: #ffebee !important;
+        /* Vermelho claro */
         border-left: 4px solid #f44336 !important;
     }
+
     .conta-vencida {
-        background-color: #ffcdd2 !important;      /* Vermelho MAIS FORTE */
+        background-color: #ffcdd2 !important;
+        /* Vermelho MAIS FORTE */
         border-left: 4px solid #d32f2f !important;
         font-weight: 600;
     }
+
     /* Hover mantém a cor de fundo */
     .conta-paga:hover,
     .conta-nao-paga:hover,
@@ -290,7 +357,7 @@ HTML;
         $('#forma_pagamento').val(forma_pagamento);
         $('#frequencia').val(frequencia);
         $('#obs-perfil').val(obs);
-        
+
         // ✅ Campos financeiros (para override manual)
         if (typeof $('#multa-perfil').val !== 'undefined') $('#multa-perfil').val(multa !== '-' ? multa : '');
         if (typeof $('#juros-perfil').val !== 'undefined') $('#juros-perfil').val(juros !== '-' ? juros : '');
@@ -309,27 +376,27 @@ HTML;
     // ✅ Função mostrar() com exibição da taxa
     function mostrar(descricao, paciente, valor, data_vencimento, data_lancamento, data_pagamento,
         forma_pagamento, frequencia, obs, arquivo, multa, juros, desconto, taxa, subtotal, usuario_lanc, usuario_pgto) {
-        
+
         $('#titulo_dados').text('Detalhes: ' + descricao);
         $('#descricao_dados-cli').text(descricao);
         $('#paciente_dados-cli').text(paciente);
         $('#valor_dados-cli').text(valor);
-        
+
         $('#vencimento_dados-cli').text(data_vencimento && data_vencimento !== '-' ? data_vencimento : '-');
         $('#lancamento_dados-cli').text(data_lancamento && data_lancamento !== '-' ? data_lancamento : '-');
         $('#pagamento_dados-cli').text(data_pagamento && data_pagamento !== 'Não pago' ? data_pagamento : 'Não pago');
-        
+
         $('#forma_pagamento_dados-cli').text(forma_pagamento);
         $('#frequencia_dados-cli').text(frequencia);
         $('#obs_dados-cli').text(obs || '-');
-        
+
         // ✅ Dados financeiros no modal de visualização
         $('#multa_dados-cli').text(multa);
         $('#juros_dados-cli').text(juros);
         $('#desconto_dados-cli').text(desconto);
-        $('#taxa_dados-cli').text(taxa);  // ← ✅ Exibe a taxa
+        $('#taxa_dados-cli').text(taxa); // ← ✅ Exibe a taxa
         $('#subtotal_dados-cli').text(subtotal);
-        
+
         if (arquivo && arquivo !== 'sem-foto.png' && arquivo !== '') {
             $('#target-arquivo-dados').attr('src', './images/receber/' + arquivo).show();
             $('#link-arquivo-dados').attr('href', './images/receber/' + arquivo).show();
@@ -337,11 +404,11 @@ HTML;
             $('#target-arquivo-dados').attr('src', './images/receber/sem-foto.png');
             $('#link-arquivo-dados').hide();
         }
-        
+
         // ✅ Usuários (Lançamento e Pagamento)
         $('#usuario_lanc_dados-cli').text(usuario_lanc);
         $('#usuario_pgto_dados-cli').text(usuario_pgto);
-        
+
         $('#modalDados').modal('show');
     }
 
@@ -365,7 +432,9 @@ HTML;
 
     function deletarSel() {
         var ids = $('#ids').val().split("-");
-        for (var i = 0; i < ids.length - 1; i++) { if (ids[i]) excluir(ids[i]); }
+        for (var i = 0; i < ids.length - 1; i++) {
+            if (ids[i]) excluir(ids[i]);
+        }
         limparCampos();
     }
 
@@ -373,11 +442,16 @@ HTML;
         $.ajax({
             url: 'paginas/' + pag + "/excluir.php",
             method: 'POST',
-            data: { id: id },
+            data: {
+                id: id
+            },
             dataType: "html",
             success: function(mensagem) {
-                if (mensagem.trim() === "Excluído com Sucesso") { listar(); } 
-                else { $('#mensagem-excluir').addClass('text-danger').text(mensagem); }
+                if (mensagem.trim() === "Excluído com Sucesso") {
+                    listar();
+                } else {
+                    $('#mensagem-excluir').addClass('text-danger').text(mensagem);
+                }
             }
         });
     }
@@ -393,7 +467,9 @@ HTML;
         $.ajax({
             url: 'paginas/' + pag + "/listar_permissoes.php",
             method: 'POST',
-            data: { id: id },
+            data: {
+                id: id
+            },
             dataType: "html",
             success: function(result) {
                 $('#listar_permissoes').html(result);
@@ -406,11 +482,17 @@ HTML;
         $.ajax({
             url: 'paginas/' + pag + "/add_permissoes.php",
             method: 'POST',
-            data: { id: id, acesso: acesso },
+            data: {
+                id: id,
+                acesso: acesso
+            },
             dataType: "text",
             success: function(result) {
-                if (result.trim() === 'inserido' || result.trim() === 'removido') { listarPermissoes(id); } 
-                else { $('#mensagem_permissao').addClass('text-danger').text('Erro: ' + result); }
+                if (result.trim() === 'inserido' || result.trim() === 'removido') {
+                    listarPermissoes(id);
+                } else {
+                    $('#mensagem_permissao').addClass('text-danger').text('Erro: ' + result);
+                }
             }
         });
     }
@@ -421,9 +503,14 @@ HTML;
         $.ajax({
             url: 'paginas/' + pag + "/add_all_permissoes.php",
             method: 'POST',
-            data: { id: id_usuario, acao: marcado ? 'marcar_todos' : 'desmarcar_todos' },
+            data: {
+                id: id_usuario,
+                acao: marcado ? 'marcar_todos' : 'desmarcar_todos'
+            },
             dataType: "html",
-            success: function(result) { listarPermissoes(id_usuario); }
+            success: function(result) {
+                listarPermissoes(id_usuario);
+            }
         });
     }
 </script>

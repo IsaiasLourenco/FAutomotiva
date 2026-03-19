@@ -138,16 +138,24 @@ $pag = 'receber';
 
         <!-- Filtros de Data (Direita) -->
         <div class="col-md-8 col-sm-12">
-            <div class="row align-items-end">
-                <div class="col-md-3 col-sm-6 mb-2 mb-md-0 btn-sm">
+            <div class="row align-items-center"> <!-- ✅ MUDANÇA 1: center em vez de end -->
+
+                <!-- Data Inicial -->
+                <div class="col-md-2 col-sm-6 mb-2 mb-md-0">
                     <label class="small text-muted mb-1">De:</label>
-                    <input type="date" name="dataInicial" id="dataInicial" class="form-control" value="<?php echo $data_inicio_mes?>">
+                    <input type="date" name="dataInicial" id="dataInicial"
+                        class="form-control form-control-sm" value="<?php echo $data_inicio_mes ?>" onchange="buscarData()">
                 </div>
-                <div class="col-md-3 col-sm-6 mb-2 mb-md-0 btn-sm">
+
+                <!-- Data Final -->
+                <div class="col-md-2 col-sm-6 mb-2 mb-md-0">
                     <label class="small text-muted mb-1">Até:</label>
-                    <input type="date" name="dataFinal" id="dataFinal" class="form-control" value="<?php echo $data_final_mes?>">
+                    <input type="date" name="dataFinal" id="dataFinal"
+                        class="form-control form-control-sm" value="<?php echo $data_final_mes ?>" onchange="buscarData()">
                 </div>
-                <div class="col-md-3 col-sm-12 mb-2 mb-md-0 btn-sm">
+
+                <!-- Status -->
+                <div class="col-md-2 col-sm-6 mb-2 mb-md-0">
                     <label class="small text-muted mb-1">Status:</label>
                     <select name="pago" id="pago" class="form-control form-control-sm">
                         <option value="">Todas</option>
@@ -155,12 +163,29 @@ $pag = 'receber';
                         <option value="Não">Pendentes</option>
                     </select>
                 </div>
+
+                <!-- Links de Filtro Rápido -->
                 <div class="col-md-3 col-sm-12 mb-2 mb-md-0">
                     <label class="small text-muted mb-1">&nbsp;</label>
+                    <span class="d-inline-flex align-items-center gap-1 text-nowrap  filtro-rapido"> <!-- ✅ MUDANÇA 2: alinha links -->
+                        <a href="#" onclick="trocarData('mes')" class="text-decoration-none small">Mês</a>
+                        <span class="text-muted">|</span>
+                        <a href="#" onclick="trocarData('hoje')" class="text-decoration-none small">Hoje</a>
+                        <span class="text-muted">|</span>
+                        <a href="#" onclick="trocarData('ontem')" class="text-decoration-none small">Ontem</a>
+                        <span class="text-muted">|</span>
+                        <a href="#" onclick="trocarData('amanha')" class="text-decoration-none small">Amanhã</a>
+                    </span>
+                </div>
+
+                <!-- Botão Filtrar -->
+                <div class="col-md-2 col-sm-12 mb-2 mb-md-0">
+                    <label class="small text-muted mb-1">&nbsp;</label>
                     <button type="button" class="btn btn-primary btn-sm btn-block" onclick="filtrarPorData()">
-                        <span class="fa fa-filter">&nbsp;Filtrar</span>
+                        <span class="fa fa-filter"></span>&nbsp;Filtrar
                     </button>
                 </div>
+
             </div>
         </div>
 
@@ -524,5 +549,62 @@ $pag = 'receber';
                 }
             });
         });
+    });
+
+    function buscarData() {
+        dataInicial = $('#dataInicial').val();
+        dataFinal = $('#dataFinal').val();
+        statusPago = $('#pago').val();
+        tipoData = $('#tipoData').val();
+
+        listar(dataInicial, dataFinal, statusPago, tipoData);
+    }
+
+    function trocarData(tipo) {
+
+        data_inicio_mes = "<?php echo $data_inicio_mes ?>";
+        data_final_mes = "<?php echo $data_final_mes ?>";
+        data_atual = "<?php echo $data_atual ?>";
+        data_ontem = "<?php echo $data_ontem ?>";
+        data_amanha = "<?php echo $data_amanha ?>";
+
+        if (tipo == 'mes') {
+            $('#dataInicial').val(data_inicio_mes);
+            $('#dataFinal').val(data_final_mes);
+        }
+
+        if (tipo == 'hoje') {
+            $('#dataInicial').val(data_atual);
+            $('#dataFinal').val(data_atual);
+        }
+
+        if (tipo == 'ontem') {
+            $('#dataInicial').val(data_ontem);
+            $('#dataFinal').val(data_ontem);
+        }
+
+        if (tipo == 'amanha') {
+            $('#dataInicial').val(data_amanha);
+            $('#dataFinal').val(data_amanha);
+        }
+        buscarData();
+    }
+
+    function porData(tipo) {
+        $('#tipoData').val(tipo);
+        buscarData();
+    }
+
+    // ✅ Filtrar automaticamente ao mudar o status (Sem/ Pagas/ Pendentes)
+    $('#pago').on('change', function() {
+        buscarData(); // Já chama listar() com os filtros
+    });
+
+    // ✅ Filtrar ao pressionar Enter nos campos de data
+    $('#dataInicial, #dataFinal').on('keypress', function(e) {
+        if (e.which === 13) {
+            e.preventDefault();
+            buscarData();
+        }
     });
 </script>
