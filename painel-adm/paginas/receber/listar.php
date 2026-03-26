@@ -189,12 +189,20 @@ if ($linhas > 0) {
 HTML;
 
         if ($mostrarBotoesAcao) {
-            // ✅ MUDANÇA: Agora passa 6 parâmetros (inclui multa, juros, desconto)
             echo <<<HTML
-                    <a href="#" onclick="parcelar('{$id}', '{$e_valorF}', '{$e_descricao}', '{$e_multaF}', '{$e_jurosF}', '{$e_descontoF}')" title="Parcelar valor">
-                        <i class="fa-solid fa-calendar text-success ico-grande"></i>
+                    <a href="#" onclick="parcelar('{$id}', 
+                                                  '{$e_valorF}', 
+                                                  '{$e_descricao}', 
+                                                  '{$e_multaF}', 
+                                                  '{$e_jurosF}', 
+                                                  '{$e_descontoF}')" title="Parcelar valor">
+                        <i class="fa-solid fa-calendar-days text-success ico-grande"></i>
                     </a>
-                    <a href="#" onclick="baixar('{$id}', '{$e_valorF}', '{$e_descricao}', '{$e_forma_pagamento_nome}')" title="Baixar valor">
+                    <a href="#" onclick="baixar('{$id}', 
+                                                '{$e_valorF}', 
+                                                '{$e_descricao}', 
+                                                '{$e_forma_pagamento_nome}', 
+                                                '{$data_vencimento_iso}')" title="Baixar valor">
                         <i class="fa-solid fa-square-check text-danger ico-grande"></i>
                     </a>
 HTML;
@@ -425,6 +433,36 @@ HTML;
         });
     }
 
+    function parcelar(id, valor, descricao, multa, juros, desconto) {
+        limparModalParcelar();
+        setTimeout(function() {
+            $('#id-parcelar').val(id);
+            $('#descricao-original').val(descricao);
+            $('#nome-parcelar').text(descricao);
+            $('#valor-parcelar').val(valor);
+            $('#multa-parcelar').val(multa !== '-' ? multa : '');
+            $('#juros-parcelar').val(juros !== '-' ? juros : '');
+            $('#desconto-parcelar').val(desconto !== '-' ? desconto : '');
+            var hoje = new Date();
+            $('#data-primeira-parcela').val(hoje.toISOString().split('T')[0]);
+            $('#frequencia-parcelar')[0].selectedIndex = 0;
+            $('#freq-id-hidden').val('');
+            $('#tabela-parcelas').hide();
+            $('#qtd-parcelar, #frequencia-parcelar, #data-primeira-parcela, #valor-parcelar, #forma-pagamento-parcelas, #multa-parcelar, #juros-parcelar, #desconto-parcelar, #taxa-parcelar').off('change input').on('change input', function() {
+                if ($(this).is('#frequencia-parcelar')) {
+                    $('#freq-id-hidden').val($('#frequencia-parcelar').val());
+                }
+                if ($('#valor-parcelar').val() && $('#frequencia-parcelar').val() && $('#data-primeira-parcela').val()) {
+                    calcularParcelas();
+                    $('#tabela-parcelas').show();
+                } else {
+                    $('#tabela-parcelas').hide();
+                }
+            });
+            $('#modalParcelar').modal('show');
+        }, 50);
+    }
+
     function limparModalParcelar() {
         $('#mensagem-parcelar').html('');
         $('#lista-parcelas').html('');
@@ -433,7 +471,6 @@ HTML;
         $('#id-parcelar, #descricao-original, #freq-id-hidden').val('');
         $('#valor-por-parcela').text('R$ 0,00');
         $('#info-resto').text('');
-        // ✅ Ambos os selects começam em "Selecione..."
         $('#frequencia-parcelar')[0].selectedIndex = 0;
         $('#forma-pagamento-parcelas')[0].selectedIndex = 0;
         $('#data-primeira-parcela').val('');
@@ -530,8 +567,6 @@ HTML;
     function formatarMoeda(valor) {
         return 'R$ ' + valor.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
     }
-
-    // ✅ Auto-preencher taxa ao selecionar forma de pagamento
     $('#forma-pagamento-parcelas').on('change', function() {
         var taxa = $(this).find('option:selected').data('taxa');
         $('#taxa-parcelar').val(taxa > 0 ? taxa : '');
@@ -540,7 +575,6 @@ HTML;
             $('#tabela-parcelas').show();
         }
     });
-
     $('#btn-cancelar-parcelar, #modalParcelar .close').on('click', function() {
         limparModalParcelar();
     });

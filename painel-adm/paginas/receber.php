@@ -269,24 +269,14 @@ $pag = 'receber';
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header bg-primary text-white">
-                <h4 class="modal-title"><i class="fa-solid fa-calendar-days"></i> Parcelar Conta: <span id="nome-parcelar"></span></h4>
+                <h4 class="modal-title"><i class="fa-solid fa-calendar-check"></i> Parcelar Conta: <span id="nome-parcelar"></span></h4>
                 <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close" style="margin-top:-20px;"><span aria-hidden="true">&times;</span></button>
             </div>
             <form id="form-parcelar" autocomplete="off">
                 <div class="modal-body">
                     <div class="row mb-3 pb-2 border-bottom">
-                        <div class="col-md-3">
-                            <label class="small text-muted">
-                                Valor Total
-                            </label>
-                            <input type="text" class="form-control form-control-sm moeda" id="valor-parcelar" name="valor-parcelar" readonly>
-                        </div>
-                        <div class="col-md-2">
-                            <label class="small text-muted">
-                                Parcelas
-                            </label>
-                            <input type="number" class="form-control form-control-sm" id="qtd-parcelar" name="qtd-parcelar" min="2" max="24" value="2" required>
-                        </div>
+                        <div class="col-md-3"><label class="small text-muted">Valor Total</label><input type="text" class="form-control form-control-sm moeda" id="valor-parcelar" name="valor-parcelar" readonly></div>
+                        <div class="col-md-2"><label class="small text-muted">Parcelas</label><input type="number" class="form-control form-control-sm" id="qtd-parcelar" name="qtd-parcelar" min="2" max="24" value="2" required></div>
                         <div class="col-md-4">
                             <label class="small text-muted">Frequência</label>
                             <select class="form-control form-control-sm" id="frequencia-parcelar" name="frequencia" required>
@@ -353,6 +343,63 @@ $pag = 'receber';
                 <div class="modal-footer justify-content-between">
                     <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal" id="btn-cancelar-parcelar"><i class="fa fa-times"></i> Cancelar</button>
                     <button type="submit" class="btn btn-primary btn-sm" id="btn-confirmar-parcelar"><i class="fa fa-check"></i> Confirmar Parcelamento</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ✅ Modal Baixar -->
+<div class="modal fade" id="modalBaixar" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-md" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title"><i class="fa fa-check"></i> Baixar Conta</h5>
+                <button type="button" class="close text-white" data-dismiss="modal"><span>&times;</span></button>
+            </div>
+            <form id="form-baixar">
+                <div class="modal-body">
+                    <p><b>Descrição:</b> <span id="descricao-baixar"></span></p>
+                    <div class="row">
+                        <div class="col-md-6"><label>Valor</label><input type="text" class="form-control moeda" id="valor-baixar" name="valor" readonly></div>
+                        <div class="col-md-6"><label>Forma de Pagamento</label><select class="form-control" name="forma_pagamento" id="saida-baixar" required>
+                                <option value="">Selecione...</option><?php $query = $pdo->query("SELECT * FROM forma_pagamento ORDER BY nome ASC");
+                                                                        foreach ($query->fetchAll(PDO::FETCH_ASSOC) as $fp) {
+
+                                                                            $taxa = 0;
+                                                                            $nome = strtolower($fp['nome']);
+
+                                                                            if (strpos($nome, 'débito') !== false || strpos($nome, 'debito') !== false) {
+                                                                                $taxa = 3;
+                                                                            } elseif (strpos($nome, 'crédito') !== false || strpos($nome, 'credito') !== false) {
+                                                                                $taxa = 5;
+                                                                            }
+
+                                                                            echo "<option value='{$fp['id']}' data-taxa='{$taxa}'>{$fp['nome']}</option>";
+
+
+                                                                            // echo "<option value='{$fp['id']}'>{$fp['nome']}</option>";
+                                                                        } ?>
+                            </select></div>
+                    </div>
+                    <div class="row mt-3 bg-light p-2 rounded">
+                        <div class="col-12"><b>Ajustes Financeiros</b></div>
+                        <div class="col-md-3"><label>Multa</label><input type="text" class="form-control moeda" name="multa" id="valor-multa"></div>
+                        <div class="col-md-3"><label>Juros</label><input type="text" class="form-control moeda" name="juros" id="valor-juros"></div>
+                        <div class="col-md-3"><label>Desconto</label><input type="text" class="form-control moeda" name="desconto" id="valor-desconto"></div>
+                        <div class="col-md-3"><label>Taxa (%)</label><input type="number" class="form-control" name="taxa" id="valor-taxa" step="0.01"></div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-6"><label>Data do Pagamento</label><input type="date" class="form-control" name="data_pgto" value="<?php echo date('Y-m-d'); ?>"></div>
+                        <div class="col-md-6"><label>Subtotal</label><input type="text" class="form-control" id="subtotal-baixar" name="subtotal" readonly></div>
+                    </div>
+                    <input type="hidden" name="id" id="id-baixar">
+                    <input type="hidden" id="data-vencimento-baixar">
+                    <div id="mensagem-baixar" class="mt-2"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="btn-fechar-baixar" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Confirmar Baixa</button>
                 </div>
             </form>
         </div>
@@ -454,44 +501,32 @@ $pag = 'receber';
         $('#btn-deletar').hide();
     });
 
-    // ✅ MUDANÇA: Agora recebe 6 parâmetros
     function parcelar(id, valor, descricao, multa, juros, desconto) {
         limparModalParcelar();
-        setTimeout(function() {
-            $('#id-parcelar').val(id);
-            $('#descricao-original').val(descricao);
-            $('#nome-parcelar').text(descricao);
-            $('#valor-parcelar').val(valor);
-
-            // ✅ Preenche multa/juros/desconto da conta original (editáveis)
-            $('#multa-parcelar').val(multa !== '-' ? multa : '');
-            $('#juros-parcelar').val(juros !== '-' ? juros : '');
-            $('#desconto-parcelar').val(desconto !== '-' ? desconto : '');
-
-            var hoje = new Date();
-            $('#data-primeira-parcela').val(hoje.toISOString().split('T')[0]);
-
-            // ✅ Frequência começa em "Selecione..." (índice 0)
-            $('#frequencia-parcelar')[0].selectedIndex = 0;
-            $('#freq-id-hidden').val('');
-
-            // ✅ Tabela oculta até usuário selecionar frequência
-            $('#tabela-parcelas').hide();
-
-            // ✅ Eventos para recalcular
-            $('#qtd-parcelar, #frequencia-parcelar, #data-primeira-parcela, #valor-parcelar, #forma-pagamento-parcelas, #multa-parcelar, #juros-parcelar, #desconto-parcelar, #taxa-parcelar').off('change input').on('change input', function() {
-                if ($(this).is('#frequencia-parcelar')) {
-                    $('#freq-id-hidden').val($('#frequencia-parcelar').val());
-                }
-                if ($('#valor-parcelar').val() && $('#frequencia-parcelar').val() && $('#data-primeira-parcela').val()) {
-                    calcularParcelas();
-                    $('#tabela-parcelas').show();
-                } else {
-                    $('#tabela-parcelas').hide();
-                }
-            });
-            $('#modalParcelar').modal('show');
-        }, 50);
+        $('#id-parcelar').val(id);
+        $('#descricao-original').val(descricao);
+        $('#nome-parcelar').text(descricao);
+        $('#valor-parcelar').val(valor);
+        $('#multa-parcelar').val(multa !== '-' ? multa : '');
+        $('#juros-parcelar').val(juros !== '-' ? juros : '');
+        $('#desconto-parcelar').val(desconto !== '-' ? desconto : '');
+        var hoje = new Date();
+        $('#data-primeira-parcela').val(hoje.toISOString().split('T')[0]);
+        $('#frequencia-parcelar')[0].selectedIndex = 0;
+        $('#freq-id-hidden').val('');
+        $('#tabela-parcelas').hide();
+        $('#qtd-parcelar, #frequencia-parcelar, #data-primeira-parcela, #valor-parcelar, #forma-pagamento-parcelas, #multa-parcelar, #juros-parcelar, #desconto-parcelar, #taxa-parcelar').off('change input').on('change input', function() {
+            if ($(this).is('#frequencia-parcelar')) {
+                $('#freq-id-hidden').val($('#frequencia-parcelar').val());
+            }
+            if ($('#valor-parcelar').val() && $('#frequencia-parcelar').val() && $('#data-primeira-parcela').val()) {
+                calcularParcelas();
+                $('#tabela-parcelas').show();
+            } else {
+                $('#tabela-parcelas').hide();
+            }
+        });
+        $('#modalParcelar').modal('show');
     }
 
     function limparModalParcelar() {
@@ -598,7 +633,6 @@ $pag = 'receber';
     function formatarMoeda(valor) {
         return 'R$ ' + valor.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
     }
-
     $('#forma-pagamento-parcelas').on('change', function() {
         var taxa = $(this).find('option:selected').data('taxa');
         $('#taxa-parcelar').val(taxa > 0 ? taxa : '');
@@ -607,8 +641,6 @@ $pag = 'receber';
             $('#tabela-parcelas').show();
         }
     });
-
-    // ✅ CORREÇÃO 5: REMOVE submit handler anterior ANTES de adicionar
     $('#form-parcelar').off('submit').on('submit', function(e) {
         e.preventDefault();
         var btn = $('#btn-confirmar-parcelar');
@@ -638,7 +670,6 @@ $pag = 'receber';
             }
         });
     });
-
     $('#btn-cancelar-parcelar, #modalParcelar .close').on('click', function() {
         limparModalParcelar();
     });
@@ -800,16 +831,123 @@ $pag = 'receber';
         });
     }
 
-    function baixar(id, valor, descricao, forma_pgto) {
+    function baixar(id, valor, descricao, forma_pgto, data_vencimento) {
         $('#id-baixar').val(id);
         $('#descricao-baixar').text(descricao);
         $('#valor-baixar').val(valor);
+        $('#data-vencimento-baixar').val(data_vencimento); // ✅ Campo oculto para cálculo de atraso
         if (forma_pgto && forma_pgto !== 'undefined') {
-            $('#saida-baixar').val(forma_pgto).change();
+            $('#saida-baixar').val(forma_pgto).trigger('change');
         }
+
         $('#subtotal-baixar').val(valor);
         $('#valor-juros, #valor-desconto, #valor-multa, #valor-taxa').val('');
         $('#modalBaixar').modal('show');
         $('#mensagem-baixar').text('');
     }
+
+    $("#form-baixar").submit(function(e) {
+        e.preventDefault();
+        var formData = new FormData(this);
+        $.ajax({
+            url: 'paginas/' + pag + "/baixar.php",
+            type: 'POST',
+            data: formData,
+            success: function(mensagem) {
+                $('#mensagem-baixar').text('');
+                $('#mensagem-baixar').removeClass();
+                if (mensagem.trim() == "Baixado com Sucesso") {
+                    $('#btn-fechar-baixar').click();
+                    listar();
+                } else {
+                    $('#mensagem-baixar').addClass('text-danger');
+                    $('#mensagem-baixar').text(mensagem);
+                }
+            },
+            cache: false,
+            contentType: false,
+            processData: false,
+        });
+    });
+
+    // ✅ LÓGICA DA MODAL DE BAIXA
+
+    // Função para calcular subtotal
+    function calcularSubtotalBaixa() {
+        var valorStr = $('#valor-baixar').val();
+        var valor = parseFloat(valorStr.replace('R$', '').replace(/\./g, '').replace(',', '.')) || 0;
+
+        var multaStr = $('#valor-multa').val();
+        var multa = multaStr ? parseFloat(multaStr.replace('R$', '').replace(/\./g, '').replace(',', '.')) : 0;
+
+        var jurosStr = $('#valor-juros').val();
+        var juros = jurosStr ? parseFloat(jurosStr.replace('R$', '').replace(/\./g, '').replace(',', '.')) : 0;
+
+        var descontoStr = $('#valor-desconto').val();
+        var desconto = descontoStr ? parseFloat(descontoStr.replace('R$', '').replace(/\./g, '').replace(',', '.')) : 0;
+
+        var taxa = parseFloat($('#valor-taxa').val()) || 0;
+
+        var subtotal = valor + multa + juros + (valor * taxa / 100) - desconto;
+
+        $('#subtotal-baixar').val('R$ ' + subtotal.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.'));
+    }
+
+    // ✅ Auto-preencher taxa conforme forma de pagamento
+    $('#saida-baixar').on('change', function() {
+        var optionSelecionada = $(this).find('option:selected');
+        var taxa = optionSelecionada.data('taxa') || 0;
+
+        $('#valor-taxa').val(taxa > 0 ? taxa : '');
+
+        // 🔥 FORÇA cálculo de multa e juros também
+        $('[name="data_pgto"]').trigger('change');
+
+        calcularSubtotalBaixa();
+    });
+
+
+
+    // ✅ Calcular multa/juros automáticos se data de pagamento > vencimento
+    $('[name="data_pgto"]').on('change', function() {
+        var dataPgto = $(this).val();
+        var dataVencimentoStr = $('#data-vencimento-baixar').val(); // precisa ser passado na função baixar()
+
+        if (dataPgto && dataVencimentoStr && dataPgto > dataVencimentoStr) {
+            var diasAtraso = Math.ceil((new Date(dataPgto) - new Date(dataVencimentoStr)) / (1000 * 60 * 60 * 24));
+
+            // Multa padrão: 2% do valor (se campo vazio)
+            if (!$('#valor-multa').val() || $('#valor-multa').val() === 'R$ 0,00') {
+                var valorStr = $('#valor-baixar').val();
+                var valor = parseFloat(valorStr.replace('R$', '').replace(/\./g, '').replace(',', '.')) || 0;
+                var multa = valor * 0.02;
+                $('#valor-multa').val('R$ ' + multa.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.'));
+            }
+
+            // Juros padrão: 1% ao mês proporcional (se campo vazio)
+            if (!$('#valor-juros').val() || $('#valor-juros').val() === 'R$ 0,00') {
+                var valorStr = $('#valor-baixar').val();
+                var valor = parseFloat(valorStr.replace('R$', '').replace(/\./g, '').replace(',', '.')) || 0;
+                var juros = valor * 0.01 * (diasAtraso / 30);
+                $('#valor-juros').val('R$ ' + juros.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.'));
+            }
+        }
+
+        calcularSubtotalBaixa();
+    });
+
+    // ✅ Recalcular subtotal ao mudar qualquer campo de ajuste
+    $('#valor-multa, #valor-juros, #valor-desconto, #valor-taxa').on('change input', function() {
+        calcularSubtotalBaixa();
+    });
+
+    // ✅ Formatar campos de moeda na modal de baixa
+    $('#valor-multa, #valor-juros, #valor-desconto').on('input', function() {
+        let valor = this.value.replace(/\D/g, "");
+        valor = (valor / 100).toFixed(2) + "";
+        valor = valor.replace(".", ",");
+        valor = valor.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        this.value = "R$ " + valor;
+        calcularSubtotalBaixa();
+    });
 </script>
