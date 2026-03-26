@@ -425,46 +425,6 @@ HTML;
         });
     }
 
-    // ✅ MUDANÇA: Agora recebe 6 parâmetros
-    function parcelar(id, valor, descricao, multa, juros, desconto) {
-        limparModalParcelar();
-        setTimeout(function() {
-            $('#id-parcelar').val(id);
-            $('#descricao-original').val(descricao);
-            $('#nome-parcelar').text(descricao);
-            $('#valor-parcelar').val(valor);
-
-            // ✅ Preenche multa/juros/desconto da conta original (editáveis)
-            $('#multa-parcelar').val(multa !== '-' ? multa : '');
-            $('#juros-parcelar').val(juros !== '-' ? juros : '');
-            $('#desconto-parcelar').val(desconto !== '-' ? desconto : '');
-
-            var hoje = new Date();
-            $('#data-primeira-parcela').val(hoje.toISOString().split('T')[0]);
-
-            // ✅ Frequência começa em "Selecione..." (índice 0)
-            $('#frequencia-parcelar')[0].selectedIndex = 0;
-            $('#freq-id-hidden').val('');
-
-            // ✅ Tabela oculta até usuário selecionar frequência
-            $('#tabela-parcelas').hide();
-
-            // ✅ Eventos para recalcular
-            $('#qtd-parcelar, #frequencia-parcelar, #data-primeira-parcela, #valor-parcelar, #forma-pagamento-parcelas, #multa-parcelar, #juros-parcelar, #desconto-parcelar, #taxa-parcelar').off('change input').on('change input', function() {
-                if ($(this).is('#frequencia-parcelar')) {
-                    $('#freq-id-hidden').val($('#frequencia-parcelar').val());
-                }
-                if ($('#valor-parcelar').val() && $('#frequencia-parcelar').val() && $('#data-primeira-parcela').val()) {
-                    calcularParcelas();
-                    $('#tabela-parcelas').show();
-                } else {
-                    $('#tabela-parcelas').hide();
-                }
-            });
-            $('#modalParcelar').modal('show');
-        }, 50);
-    }
-
     function limparModalParcelar() {
         $('#mensagem-parcelar').html('');
         $('#lista-parcelas').html('');
@@ -579,36 +539,6 @@ HTML;
             calcularParcelas();
             $('#tabela-parcelas').show();
         }
-    });
-
-    $('#form-parcelar').on('submit', function(e) {
-        e.preventDefault();
-        var btn = $('#btn-confirmar-parcelar');
-        var originalText = btn.html();
-        btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Processando...');
-        $.ajax({
-            url: 'paginas/receber/parcelar.php',
-            method: 'POST',
-            data: $(this).serialize(),
-            dataType: "html",
-            success: function(resposta) {
-                if (resposta.indexOf('Sucesso:') === 0) {
-                    $('#mensagem-parcelar').html('<div class="alert alert-success py-1 mb-0"><small>' + resposta + '</small></div>');
-                    setTimeout(function() {
-                        $('#modalParcelar').modal('hide');
-                        limparModalParcelar();
-                        listar();
-                    }, 1500);
-                } else {
-                    $('#mensagem-parcelar').html('<div class="alert alert-danger py-1 mb-0"><small>' + resposta + '</small></div>');
-                    btn.prop('disabled', false).html(originalText);
-                }
-            },
-            error: function(xhr, status, error) {
-                $('#mensagem-parcelar').html('<div class="alert alert-danger py-1 mb-0"><small>Erro na requisição: ' + error + '</small></div>');
-                btn.prop('disabled', false).html(originalText);
-            }
-        });
     });
 
     $('#btn-cancelar-parcelar, #modalParcelar .close').on('click', function() {

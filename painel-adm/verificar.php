@@ -2,7 +2,7 @@
 @session_start();
 
 // ✅ VERIFICAÇÃO DE ASSINATURA/ATIVIDADE DO SISTEMA (CONTROLE EXTERNO)
-require_once("../conexao.php");
+require_once(__DIR__ . '/../conexao.php');
 $config = $pdo->query("SELECT ativo FROM configuracoes LIMIT 1")->fetch(PDO::FETCH_ASSOC);
 
 // Se NÃO estiver ativo, bloqueia TODOS (inclusive Admin da clínica)

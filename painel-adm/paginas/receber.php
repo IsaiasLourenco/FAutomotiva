@@ -269,14 +269,24 @@ $pag = 'receber';
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header bg-primary text-white">
-                <h4 class="modal-title"><i class="fa-solid fa-calendar-check"></i> Parcelar Conta: <span id="nome-parcelar"></span></h4>
+                <h4 class="modal-title"><i class="fa-solid fa-calendar-days"></i> Parcelar Conta: <span id="nome-parcelar"></span></h4>
                 <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close" style="margin-top:-20px;"><span aria-hidden="true">&times;</span></button>
             </div>
             <form id="form-parcelar" autocomplete="off">
                 <div class="modal-body">
                     <div class="row mb-3 pb-2 border-bottom">
-                        <div class="col-md-3"><label class="small text-muted">Valor Total</label><input type="text" class="form-control form-control-sm moeda" id="valor-parcelar" name="valor-parcelar" readonly></div>
-                        <div class="col-md-2"><label class="small text-muted">Parcelas</label><input type="number" class="form-control form-control-sm" id="qtd-parcelar" name="qtd-parcelar" min="2" max="24" value="2" required></div>
+                        <div class="col-md-3">
+                            <label class="small text-muted">
+                                Valor Total
+                            </label>
+                            <input type="text" class="form-control form-control-sm moeda" id="valor-parcelar" name="valor-parcelar" readonly>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="small text-muted">
+                                Parcelas
+                            </label>
+                            <input type="number" class="form-control form-control-sm" id="qtd-parcelar" name="qtd-parcelar" min="2" max="24" value="2" required>
+                        </div>
                         <div class="col-md-4">
                             <label class="small text-muted">Frequência</label>
                             <select class="form-control form-control-sm" id="frequencia-parcelar" name="frequencia" required>
@@ -444,42 +454,44 @@ $pag = 'receber';
         $('#btn-deletar').hide();
     });
 
-    // ✅ CORREÇÃO 1: Função recebe 6 parâmetros
+    // ✅ MUDANÇA: Agora recebe 6 parâmetros
     function parcelar(id, valor, descricao, multa, juros, desconto) {
         limparModalParcelar();
+        setTimeout(function() {
+            $('#id-parcelar').val(id);
+            $('#descricao-original').val(descricao);
+            $('#nome-parcelar').text(descricao);
+            $('#valor-parcelar').val(valor);
 
-        $('#id-parcelar').val(id);
-        $('#descricao-original').val(descricao);
-        $('#nome-parcelar').text(descricao);
-        $('#valor-parcelar').val(valor);
-        $('#multa-parcelar').val(multa !== '-' ? multa : '');
-        $('#juros-parcelar').val(juros !== '-' ? juros : '');
-        $('#desconto-parcelar').val(desconto !== '-' ? desconto : '');
+            // ✅ Preenche multa/juros/desconto da conta original (editáveis)
+            $('#multa-parcelar').val(multa !== '-' ? multa : '');
+            $('#juros-parcelar').val(juros !== '-' ? juros : '');
+            $('#desconto-parcelar').val(desconto !== '-' ? desconto : '');
 
-        var hoje = new Date();
-        $('#data-primeira-parcela').val(hoje.toISOString().split('T')[0]);
+            var hoje = new Date();
+            $('#data-primeira-parcela').val(hoje.toISOString().split('T')[0]);
 
-        // ✅ CORREÇÃO 2: Frequência começa em "Selecione..."
-        $('#frequencia-parcelar')[0].selectedIndex = 0;
-        $('#freq-id-hidden').val('');
+            // ✅ Frequência começa em "Selecione..." (índice 0)
+            $('#frequencia-parcelar')[0].selectedIndex = 0;
+            $('#freq-id-hidden').val('');
 
-        // ✅ CORREÇÃO 3: Tabela oculta
-        $('#tabela-parcelas').hide();
+            // ✅ Tabela oculta até usuário selecionar frequência
+            $('#tabela-parcelas').hide();
 
-        // ✅ CORREÇÃO 4: REMOVE handler anterior ANTES de adicionar (EVITA DUPLICAÇÃO)
-        $('#qtd-parcelar, #frequencia-parcelar, #data-primeira-parcela, #valor-parcelar, #forma-pagamento-parcelas, #multa-parcelar, #juros-parcelar, #desconto-parcelar, #taxa-parcelar').off('change input').on('change input', function() {
-            if ($(this).is('#frequencia-parcelar')) {
-                $('#freq-id-hidden').val($('#frequencia-parcelar').val());
-            }
-            if ($('#valor-parcelar').val() && $('#frequencia-parcelar').val() && $('#data-primeira-parcela').val()) {
-                calcularParcelas();
-                $('#tabela-parcelas').show();
-            } else {
-                $('#tabela-parcelas').hide();
-            }
-        });
-
-        $('#modalParcelar').modal('show');
+            // ✅ Eventos para recalcular
+            $('#qtd-parcelar, #frequencia-parcelar, #data-primeira-parcela, #valor-parcelar, #forma-pagamento-parcelas, #multa-parcelar, #juros-parcelar, #desconto-parcelar, #taxa-parcelar').off('change input').on('change input', function() {
+                if ($(this).is('#frequencia-parcelar')) {
+                    $('#freq-id-hidden').val($('#frequencia-parcelar').val());
+                }
+                if ($('#valor-parcelar').val() && $('#frequencia-parcelar').val() && $('#data-primeira-parcela').val()) {
+                    calcularParcelas();
+                    $('#tabela-parcelas').show();
+                } else {
+                    $('#tabela-parcelas').hide();
+                }
+            });
+            $('#modalParcelar').modal('show');
+        }, 50);
     }
 
     function limparModalParcelar() {
