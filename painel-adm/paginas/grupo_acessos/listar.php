@@ -27,7 +27,7 @@ HTML;
         $total_acessos = count($result);
         echo <<<HTML
             <tr>
-                <td><input type="checkbox" id="seletor-{$id}" class="form-check-input" onchange="selecionar('{$id}')">{$nome_grupo}</td>
+                <td><input type="checkbox" id="seletor-{$id}" class="form-check-input" onchange="selecionar('{$id}')">&nbsp;{$nome_grupo}</td>
                 <td>{$total_acessos}</td>
                 <td>
                     <a href="#" onclick="editar('{$id}', '{$nome_grupo}')" title="Editar">

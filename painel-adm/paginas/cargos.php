@@ -180,7 +180,7 @@ $pag = 'cargos';
                 </div>
                 <div class="modal-footer centro">
                     <button type="submit" class="btn btn-primary">Salvar</button>
-                    <input type="text" name="id" id="id">
+                    <input type="hidden" name="id" id="id">
                 </div>
             </form>
         </div>

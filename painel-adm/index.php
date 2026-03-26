@@ -22,6 +22,7 @@
     $home = '';
     $configuracoes = '';
     $usuarios = '';
+    $pacientes = '';
     $grupo_acessos = '';
     $acessos = '';
     $cargos = '';
