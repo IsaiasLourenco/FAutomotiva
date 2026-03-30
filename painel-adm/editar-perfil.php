@@ -9,7 +9,7 @@ if (!isset($_SESSION['id_user'])) {
 }
 
 // Recebe os dados do formulário
-$id_usuario   = @$_POST['id-usuario'];
+$id_user      = @$_POST['id-usuario'];
 $nome         = $_POST['nome'];
 $email        = $_POST['email'];
 $cpf          = $_POST['cpf'];
@@ -48,7 +48,7 @@ if (!empty($senha) || !empty($conf_senha)) {
 // Validação de email único (exceto o próprio usuário)
 $email_buscado = $pdo->prepare("SELECT id FROM usuarios WHERE email = :email AND id != :id");
 $email_buscado->bindValue(":email", $email);
-$email_buscado->bindValue(":id", $id_usuario, PDO::PARAM_INT);
+$email_buscado->bindValue(":id", $id_user, PDO::PARAM_INT);
 $email_buscado->execute();
 if ($email_buscado->rowCount() > 0) {
     echo "Este email já está cadastrado para outro usuário!";

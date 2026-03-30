@@ -32,7 +32,7 @@ if ($usuario) {
         $nome_usuario = $usuario['nome'];
 
         // Redireciona para o painel principal
-        echo '<script>window.location="painel-adm"</script>';
+        header("Location: painel-adm/");
         exit;
     } else {
         echo '<script>window.alert("Dados incorretos!")</script>';
@@ -91,7 +91,8 @@ if ($usuario) {
         $insert->bindValue(":cidade", "$cidade_fake");
         $insert->bindValue(":estado", "$estado_fake");
         $insert->bindValue(":foto", "$foto_fake");
-        $insert->bindValue(":ativo", "$ativo_fake", PDO::PARAM_INT);
+        // $insert->bindValue(":ativo", "$ativo_fake", PDO::PARAM_INT);
+        $insert->bindValue(":ativo", $ativo_fake);
         $insert->execute();
 
         echo "Banco vazio! Usuário de teste criado automaticamente.<br>";

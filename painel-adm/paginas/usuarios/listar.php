@@ -368,19 +368,19 @@ HTML;
     }''
 
     function marcarTodos() {
-        var id_usuario = $('#id_permissoes').val();
+        var id_user = $('#id_permissoes').val();
         var marcado = $('#input_todos').is(':checked'); // ← Verifica se está marcado
 
         $.ajax({
             url: 'paginas/' + pag + "/add_all_permissoes.php",
             method: 'POST',
             data: {
-                id: id_usuario,
+                id: id_user,
                 acao: marcado ? 'marcar_todos' : 'desmarcar_todos' // ← Envia a ação correta
             },
             dataType: "html",
             success: function(result) {
-                listarPermissoes(id_usuario);
+                listarPermissoes(id_user);
             }
         });
     }

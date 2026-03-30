@@ -99,7 +99,7 @@ function ativar(id, acao) {
 
 
 function baixar(id, pg, id_listar) {
-    var id_usuario = localStorage.id_usu;
+    var id_user = localStorage.id_usu;
     var id_empresa = localStorage.id_empresa;
 
     if (pg != "" && pg != "undefined" && pg != undefined) {
@@ -109,7 +109,7 @@ function baixar(id, pg, id_listar) {
     $.ajax({
         url: 'paginas/' + pag + "/baixar.php",
         method: 'POST',
-        data: { id, id_usuario, id_empresa },
+        data: { id, id_user, id_empresa },
         dataType: "html",
 
         success: function (mensagem) {

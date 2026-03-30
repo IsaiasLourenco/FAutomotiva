@@ -3,7 +3,7 @@ if (defined('PERMISSOES_JA_CARREGADAS')) { return; }
 define('PERMISSOES_JA_CARREGADAS', true);
 @session_start();
 require_once("../conexao.php");
-$id_usuario = $_SESSION['id_user'];
+$id_user = $_SESSION['id_user'];
 
 // Inicializa todas como 'ocultar' (padrão: sem acesso)
 $home = 'ocultar';
@@ -20,7 +20,7 @@ $menu_financeiro = 'ocultar';
 $perfil_modal = 'ocultar';
 
 // Busca permissões do usuário
-$permissoes = $pdo->query("SELECT * FROM permissoes WHERE usuario = '$id_usuario'");
+$permissoes = $pdo->query("SELECT * FROM permissoes WHERE usuario = '$id_user'");
 $permitidos = $permissoes->fetchAll(PDO::FETCH_ASSOC);
 $total_permissoes = count($permitidos);
 

@@ -382,6 +382,25 @@ $pag = 'receber';
                                                                         } ?>
                             </select></div>
                     </div>
+
+                    <!-- ✅ ADICIONE após o campo "Valor" -->
+                    <div class="row mt-2">
+                        <div class="col-12">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="pagamento-parcial" name="pagamento_parcial">
+                                <label class="form-check-label" for="pagamento-parcial">Pagamento Parcial (Resíduo)</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6" id="div-valor-parcial" style="display:none;">
+                            <label>Valor Recebido</label>
+                            <input type="text" class="form-control moeda" id="valor-parcial" name="valor_parcial" placeholder="R$ 0,00">
+                        </div>
+                        <div class="col-md-6" id="div-saldo-restante" style="display:none;">
+                            <label>Saldo Restante</label>
+                            <input type="text" class="form-control" id="saldo-restante" readonly>
+                        </div>
+                    </div>
+
                     <div class="row mt-3 bg-light p-2 rounded">
                         <div class="col-12"><b>Ajustes Financeiros</b></div>
                         <div class="col-md-3"><label>Multa</label><input type="text" class="form-control moeda" name="multa" id="valor-multa"></div>
@@ -399,7 +418,7 @@ $pag = 'receber';
                 </div>
                 <div class="modal-footer">
                     <button type="button" id="btn-fechar-baixar" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-success">Confirmar Baixa</button>
+                    <button type="submit" class="btn btn-success" id="btn-confirmar-baixar">Confirmar Baixa</button>
                 </div>
             </form>
         </div>
@@ -815,18 +834,18 @@ $pag = 'receber';
     }
 
     function marcarTodos() {
-        var id_usuario = $('#id_permissoes').val();
+        var id_user = $('#id_permissoes').val();
         var marcado = $('#input_todos').is(':checked');
         $.ajax({
             url: 'paginas/' + pag + "/add_all_permissoes.php",
             method: 'POST',
             data: {
-                id: id_usuario,
+                id: id_user,
                 acao: marcado ? 'marcar_todos' : 'desmarcar_todos'
             },
             dataType: "html",
             success: function(result) {
-                listarPermissoes(id_usuario);
+                listarPermissoes(id_user);
             }
         });
     }
@@ -849,6 +868,12 @@ $pag = 'receber';
     $("#form-baixar").submit(function(e) {
         e.preventDefault();
         var formData = new FormData(this);
+        var btn = $('#btn-confirmar-baixar');
+        var originalText = btn.html();
+
+        // ✅ Desabilita botão durante processamento
+        btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Processando...');
+
         $.ajax({
             url: 'paginas/' + pag + "/baixar.php",
             type: 'POST',
@@ -856,13 +881,28 @@ $pag = 'receber';
             success: function(mensagem) {
                 $('#mensagem-baixar').text('');
                 $('#mensagem-baixar').removeClass();
-                if (mensagem.trim() == "Baixado com Sucesso") {
-                    $('#btn-fechar-baixar').click();
-                    listar();
+
+                if (mensagem.indexOf('Sucesso') !== -1 || mensagem.indexOf('Resíduo registrado') !== -1) {
+                    // ✅ Mostra mensagem de sucesso
+                    $('#mensagem-baixar').addClass('text-success');
+                    $('#mensagem-baixar').text(mensagem);
+
+                    // ✅ Fecha modal após 1.5 segundos
+                    setTimeout(function() {
+                        $('#btn-fechar-baixar').click();
+                        listar(); // ✅ Atualiza a lista automaticamente
+                    }, 1500);
                 } else {
+                    // ✅ Mostra erro
                     $('#mensagem-baixar').addClass('text-danger');
                     $('#mensagem-baixar').text(mensagem);
+                    btn.prop('disabled', false).html(originalText);
                 }
+            },
+            error: function(xhr, status, error) {
+                $('#mensagem-baixar').addClass('text-danger');
+                $('#mensagem-baixar').text('Erro na requisição: ' + error);
+                btn.prop('disabled', false).html(originalText);
             },
             cache: false,
             contentType: false,
@@ -949,5 +989,70 @@ $pag = 'receber';
         valor = valor.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
         this.value = "R$ " + valor;
         calcularSubtotalBaixa();
+    });
+
+    // ✅ Lógica de Pagamento Parcial (Resíduo) - CORRIGIDO
+    $('#pagamento-parcial').on('change', function() {
+        if ($(this).is(':checked')) {
+            $('#div-valor-parcial, #div-saldo-restante').show();
+            $('#valor-parcial').val($('#valor-baixar').val());
+            $('#saldo-restante').val('R$ 0,00');
+            calcularSaldoRestante(); // ✅ Calcula inicial
+        } else {
+            $('#div-valor-parcial, #div-saldo-restante').hide();
+            $('#valor-parcial').val('');
+            $('#saldo-restante').val('');
+        }
+    });
+
+    // ✅ Função separada para calcular saldo
+    function calcularSaldoRestante() {
+        var valorTotalStr = $('#valor-baixar').val();
+        var valorParcialStr = $('#valor-parcial').val();
+
+        // ✅ Remove formatação de moeda corretamente
+        var valorTotal = parseFloat(valorTotalStr.replace('R$', '').replace(/\./g, '').replace(',', '.')) || 0;
+        var valorParcial = parseFloat(valorParcialStr.replace('R$', '').replace(/\./g, '').replace(',', '.')) || 0;
+
+        var saldoRestante = valorTotal - valorParcial;
+
+        $('#saldo-restante').val('R$ ' + saldoRestante.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.'));
+    }
+
+    // ✅ Usa blur em vez de input (evita cálculo durante digitação)
+    $('#valor-parcial').on('blur', function() {
+        if ($(this).val() !== '' && $(this).val() !== 'R$ ') {
+            calcularSaldoRestante();
+        }
+    });
+
+    // ✅ Também calcula ao mudar o valor (para quando o usuário clica fora)
+    $('#valor-parcial').on('change', function() {
+        calcularSaldoRestante();
+    });
+
+    // ✅ Muda texto do botão quando marca/desmarca "Pagamento Parcial"
+    $('#pagamento-parcial').on('change', function() {
+        if ($(this).is(':checked')) {
+            $('#btn-confirmar-baixar').html('<i class="fa fa-check"></i> Receber Resíduo');
+            $('#div-valor-parcial, #div-saldo-restante').show();
+            $('#valor-parcial').val($('#valor-baixar').val());
+            $('#saldo-restante').val('R$ 0,00');
+            calcularSaldoRestante();
+        } else {
+            $('#btn-confirmar-baixar').html('<i class="fa fa-check"></i> Confirmar Baixa');
+            $('#div-valor-parcial, #div-saldo-restante').hide();
+            $('#valor-parcial').val('');
+            $('#saldo-restante').val('');
+        }
+    });
+
+    // ✅ Muda texto do botão quando marca/desmarca "Pagamento Parcial"
+    $('#pagamento-parcial').on('change', function() {
+        if ($(this).is(':checked')) {
+            $('#btn-confirmar-baixar').html('<i class="fa fa-check"></i> Receber Resíduo');
+        } else {
+            $('#btn-confirmar-baixar').html('<i class="fa fa-check"></i> Confirmar Baixa');
+        }
     });
 </script>

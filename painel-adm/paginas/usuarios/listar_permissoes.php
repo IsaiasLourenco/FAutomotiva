@@ -2,7 +2,7 @@
 $tabela = 'permissoes';
 require_once("../../../conexao.php");
 
-$id_usuario = @$_POST['id'] ?? 0;
+$id_user = @$_POST['id'] ?? 0;
 
 // ============================================================
 // 1. ACESSOS SEM GRUPO (grupo = 0)
@@ -19,12 +19,12 @@ if (count($listaSemGrupo) > 0) {
         
         // Verifica permissão do usuário
         $verifica = $pdo->prepare("SELECT id FROM $tabela WHERE usuario = :usuario AND permissao = :permissao");
-        $verifica->execute([':usuario' => $id_usuario, ':permissao' => $idAcesso]);
+        $verifica->execute([':usuario' => $id_user, ':permissao' => $idAcesso]);
         $checked = ($verifica->rowCount() > 0) ? 'checked' : '';
         
         echo '<div class="col-md-4 mb-3">
                 <div class="form-check">
-                    <input class="form-check-input" onclick="adicionarPermissoes(' . $id_usuario . ', ' . $idAcesso . ')" type="checkbox" value="' . $idAcesso . '" id="acesso_' . $idAcesso . '" ' . $checked . '>
+                    <input class="form-check-input" onclick="adicionarPermissoes(' . $id_user . ', ' . $idAcesso . ')" type="checkbox" value="' . $idAcesso . '" id="acesso_' . $idAcesso . '" ' . $checked . '>
                     <label class="form-check-label font-permissoes" for="acesso_' . $idAcesso . '">' . $nomeAcesso . '</label>
                 </div>
               </div>';
@@ -57,12 +57,12 @@ foreach ($listaGrupos as $grupo) {
             
             // Verifica permissão do usuário
             $verifica = $pdo->prepare("SELECT id FROM $tabela WHERE usuario = :usuario AND permissao = :permissao");
-            $verifica->execute([':usuario' => $id_usuario, ':permissao' => $idAcesso]);
+            $verifica->execute([':usuario' => $id_user, ':permissao' => $idAcesso]);
             $checked = ($verifica->rowCount() > 0) ? 'checked' : '';
             
             echo '<div class="col-md-4 mb-3">
                     <div class="form-check">
-                        <input class="form-check-input" onclick="adicionarPermissoes(' . $id_usuario . ', ' . $idAcesso . ')" type="checkbox" value="' . $idAcesso . '" id="acesso_' . $idAcesso . '" ' . $checked . '>
+                        <input class="form-check-input" onclick="adicionarPermissoes(' . $id_user . ', ' . $idAcesso . ')" type="checkbox" value="' . $idAcesso . '" id="acesso_' . $idAcesso . '" ' . $checked . '>
                         <label class="form-check-label font-permissoes" for="acesso_' . $idAcesso . '">' . $nomeAcesso . '</label>
                     </div>
                   </div>';

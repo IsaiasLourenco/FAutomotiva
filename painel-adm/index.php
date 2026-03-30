@@ -53,10 +53,10 @@
         $pagina = $pag_inicial;
     }
 
-    $id_usuario = $_SESSION['id_user'];
+    $id_user = $_SESSION['id_user'];
 
     $query = $pdo->prepare("SELECT * FROM usuarios WHERE id = :id LIMIT 1");
-    $query->bindValue(":id", $id_usuario);
+    $query->bindValue(":id", $id_user);
     $query->execute();
     $res = $query->fetchAll(PDO::FETCH_ASSOC);
     $linhas = count($res);

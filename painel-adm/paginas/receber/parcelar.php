@@ -122,7 +122,7 @@ try {
             ':forma_pgto' => $forma_pagamento,
             ':freq_id' => $frequencia_id,
             ':obs' => "Parcela {$i} de {$qtd_parcelas}",
-            ':usuario_lanc' => $_SESSION['id_usuario'] ?? 1,
+            ':usuario_lanc' => $_SESSION['id_user'] ?? 1,
             ':id_orig' => $id_original,
             ':multa' => $multa_parcela > 0 ? round($multa_parcela, 2) : null,
             ':juros' => $juros_parcela > 0 ? round($juros_parcela, 2) : null,

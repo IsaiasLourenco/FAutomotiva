@@ -94,20 +94,29 @@ if ($linhas > 0) {
         $subtotalF = 'R$ ' . number_format($subtotal, 2, ',', '.');
         $data_vencimentoF = (!empty($data_vencimento) && $data_vencimento != '0000-00-00') ? date('d/m/Y', strtotime($data_vencimento)) : '-';
         $data_lancamentoF = (!empty($data_lancamento) && $data_lancamento != '0000-00-00') ? date('d/m/Y', strtotime($data_lancamento)) : '-';
-        $data_pagamentoF_tabela = (!empty($data_pagamento) && $data_pagamento != '0000-00-00') ? date('d/m/Y', strtotime($data_pagamento)) : '<span class="text-muted">Não pago</span>';
+        $data_pagamentoF_tabela = (!empty($data_pagamento) && $data_pagamento != '0000-00-00') ? date('d/m/Y', strtotime($data_pagamento)) :
+            '<span class="text-muted">Não pago</span>';
         $data_pagamentoF_js = (!empty($data_pagamento) && $data_pagamento != '0000-00-00') ? date('d/m/Y', strtotime($data_pagamento)) : 'Não pago';
         $data_vencimento_iso = (!empty($data_vencimento) && $data_vencimento != '0000-00-00') ? date('Y-m-d', strtotime($data_vencimento)) : '';
         $data_pagamento_iso = (!empty($data_pagamento) && $data_pagamento != '0000-00-00') ? date('Y-m-d', strtotime($data_pagamento)) : '';
 
+        // ✅ LÓGICA CORRIGIDA: controle separado para cada botão
         if (!empty($data_pagamento) && $data_pagamento != '0000-00-00') {
             $classe_status = 'conta-paga';
-            $mostrarBotoesAcao = false;
+            $mostrarBotaoParcelar = false;
+            $mostrarBotaoBaixar = false;
+        } elseif (strpos($descricao, '(Parcelada)') !== false) {
+            $classe_status = 'conta-parcelada';
+            $mostrarBotaoParcelar = false;
+            $mostrarBotaoBaixar = true;
         } elseif (!empty($data_vencimento) && $data_vencimento < date('Y-m-d')) {
             $classe_status = 'conta-vencida';
-            $mostrarBotoesAcao = true;
+            $mostrarBotaoParcelar = true;
+            $mostrarBotaoBaixar = true;
         } else {
             $classe_status = 'conta-nao-paga';
-            $mostrarBotoesAcao = true;
+            $mostrarBotaoParcelar = true;
+            $mostrarBotaoBaixar = true;
         }
 
         $qp = $pdo->prepare("SELECT nome FROM pacientes WHERE id = :id LIMIT 1");
@@ -183,28 +192,45 @@ if ($linhas > 0) {
                             <li><div class="notification_desc2"><p>Confirmar Exclusão? <a href="#" onclick="excluir('{$id}')"><span class="text-danger">Sim</span></a></p></div></li>
                         </ul>
                     </li>
-                    <a href="#" onclick="mostrar('{$e_descricao}','{$e_paciente_nome}','{$e_valorF}','{$e_data_vencimentoF}','{$e_data_lancamentoF}','{$e_data_pagamentoF_js}','{$e_forma_pagamento_nome}','{$e_frequencia_nome}','{$e_obs}','{$e_arquivo}','{$e_multaF}','{$e_jurosF}','{$e_descontoF}','{$e_taxaF}','{$e_subtotalF}','{$e_usuario_lanc_nome}','{$e_usuario_pgto_nome}')" title="Mostrar Dados">
+                    <a href="#" onclick="mostrar('{$e_descricao}',
+                                                 '{$e_paciente_nome}',
+                                                 '{$e_valorF}',
+                                                 '{$e_data_vencimentoF}',
+                                                 '{$e_data_lancamentoF}',
+                                                 '{$e_data_pagamentoF_js}',
+                                                 '{$e_forma_pagamento_nome}',
+                                                 '{$e_frequencia_nome}',
+                                                 '{$e_obs}',
+                                                 '{$e_arquivo}',
+                                                 '{$e_multaF}',
+                                                 '{$e_jurosF}',
+                                                 '{$e_descontoF}',
+                                                 '{$e_taxaF}',
+                                                 '{$e_subtotalF}',
+                                                 '{$e_usuario_lanc_nome}',
+                                                 '{$e_usuario_pgto_nome}')" title="Mostrar Dados">
                         <i class="fa fa-info-circle text-dark ico-grande"></i>
                     </a>
 HTML;
 
-        if ($mostrarBotoesAcao) {
+        if ($mostrarBotaoParcelar) {
             echo <<<HTML
-                    <a href="#" onclick="parcelar('{$id}', 
-                                                  '{$e_valorF}', 
-                                                  '{$e_descricao}', 
-                                                  '{$e_multaF}', 
-                                                  '{$e_jurosF}', 
-                                                  '{$e_descontoF}')" title="Parcelar valor">
-                        <i class="fa-solid fa-calendar-days text-success ico-grande"></i>
-                    </a>
-                    <a href="#" onclick="baixar('{$id}', 
-                                                '{$e_valorF}', 
-                                                '{$e_descricao}', 
-                                                '{$e_forma_pagamento_nome}', 
-                                                '{$data_vencimento_iso}')" title="Baixar valor">
-                        <i class="fa-solid fa-square-check text-danger ico-grande"></i>
-                    </a>
+            <a href="#" onclick="parcelar('{$id}', 
+                                          '{$e_valorF}', 
+                                          '{$e_descricao}', 
+                                          '{$e_multaF}', 
+                                          '{$e_jurosF}', 
+                                          '{$e_descontoF}')" title="Parcelar valor">
+                <i class="fa-solid fa-calendar-days text-success ico-grande"></i>
+            </a>
+HTML;
+        }
+
+        if ($mostrarBotaoBaixar) {
+            echo <<<HTML
+            <a href="#" onclick="baixar('{$id}', '{$e_valorF}', '{$e_descricao}', '{$e_forma_pagamento_nome}', '{$data_vencimento_iso}')" title="Baixar valor">
+                <i class="fa-solid fa-square-check text-danger ico-grande"></i>
+            </a>
 HTML;
         }
 
@@ -257,6 +283,16 @@ HTML;
     .conta-vencida:hover {
         filter: brightness(0.95);
     }
+
+    .conta-parcelada {
+        background-color: #ffcdd2 !important;
+        border-left: 4px solid #d32f2f !important;
+        font-weight: 600;
+    }
+
+    .conta-parcelada:hover {
+        filter: brightness(0.95);
+    }
 </style>
 
 <script>
@@ -279,7 +315,8 @@ HTML;
 </script>
 
 <script type="text/javascript">
-    function editar(id, descricao, paciente, valor, data_vencimento, data_lancamento, data_pagamento, forma_pagamento, frequencia, obs, arquivo, multa, juros, desconto, taxa, subtotal) {
+    function editar(id, descricao, paciente, valor, data_vencimento, data_lancamento, data_pagamento, forma_pagamento, frequencia, obs, arquivo, multa,
+        juros, desconto, taxa, subtotal) {
         $('#mensagem').text('');
         $('#titulo_inserir').text('Editar Registro');
         $('#id').val(id);
@@ -303,7 +340,8 @@ HTML;
         $('#modalForm').modal('show');
     }
 
-    function mostrar(descricao, paciente, valor, data_vencimento, data_lancamento, data_pagamento, forma_pagamento, frequencia, obs, arquivo, multa, juros, desconto, taxa, subtotal, usuario_lanc, usuario_pgto) {
+    function mostrar(descricao, paciente, valor, data_vencimento, data_lancamento, data_pagamento, forma_pagamento, frequencia, obs, arquivo, multa, juros,
+        desconto, taxa, subtotal, usuario_lanc, usuario_pgto) {
         $('#titulo_dados').text('Detalhes: ' + descricao);
         $('#descricao_dados-cli').text(descricao);
         $('#paciente_dados-cli').text(paciente);
@@ -417,18 +455,18 @@ HTML;
     }
 
     function marcarTodos() {
-        var id_usuario = $('#id_permissoes').val();
+        var id_user = $('#id_permissoes').val();
         var marcado = $('#input_todos').is(':checked');
         $.ajax({
             url: 'paginas/' + pag + "/add_all_permissoes.php",
             method: 'POST',
             data: {
-                id: id_usuario,
+                id: id_user,
                 acao: marcado ? 'marcar_todos' : 'desmarcar_todos'
             },
             dataType: "html",
             success: function(result) {
-                listarPermissoes(id_usuario);
+                listarPermissoes(id_user);
             }
         });
     }
