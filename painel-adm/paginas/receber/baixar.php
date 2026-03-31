@@ -83,6 +83,17 @@ try {
             :arquivo, 'Resíduo', :id_referencia, :multa, :juros, :desconto, :taxa, :subtotal
         )");
 
+        // ✅ Calcula subtotal do resíduo (valor parcial + ajustes)
+        $subtotal_residuo = $valor_parcial_num + $multa_num + $juros_num + ($valor_parcial_num * $taxa_num / 100) - $desconto_num;
+
+        // ✅ 1. Cria registro de RESÍDUO
+        $stmt_residuo = $pdo->prepare("INSERT INTO receber (descricao, paciente, valor, data_vencimento, data_lancamento, data_pagamento,
+                                                            forma_pagamento, frequencia, obs, usuario_lanc, usuario_pgto,
+                                                            arquivo, referencia, id_referencia, multa, juros, desconto, taxa, subtotal
+                                     ) VALUES (:descricao, :paciente, :valor, :data_venc, :data_lanc, :data_pgto,
+                                               :forma_pgto, :freq, :obs, :usuario_lanc, :usuario_pgto,
+                                               :arquivo, 'Resíduo', :id_referencia, :multa, :juros, :desconto, :taxa, :subtotal)");
+
         $stmt_residuo->execute([
             ':descricao' => $conta['descricao'] . ' (Resíduo)',
             ':paciente' => $conta['paciente'],
@@ -96,27 +107,20 @@ try {
             ':usuario_lanc' => $_SESSION['id_usuario'] ?? 1,
             ':usuario_pgto' => $_SESSION['id_usuario'] ?? 1,
             ':arquivo' => $conta['arquivo'] ?? 'aPagar.png',
-            ':id_referencia' => $id,  // ✅ LINKA COM CONTA ORIGINAL
-            ':multa' => $multa_num,
-            ':juros' => $juros_num,
-            ':desconto' => $desconto_num,
-            ':taxa' => $taxa_num,
-            ':subtotal' => $valor_parcial_num
+            ':id_referencia' => $id,
+            ':multa' => round($multa_num, 2),
+            ':juros' => round($juros_num, 2),
+            ':desconto' => round($desconto_num, 2),
+            ':taxa' => round($taxa_num, 2),
+            ':subtotal' => round($subtotal_residuo, 2)  // ✅ SUBTOTAL CALCULADO
         ]);
 
-        // ✅ 2. ATUALIZA CONTA ORIGINAL: reduz valor e subtotal
-        $novo_valor = $conta['valor'] - $valor_parcial_num;
-        $novo_subtotal = $conta['subtotal'] - $valor_parcial_num;
+        // ✅ 2. ATUALIZA CONTA ORIGINAL: reduz valor pelo subtotal recebido
+        $novo_valor = $conta['valor'] - $subtotal_residuo;
+        $novo_subtotal = $conta['subtotal'] - $subtotal_residuo;
 
-        $stmt_update = $pdo->prepare("UPDATE receber SET 
-            valor = :novo_valor,
-            subtotal = :novo_subtotal
-            WHERE id = :id");
-        $stmt_update->execute([
-            ':novo_valor' => round($novo_valor, 2),
-            ':novo_subtotal' => round($novo_subtotal, 2),
-            ':id' => $id
-        ]);
+        $stmt_update = $pdo->prepare("UPDATE receber SET valor = :novo_valor, subtotal = :novo_subtotalWHERE id = :id");
+        $stmt_update->execute([':novo_valor' => round($novo_valor, 2), ':novo_subtotal' => round($novo_subtotal, 2), ':id' => $id]);
 
         echo "Sucesso: Resíduo de R$ " . number_format($valor_parcial_num, 2, ',', '.') . " registrado! Saldo restante: R$ " . number_format($novo_valor, 2, ',', '.');
         exit;

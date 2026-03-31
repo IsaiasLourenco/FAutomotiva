@@ -107,16 +107,45 @@ $pag = 'receber';
     <div class="row mb-3 align-items-center">
         <div class="col-md-4 col-sm-12 mb-2 mb-md-0">
             <a onclick="inserir()" href="#" class="btn btn-primary mr-3 btn-sm"><span class="fa fa-plus"></span> Conta</a>
+
             <li class="dropdown head-dpdn2" style="display: inline-block;" id="btn-deletar">
-                <a href="#" class="btn btn-danger dropdown-toggle btn-sm" data-toggle="dropdown"><span class="fa-solid fa-trash-can"></span> Excluir Conta</a>
+                <a href="#" class="btn btn-danger dropdown-toggle btn-sm" data-toggle="dropdown">
+                    <span class="fa-solid fa-trash-can"></span> Excluir Conta
+                </a>
                 <ul class="dropdown-menu">
                     <li>
                         <div class="notification_desc2">
-                            <p class="mb-1">Confirmar Exclusão?<a href="#" onclick="deletarSel()" class="btn btn-danger btn-xs"><span class="fa fa-check"></span> Sim, Excluir</a></p>
+                            <p class="mb-1">Confirmar Exclusão?
+                                <a href="#" onclick="deletarSel()" class="btn btn-danger btn-xs">
+                                    <span class="fa fa-check"></span> Sim, Excluir
+                                </a>
+                            </p>
                         </div>
                     </li>
                 </ul>
             </li>
+
+            <li class="dropdown head-dpdn2" style="display: inline-block;" id="btn-baixar">
+                <a href="#" class="btn btn-success dropdown-toggle btn-sm" data-toggle="dropdown">
+                    <span class="fa-solid fa-check-square"></span> Baixar Conta
+                </a>
+                <ul class="dropdown-menu">
+                    <li>
+                        <div class="notification_desc2">
+                            <p class="mb-1">Confirmar Baixa das contas selecionadas?
+                                <a href="#" onclick="baixarSel()" class="btn btn-success btn-xs">
+                                    <span class="fa fa-check"></span> Sim, Baixar
+                                </a>
+                            </p>
+                            <p>
+                                <strong>Total das Contas:</strong>
+                                <span id="totalContas"></span>
+                            </p>
+                        </div>
+                    </li>
+                </ul>
+            </li>
+
         </div>
         <div class="col-md-8 col-sm-12">
             <div class="row align-items-center">
@@ -425,6 +454,112 @@ $pag = 'receber';
     </div>
 </div>
 
+<!-- ✅ Modal de Relacionados (Parcelas/Resíduos) -->
+<div class="modal fade" id="modalRelacionados" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h4 class="modal-title">
+                    <i class="fa-solid fa-diagram-project"></i>
+                    Relacionados: <span id="titulo-relacionados"></span>
+                </h4>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover">
+                        <thead class="bg-light">
+                            <tr>
+                                <th width="5%" class="text-center">Tipo</th>
+                                <th width="35%">Descrição</th>
+                                <th width="15%" class="text-center">Pago em</th>
+                                <th width="15%" class="text-center">Forma Pgto</th>
+                                <th width="30%" class="text-end">Valores</th>
+                            </tr>
+                        </thead>
+                        <tbody id="lista-relacionados">
+                            <tr>
+                                <td colspan="5" class="text-center text-muted">Carregando...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- ✅ Resumo no rodapé da modal -->
+                <div class="row mt-3 pt-3 border-top" id="resumo-relacionados" style="display:none;">
+                    <div class="col-md-4">
+                        <small class="text-muted">Total Pago:</small>
+                        <h5 class="text-success font-weight-bold" id="total-pago">R$ 0,00</h5>
+                    </div>
+                    <div class="col-md-4">
+                        <small class="text-muted">Saldo Restante:</small>
+                        <h5 class="text-danger font-weight-bold" id="saldo-restante">R$ 0,00</h5>
+                    </div>
+                    <div class="col-md-4">
+                        <small class="text-muted">Valor Original:</small>
+                        <h5 class="text-dark font-weight-bold" id="valor-original">R$ 0,00</h5>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ✅ Modal de Baixa Múltipla -->
+<div class="modal fade" id="modalBaixarMultiplo" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-md" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h4 class="modal-title"><i class="fa fa-check-square"></i> Baixar Múltiplas Contas</h4>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close"><span>&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Contas selecionadas:</strong> <span id="qtd-contas-selecionadas">0</span></p>
+                <p><strong>Total a receber:</strong> <span id="total-multiplo" class="text-success font-weight-bold">R$ 0,00</span></p>
+
+                <div class="form-group">
+                    <label>Forma de Pagamento (para todas)</label>
+                    <select class="form-control" id="forma-pagamento-multiplo" required>
+                        <option value="">Selecione...</option>
+                        <?php $query = $pdo->query("SELECT * FROM forma_pagamento ORDER BY nome ASC");
+                        foreach ($query->fetchAll(PDO::FETCH_ASSOC) as $fp) {
+                            $taxa = 0;
+                            $nome = strtolower($fp['nome']);
+                            if (strpos($nome, 'débito') !== false || strpos($nome, 'debito') !== false) {
+                                $taxa = 3;
+                            } elseif (strpos($nome, 'crédito') !== false || strpos($nome, 'credito') !== false) {
+                                $taxa = 5;
+                            }
+                            echo "<option value='{$fp['id']}' data-taxa='{$taxa}'>{$fp['nome']}</option>";
+                        } ?>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Data do Pagamento</label>
+                    <input type="date" class="form-control" id="data-pagamento-multiplo" value="<?php echo date('Y-m-d'); ?>">
+                </div>
+
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="aplicar-multas-multiplo">
+                    <label class="form-check-label" for="aplicar-multas-multiplo">Aplicar multa (2%) e juros (1%/mês) se vencidas</label>
+                </div>
+
+                <div id="mensagem-baixar-multiplo" class="mt-2"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-success" id="btn-confirmar-baixar-multiplo">Confirmar Baixa</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src="../js/ajax.js"></script>
 <script>
     function formatarMoedaInput(input) {
@@ -515,9 +650,30 @@ $pag = 'receber';
             buscarData();
         }
     });
+
     $(document).ready(function() {
         listar();
         $('#btn-deletar').hide();
+        $('#btn-baixar').hide();
+    });
+
+    // ✅ Restaurar estado dos checkboxes após listar
+    function restaurarCheckboxesBaixar() {
+        idsBaixarSelecionados.forEach(function(item) {
+            var cb = document.querySelector('.check-baixar[data-id="' + item.id + '"]');
+            if (cb) {
+                cb.checked = true;
+            }
+        });
+    }
+
+    // ✅ Chamar após listar() no document.ready
+    $(document).ready(function() {
+        listar();
+        $('#btn-deletar').hide();
+
+        // ✅ Restaurar checkboxes após tabela carregar
+        setTimeout(restaurarCheckboxesBaixar, 500);
     });
 
     function parcelar(id, valor, descricao, multa, juros, desconto) {
@@ -758,12 +914,18 @@ $pag = 'receber';
 
     function selecionar(id) {
         var ids = $('#ids').val();
+
         if ($('#seletor-' + id).is(":checked")) {
-            $('#ids').val(ids + id + '-');
+            if (ids.indexOf(id + '-') === -1) {
+                $('#ids').val(ids + id + '-');
+            }
         } else {
             $('#ids').val(ids.replace(id + '-', ''));
         }
-        $('#btn-deletar').toggle($('#ids').val() !== "");
+
+        // ✅ Checkbox da descrição controla APENAS botão de EXCLUIR
+        var idsVal = $('#ids').val().trim();
+        $('#btn-deletar').toggle(idsVal !== '');
     }
 
     function deletarSel() {
@@ -772,6 +934,33 @@ $pag = 'receber';
             if (ids[i]) excluir(ids[i]);
         }
         limparCampos();
+    }
+
+    function baixarSel() {
+        // ✅ Pega IDs do array persistente (não do $('#ids'))
+        var ids = idsBaixarSelecionados.map(item => item.id);
+
+        if (ids.length === 0) {
+            alert('Nenhuma conta selecionada!');
+            return;
+        }
+
+        // ✅ Preenche dados na modal
+        $('#qtd-contas-selecionadas').text(ids.length);
+
+        var total = idsBaixarSelecionados.reduce((sum, item) => sum + item.valor, 0);
+        $('#total-multiplo').text('R$ ' + total.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.'));
+
+        $('#forma-pagamento-multiplo').val('');
+        $('#data-pagamento-multiplo').val(new Date().toISOString().split('T')[0]);
+        $('#aplicar-multas-multiplo').prop('checked', false);
+        $('#mensagem-baixar-multiplo').html('');
+
+        // ✅ Armazena IDs para uso no AJAX
+        $('#modalBaixarMultiplo').data('ids', ids);
+
+        // ✅ Abre a modal
+        $('#modalBaixarMultiplo').modal('show');
     }
 
     function excluir(id) {
@@ -910,7 +1099,55 @@ $pag = 'receber';
         });
     });
 
-    // ✅ LÓGICA DA MODAL DE BAIXA
+    // ✅ AJAX para confirmar baixa múltipla
+    // ✅ AJAX para confirmar baixa múltipla
+    $('#btn-confirmar-baixar-multiplo').on('click', function() {
+        // ✅ Pega IDs do array persistente
+        var ids = idsBaixarSelecionados.map(item => item.id);
+
+        var formaPagamento = $('#forma-pagamento-multiplo').val();
+        var dataPagamento = $('#data-pagamento-multiplo').val();
+        var aplicarMultas = $('#aplicar-multas-multiplo').is(':checked');
+
+        if (!formaPagamento) {
+            $('#mensagem-baixar-multiplo').html('<div class="alert alert-danger">Selecione uma forma de pagamento!</div>');
+            return;
+        }
+
+        var btn = $(this);
+        btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Processando...');
+
+        $.ajax({
+            url: 'paginas/' + pag + "/baixar_multiplos.php",
+            method: 'POST',
+            data: {
+                ids: ids,
+                forma_pagamento: formaPagamento,
+                data_pgto: dataPagamento,
+                aplicar_multas: aplicarMultas ? 'sim' : 'nao'
+            },
+            dataType: 'html',
+            success: function(mensagem) {
+                if (mensagem.indexOf('Sucesso') !== -1) {
+                    $('#mensagem-baixar-multiplo').html('<div class="alert alert-success">' + mensagem + '</div>');
+                    setTimeout(function() {
+                        $('#modalBaixarMultiplo').modal('hide');
+                        idsBaixarSelecionados = []; // ✅ Limpa array
+                        document.getElementById('btn-baixar').style.display = 'none';
+                        document.getElementById('totalContas').innerText = '';
+                        listar();
+                    }, 1500);
+                } else {
+                    $('#mensagem-baixar-multiplo').html('<div class="alert alert-danger">Erro: ' + mensagem + '</div>');
+                    btn.prop('disabled', false).html('Confirmar Baixa');
+                }
+            },
+            error: function(xhr, status, error) {
+                $('#mensagem-baixar-multiplo').html('<div class="alert alert-danger">Erro na requisição: ' + error + '</div>');
+                btn.prop('disabled', false).html('Confirmar Baixa');
+            }
+        });
+    });
 
     // Função para calcular subtotal
     function calcularSubtotalBaixa() {
@@ -1053,6 +1290,88 @@ $pag = 'receber';
             $('#btn-confirmar-baixar').html('<i class="fa fa-check"></i> Receber Resíduo');
         } else {
             $('#btn-confirmar-baixar').html('<i class="fa fa-check"></i> Confirmar Baixa');
+        }
+    });
+
+    // ✅ Função para abrir modal de relacionados
+    function mostrarRelacionados(id, descricao) {
+        $('#titulo-relacionados').text(descricao);
+        $('#lista-relacionados').html('<tr><td colspan="5" class="text-center text-muted"><i class="fa fa-spinner fa-spin"></i> Carregando...</td></tr>');
+        $('#resumo-relacionados').hide();
+        $('#modalRelacionados').modal('show');
+
+        $.ajax({
+            url: 'paginas/receber/listar_relacionados.php',
+            method: 'POST',
+            data: {
+                id: id
+            },
+            dataType: 'html',
+            success: function(resposta) {
+                $('#lista-relacionados').html(resposta);
+
+                // ✅ Calcula resumo se houver dados
+                if ($(resposta).find('tr').length > 1) {
+                    calcularResumoRelacionados(id);
+                }
+            },
+            error: function() {
+                $('#lista-relacionados').html('<tr><td colspan="5" class="text-center text-danger">Erro ao carregar dados</td></tr>');
+            }
+        });
+    }
+
+    // ✅ Calcula e exibe resumo (total pago, saldo, etc.)
+    function calcularResumoRelacionados(id_original) {
+        $.ajax({
+            url: 'paginas/receber/listar_relacionados.php',
+            method: 'POST',
+            data: {
+                id: id_original,
+                resumo: 'sim'
+            },
+            dataType: 'json',
+            success: function(resposta) {
+                if (resposta.sucesso) {
+                    $('#total-pago').text(resposta.total_pago);
+                    $('#saldo-restante').text(resposta.saldo_restante);
+                    $('#valor-original').text(resposta.valor_original);
+                    $('#resumo-relacionados').show();
+                }
+            }
+        });
+    }
+
+    // ✅ Array persistente para armazenar IDs selecionados para baixa
+    var idsBaixarSelecionados = [];
+
+    // ✅ CONTROLE DE BAIXA MÚLTIPLA
+    $(document).on('change', '.check-baixar', function() {
+        var id = $(this).data('id');
+        var valor = parseFloat($(this).data('valor')) || 0;
+
+        // ✅ Adiciona ou remove do array persistente
+        if ($(this).is(':checked')) {
+            if (!idsBaixarSelecionados.includes(id)) {
+                idsBaixarSelecionados.push({
+                    id: id,
+                    valor: valor
+                });
+            }
+        } else {
+            idsBaixarSelecionados = idsBaixarSelecionados.filter(item => item.id !== id);
+        }
+
+        // ✅ Calcula total do array (não do DOM)
+        var total = idsBaixarSelecionados.reduce((sum, item) => sum + item.valor, 0);
+
+        if (idsBaixarSelecionados.length > 0) {
+            document.getElementById('btn-baixar').style.display = 'inline-block';
+            document.getElementById('totalContas').innerText = 'R$ ' + total.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+            document.getElementById('modalBaixarMultiplo').setAttribute('data-ids', JSON.stringify(idsBaixarSelecionados.map(i => i.id)));
+        } else {
+            document.getElementById('btn-baixar').style.display = 'none';
+            document.getElementById('totalContas').innerText = '';
         }
     });
 </script>

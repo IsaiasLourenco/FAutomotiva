@@ -18,6 +18,10 @@ p {
   margin: 0;
 }
 
+.alinhaDireita {
+  text-align: right;
+}
+
 html, body {
   font-family: 'Montserrat', sans-serif;
   font-size: 100%;

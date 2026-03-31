@@ -51,6 +51,10 @@ $stmt->execute();
 $res = $stmt->fetchAll(PDO::FETCH_ASSOC);
 $linhas = @count($res);
 
+// ✅ Inicializa totais
+$total_pendentes = 0;
+$total_pago = 0;
+
 echo <<<HTML
 <table class="table table-hover tabela-pequena" id="tabela">
     <thead> 
@@ -85,6 +89,13 @@ if ($linhas > 0) {
         $desconto = $res[$i]['desconto'] ?? 0;
         $taxa = $res[$i]['taxa'] ?? 0;
         $subtotal = $res[$i]['subtotal'] ?? 0;
+
+        // ✅ Acumula totais (AGORA COM VARIÁVEIS JÁ DEFINIDAS)
+        if (!empty($data_pagamento) && $data_pagamento != '0000-00-00') {
+            $total_pago += $valor;
+        } else {
+            $total_pendentes += $valor;
+        }
 
         $valorF = 'R$ ' . number_format($valor, 2, ',', '.');
         $multaF = $multa > 0 ? 'R$ ' . number_format($multa, 2, ',', '.') : '-';
@@ -152,6 +163,19 @@ if ($linhas > 0) {
             $usuario_pgto_nome = $ru2['nome'] ?? 'Não encontrado';
         }
 
+        // ✅ Busca total de resíduos já pagos para esta conta (se for conta original)
+        $total_residuos = 0;
+        if (empty($res[$i]['referencia']) || $res[$i]['referencia'] != 'Resíduo') {
+            $stmt_residuos = $pdo->prepare("SELECT COALESCE(SUM(subtotal), 0) as total_residuos FROM receber WHERE id_referencia = :id AND referencia = 'Resíduo'");
+            $stmt_residuos->execute([':id' => $id]);
+            $total_residuos = $stmt_residuos->fetchColumn();
+        }
+
+        // ✅ Formata valores para exibição (FAZER ANTES DO HEREDOC)
+        $total_residuosF = number_format($total_residuos, 2, ',', '.');
+        $saldo_restante = $valor - $total_residuos;
+        $saldo_restanteF = number_format($saldo_restante, 2, ',', '.');
+
         $e_descricao = js_escape($descricao);
         $e_paciente_nome = js_escape($paciente_nome);
         $e_valorF = js_escape($valorF);
@@ -178,7 +202,33 @@ if ($linhas > 0) {
                 <td>{$paciente_nome}</td>
                 <td>{$data_lancamentoF}</td>
                 <td class="esc">{$data_pagamentoF_tabela}</td>
-                <td>{$valorF}</td>
+                <td>
+                    <b>{$valorF}</b>
+HTML;
+
+        // ✅ Exibe "Recebido" apenas se houver ajustes (multa/juros/desconto/taxa)
+        if ($subtotal > 0 && $subtotal != $valor) {
+            echo <<<HTML
+        <br>
+        <small class="text-success font-weight-bold">
+            Recebido: {$subtotalF}
+        </small>
+HTML;
+        }
+
+        // ✅ Exibe "Pago/Saldo" apenas se houver resíduos
+        if ($total_residuos > 0) {
+            echo <<<HTML
+        <br>
+        <small class="text-muted">
+            Pago: R$ {$total_residuosF} | 
+            Saldo: R$ {$saldo_restanteF}
+        </small>
+HTML;
+        }
+
+        echo <<<HTML
+                </td>
                 <td class="esc"><a href="images/receber/{$arquivo}" target="_blank"><img src="images/receber/{$arquivo}" width="25px"></a></td>
                 <td>
                     <a href="#" onclick="editar('{$id}','{$e_descricao}','{$paciente_id}','{$e_valorF}','{$e_data_vencimento_iso}','{$e_data_lancamentoF}','{$e_data_pagamento_iso}','{$forma_pagamento_id}','{$frequencia_id}','{$e_obs}','{$e_arquivo}','{$e_multaF}','{$e_jurosF}','{$e_descontoF}','{$e_taxaF}','{$e_subtotalF}')" title="Editar Dados">
@@ -189,7 +239,15 @@ if ($linhas > 0) {
                             <i class="fa-solid fa-trash-can text-danger ico-grande"></i>
                         </a>
                         <ul class="dropdown-menu" style="margin-left:-230px;">
-                            <li><div class="notification_desc2"><p>Confirmar Exclusão? <a href="#" onclick="excluir('{$id}')"><span class="text-danger">Sim</span></a></p></div></li>
+                            <li>
+                                <div class="notification_desc2">
+                                    <p>Confirmar Exclusão? <br>
+                                        <a href="#" onclick="excluir('{$id}')" class="btn btn-danger btn-xs">
+                                            <span class="alinhaDireita">Sim</span>
+                                        </a>
+                                    </p>
+                                </div>
+                            </li>
                         </ul>
                     </li>
                     <a href="#" onclick="mostrar('{$e_descricao}',
@@ -212,7 +270,19 @@ if ($linhas > 0) {
                         <i class="fa fa-info-circle text-dark ico-grande"></i>
                     </a>
 HTML;
+        // ✅ Verifica se esta conta tem parcelas ou resíduos vinculados
+        $stmt_relacionados = $pdo->prepare("SELECT COUNT(*) as total FROM receber WHERE id_referencia = :id AND referencia IN ('Parcela', 'Resíduo')");
+        $stmt_relacionados->execute([':id' => $id]);
+        $tem_relacionados = $stmt_relacionados->fetchColumn() > 0;
 
+        if ($tem_relacionados) {
+            echo <<<HTML
+                    <a href="#" onclick="mostrarRelacionados('{$id}', 
+                                                             '{$e_descricao}')" title="Ver Parcelas e Resíduos">
+                        <i class="fa-solid fa-diagram-project text-dark ico-grande"></i>
+                    </a>
+HTML;
+        }
         if ($mostrarBotaoParcelar) {
             echo <<<HTML
             <a href="#" onclick="parcelar('{$id}', 
@@ -228,7 +298,14 @@ HTML;
 
         if ($mostrarBotaoBaixar) {
             echo <<<HTML
-            <a href="#" onclick="baixar('{$id}', '{$e_valorF}', '{$e_descricao}', '{$e_forma_pagamento_nome}', '{$data_vencimento_iso}')" title="Baixar valor">
+
+            <input type="checkbox" class="check-baixar maozinha" data-id="{$id}" data-valor="{$valor}" title="Selecionar para baixa">
+
+            <a href="#" onclick="baixar('{$id}', 
+                                        '{$e_valorF}', 
+                                        '{$e_descricao}', 
+                                        '{$e_forma_pagamento_nome}', 
+                                        '{$data_vencimento_iso}')" title="Baixar valor">
                 <i class="fa-solid fa-square-check text-danger ico-grande"></i>
             </a>
 HTML;
@@ -241,9 +318,22 @@ HTML;
     }
 }
 
+// ✅ Formata totais para exibição
+$total_pendentesF = number_format($total_pendentes, 2, ',', '.');
+$total_pagoF = number_format($total_pago, 2, ',', '.');
+
 echo <<<HTML
-    </tbody>
-</table>
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="7" class="text-end font-weight-bold">
+                    <span class="text-danger">Total Pendentes: R$ {$total_pendentesF}</span> 
+                    &nbsp;&nbsp;|&nbsp;&nbsp; 
+                    <span class="text-success">Total Pago: R$ {$total_pagoF}</span>
+                </td>
+            </tr>
+        </tfoot>
+    </table>
 <div class="row mt-2">
     <div class="col-md-3 col-sm-12 mb-2 mb-md-0">
         <label class="small text-muted mb-1">&nbsp;</label>
