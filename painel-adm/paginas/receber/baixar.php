@@ -1,6 +1,12 @@
 <?php
 require_once("../../../conexao.php");
 require_once("../../verificar.php");
+require_once("../../funcoes.php"); // ✅ Importa a função calcularDiasAtraso()
+
+// ✅ Busca configurações de multa/juros padrão do sistema
+$config = $pdo->query("SELECT multa_padrao, juros_padrao FROM configuracoes LIMIT 1")->fetch(PDO::FETCH_ASSOC);
+$multa_pct = $config['multa_padrao'] ?? 2.00;
+$juros_pct = $config['juros_padrao'] ?? 0.33;
 
 // ✅ Recebe dados do formulário
 $id = @$_POST['id'];
@@ -40,14 +46,15 @@ try {
 
     $data_vencimento = $conta['data_vencimento'];
 
-    // ✅ Calcula multa e juros automáticos SE estiver atrasado
+    // ✅ Calcula multa e juros automáticos SE estiver atrasado (USANDO FUNÇÃO REUTILIZÁVEL)
     if ($data_pgto > $data_vencimento) {
-        $dias_atraso = (strtotime($data_pgto) - strtotime($data_vencimento)) / 86400;
         if (empty($multa_informada)) {
-            $multa_num = $valor_num * 0.02;
+            $multa_num = $valor_num * ($multa_pct / 100);
         }
         if (empty($juros_informado)) {
-            $juros_num = $valor_num * 0.01 * ($dias_atraso / 30);
+            // ✅ Usa função centralizada (limita a 30 dias)
+            $dias_calculo = calcularDiasAtraso($data_vencimento, $data_pgto, 30);
+            $juros_num = $valor_num * ($juros_pct / 100) * ($dias_calculo / 30);
         }
     }
 
@@ -72,21 +79,10 @@ try {
         // ✅ Converte valor parcial
         $valor_parcial_num = floatval(str_replace(['R$', '.', ','], ['', '', '.'], $valor_parcial));
 
-        // ✅ 1. Cria registro de RESÍDUO (igual ao parcelamento)
-        $stmt_residuo = $pdo->prepare("INSERT INTO receber (
-            descricao, paciente, valor, data_vencimento, data_lancamento, data_pagamento,
-            forma_pagamento, frequencia, obs, usuario_lanc, usuario_pgto,
-            arquivo, referencia, id_referencia, multa, juros, desconto, taxa, subtotal
-        ) VALUES (
-            :descricao, :paciente, :valor, :data_venc, :data_lanc, :data_pgto,
-            :forma_pgto, :freq, :obs, :usuario_lanc, :usuario_pgto,
-            :arquivo, 'Resíduo', :id_referencia, :multa, :juros, :desconto, :taxa, :subtotal
-        )");
-
         // ✅ Calcula subtotal do resíduo (valor parcial + ajustes)
         $subtotal_residuo = $valor_parcial_num + $multa_num + $juros_num + ($valor_parcial_num * $taxa_num / 100) - $desconto_num;
 
-        // ✅ 1. Cria registro de RESÍDUO
+        // ✅ Cria registro de RESÍDUO
         $stmt_residuo = $pdo->prepare("INSERT INTO receber (descricao, paciente, valor, data_vencimento, data_lancamento, data_pagamento,
                                                             forma_pagamento, frequencia, obs, usuario_lanc, usuario_pgto,
                                                             arquivo, referencia, id_referencia, multa, juros, desconto, taxa, subtotal
@@ -112,17 +108,18 @@ try {
             ':juros' => round($juros_num, 2),
             ':desconto' => round($desconto_num, 2),
             ':taxa' => round($taxa_num, 2),
-            ':subtotal' => round($subtotal_residuo, 2)  // ✅ SUBTOTAL CALCULADO
+            ':subtotal' => round($subtotal_residuo, 2)
         ]);
 
-        // ✅ 2. ATUALIZA CONTA ORIGINAL: reduz valor pelo subtotal recebido
+        // ✅ ATUALIZA CONTA ORIGINAL: reduz valor pelo subtotal recebido
         $novo_valor = $conta['valor'] - $subtotal_residuo;
-        $novo_subtotal = $conta['subtotal'] - $subtotal_residuo;
+        $novo_subtotal = ($conta['subtotal'] ?? $conta['valor']) - $subtotal_residuo;
 
         $stmt_update = $pdo->prepare("UPDATE receber SET valor = :novo_valor, subtotal = :novo_subtotal WHERE id = :id");
         $stmt_update->execute([':novo_valor' => round($novo_valor, 2), ':novo_subtotal' => round($novo_subtotal, 2), ':id' => $id]);
 
-        echo "Sucesso: Resíduo de R$ " . number_format($valor_parcial_num, 2, ',', '.') . " registrado! Saldo restante: R$ " . number_format($novo_valor, 2, ',', '.');
+        echo "Sucesso: Resíduo de R$ " . number_format($valor_parcial_num, 2, ',', '.') . " registrado! Saldo restante: R$ " . 
+                                         number_format($novo_valor, 2, ',', '.');
         exit;
     }
 
@@ -152,3 +149,4 @@ try {
 } catch (Exception $e) {
     echo "Erro: " . $e->getMessage();
 }
+?>

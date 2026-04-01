@@ -15,8 +15,8 @@
     $data_inicio_ano = $ano_atual . '-01-01';
     $data_final_ano = $ano_atual . '-12-31';
 
-    $data_ontem = date('Y-m-d', strtotime("-1 days",strtotime($data_atual)));
-    $data_amanha = date('Y-m-d', strtotime("+1 days",strtotime($data_atual)));
+    $data_ontem = date('Y-m-d', strtotime("-1 days", strtotime($data_atual)));
+    $data_amanha = date('Y-m-d', strtotime("+1 days", strtotime($data_atual)));
 
     // Valores padrão: Admin vê tudo
     $home = '';
@@ -658,6 +658,25 @@
                                 <input type="text" class="form-control" id="instagram" name="instagram" value="<?php echo $instagram_sistema ?>">
                             </div>
                         </div>
+
+                        <!-- ✅ NOVOS CAMPOS: Multa e Juros Padrão -->
+                        <div class="row border-top pt-3 mt-3">
+                            <div class="col-md-6">
+                                <label for="multa_padrao">Multa Padrão (%)</label>
+                                <input type="text" class="form-control moeda" id="multa_padrao" name="multa_padrao"
+                                    value="<?php echo isset($multa_padrao) ? number_format($multa_padrao, 2, ',', '.') : '0,00'; ?>"
+                                    placeholder="0,00" maxlength="5">
+                                <small class="text-muted">Ex: 2,00 para 2%</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="juros_padrao">Juros Padrão (% ao mês)</label>
+                                <input type="text" class="form-control moeda" id="juros_padrao" name="juros_padrao"
+                                    value="<?php echo isset($juros_padrao) ? number_format($juros_padrao, 2, ',', '.') : '0,00'; ?>"
+                                    placeholder="0,00" maxlength="5">
+                                <small class="text-muted">Ex: 0,33 para 0,33% a.m.</small>
+                            </div>
+                        </div>
+
                         <div class="row">
                             <div class="col-md-3">
                                 <label for="tipoRel">Tipo Relatório</label>
@@ -939,5 +958,56 @@
                 }, 3000);
             }
 
+        });
+
+
+        // ✅ Formata como moeda (R$ 0,00 → 0.00 para o banco)
+        function formatarMoedaInput(input) {
+            let valor = input.value.replace(/\D/g, '');
+            valor = (valor / 100).toFixed(2) + '';
+            valor = valor.replace('.', ',');
+            valor = valor.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.');
+            input.value = valor;
+        }
+
+        // ✅ Limpa para enviar ao banco (R$ 0,00 → 0.00)
+        function limparMoeda(valor) {
+            return valor.replace('R$', '').replace(/\./g, '').replace(',', '.').trim();
+        }
+
+        // ✅ Aplica formatação nos campos de multa/juros
+        document.addEventListener('DOMContentLoaded', function() {
+            const camposMoeda = document.querySelectorAll('#multa_padrao, #juros_padrao');
+
+            camposMoeda.forEach(input => {
+                // Formata ao digitar
+                input.addEventListener('input', function() {
+                    let valor = this.value.replace(/\D/g, '');
+                    if (valor !== '') {
+                        valor = (valor / 100).toFixed(2) + '';
+                        valor = valor.replace('.', ',');
+                        valor = valor.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.');
+                        this.value = valor;
+                    }
+                });
+                // Formata ao sair do campo
+                input.addEventListener('blur', function() {
+                    if (this.value === '' || this.value === '0') {
+                        this.value = '0,00';
+                    }
+                });
+            });
+
+            // ✅ Limpa valores antes de enviar o formulário
+            const formConfig = document.getElementById('form-config');
+            if (formConfig) {
+                formConfig.addEventListener('submit', function(e) {
+                    const multa = document.getElementById('multa_padrao');
+                    const juros = document.getElementById('juros_padrao');
+
+                    if (multa) multa.value = limparMoeda(multa.value);
+                    if (juros) juros.value = limparMoeda(juros.value);
+                });
+            }
         });
     </script>

@@ -2,6 +2,12 @@
 session_start();
 $tabela = 'receber';
 require_once("../../../conexao.php");
+require_once("../../funcoes.php"); // ✅ Importa a função calcularDiasAtraso()
+
+// ✅ Busca configurações de multa/juros padrão do sistema
+$config = $pdo->query("SELECT multa_padrao, juros_padrao FROM configuracoes LIMIT 1")->fetch(PDO::FETCH_ASSOC);
+$multa_pct = $config['multa_padrao'] ?? 2.00;
+$juros_pct = $config['juros_padrao'] ?? 0.33;
 
 if (!isset($_SESSION['id_user'])) {
     echo "Acesso negado!";
@@ -48,11 +54,18 @@ if (isset($_FILES['arquivo']) && $_FILES['arquivo']['error'] === UPLOAD_ERR_OK &
 $hoje = date('Y-m-d');
 $multa_auto = $juros_auto = $desconto_auto = 0;
 $taxa_auto = 2.50;
+
+// 🔹 MULTA: usa % da configuração do sistema
 if (empty($data_pagamento) && !empty($vencimento) && $vencimento < $hoje) {
-    $multa_auto = $valor_base * 0.02;
-    $dias = min(max(0, (strtotime($hoje) - strtotime($vencimento)) / 86400), 30);
-    $juros_auto = $valor_base * 0.0033 * $dias;
+    $multa_auto = $valor_base * ($multa_pct / 100);
 }
+
+// 🔹 JUROS: usa função reutilizável (limita a 30 dias)
+if (empty($data_pagamento) && !empty($vencimento) && $vencimento < $hoje) {
+    $dias_calculo = calcularDiasAtraso($vencimento, $hoje, 30); // ✅ FUNÇÃO CENTRALIZADA
+    $juros_auto = $valor_base * ($juros_pct / 100) * ($dias_calculo / 30);
+}
+
 if (!empty($data_pagamento) && !empty($vencimento) && $data_pagamento <= $vencimento) {
     $desconto_auto = $valor_base * 0.05;
 }
@@ -82,7 +95,8 @@ try {
             $binds[':arf'] = $arquivo_nome;
         }
 
-        $q = $pdo->prepare("UPDATE $tabela SET descricao=:d, paciente=:p, valor=:v, data_vencimento=:dv, forma_pagamento=:fp, frequencia=:fq, obs=:o, multa=:m, juros=:j, desconto=:dc, taxa=:tx, subtotal=:st $extra WHERE id=:id");
+        $q = $pdo->prepare("UPDATE $tabela SET descricao=:d, paciente=:p, valor=:v, data_vencimento=:dv, forma_pagamento=:fp, frequencia=:fq, obs=:o, 
+                                               multa=:m, juros=:j, desconto=:dc, taxa=:tx, subtotal=:st $extra WHERE id=:id");
         $q->bindValue(':id', $id, PDO::PARAM_INT);
         $q->bindValue(':d', $descricao);
         $q->bindValue(':p', $paciente, PDO::PARAM_INT);
@@ -100,16 +114,17 @@ try {
     } else {
         // INSERT - SOLUÇÃO UNIVERSAL
         $arq_final = empty($arquivo_nome) ? 'sem-foto.png' : $arquivo_nome;
-        // ✅ Bind dinâmico: NULL se vazio, string se preenchido (funciona em MySQL 5.7 e 8.0+)
         $dp_val = !empty($data_pagamento) ? $data_pagamento : null;
         $dp_type = !empty($data_pagamento) ? PDO::PARAM_STR : PDO::PARAM_NULL;
 
-        $q = $pdo->prepare("INSERT INTO $tabela (descricao,paciente,valor,data_vencimento,data_lancamento,data_pagamento,forma_pagamento,frequencia,obs,arquivo,usuario_lanc,usuario_pgto,multa,juros,desconto,taxa,subtotal) VALUES (:d,:p,:v,:dv,CURDATE(),:dp,:fp,:fq,:o,:a,:ul,:up,:m,:j,:dc,:tx,:st)");
+        $q = $pdo->prepare("INSERT INTO $tabela (descricao,paciente,valor,data_vencimento,data_lancamento,data_pagamento,forma_pagamento,frequencia,obs,
+                                                 arquivo,usuario_lanc,usuario_pgto,multa,juros,desconto,taxa,subtotal) 
+                                   VALUES (:d,:p,:v,:dv,CURDATE(),:dp,:fp,:fq,:o,:a,:ul,:up,:m,:j,:dc,:tx,:st)");
         $q->bindValue(':d', $descricao);
         $q->bindValue(':p', $paciente, PDO::PARAM_INT);
         $q->bindValue(':v', $valor_base, PDO::PARAM_STR);
         $q->bindValue(':dv', $vencimento);
-        $q->bindValue(':dp', $dp_val, $dp_type); // ✅ CHAVE DA SOLUÇÃO
+        $q->bindValue(':dp', $dp_val, $dp_type);
         $q->bindValue(':fp', $forma_pagamento, PDO::PARAM_INT);
         $q->bindValue(':fq', $frequencia, PDO::PARAM_INT);
         $q->bindValue(':o', $obs);
@@ -128,3 +143,4 @@ try {
     error_log("Erro salvar.php: " . $e->getMessage());
     echo "Erro ao salvar: " . $e->getMessage();
 }
+?>

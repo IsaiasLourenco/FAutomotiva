@@ -2,7 +2,10 @@
 session_start();
 require_once("../conexao.php");
 
-if (!isset($_SESSION['id_user'])) { echo "Acesso negado!"; exit; }
+if (!isset($_SESSION['id_user'])) {
+    echo "Acesso negado!";
+    exit;
+}
 
 // Recebe os dados
 $nome_sistema    = $_POST['nome_sistema'] ?? '';
@@ -15,7 +18,7 @@ $rua_sistema     = $_POST['rua-sistema'] ?? '';
 $numero_sistema  = $_POST['numero-sistema'] ?? '';
 $bairro_sistema  = $_POST['bairro-sistema'] ?? '';
 $cidade_sistema  = $_POST['cidade-sistema'] ?? '';
-$estado_sistema  = $_POST['estado-sistema'] ?? '';
+$estado_sistema  = $_POST['estado_sistema'] ?? '';
 $instagram       = $_POST['instagram'] ?? '';
 $tipoRel         = $_POST['tipoRel'] ?? 'PDF';
 $contatoZap      = $_POST['contatoZap'] ?? 'Sim';
@@ -25,18 +28,27 @@ $url_sistema     = $_POST['url_sistema'] ?? '';
 $chave_pix       = $_POST['chave_pix'] ?? '';
 $tipo_chave      = $_POST['tipo_chave'] ?? 'CNPJ';
 
+// ✅ NOVOS CAMPOS: Multa e Juros Padrão
+$multa_padrao = $_POST['multa_padrao'] ?? '0,00';
+$juros_padrao = $_POST['juros_padrao'] ?? '0,00';
+// Converte formato BR (0,00) para decimal (0.00)
+$multa_padrao_num = floatval(str_replace(',', '.', str_replace('.', '', $multa_padrao)));
+$juros_padrao_num = floatval(str_replace(',', '.', str_replace('.', '', $juros_padrao)));
+
 // Validação
 if (empty($nome_sistema) || empty($email_sistema)) {
-    echo "Preencha os campos obrigatórios!"; exit;
+    echo "Preencha os campos obrigatórios!";
+    exit;
 }
 
 // Upload de imagens (função auxiliar)
-function processarUpload($inputName, $pastaDestino, $prefixo) {
+function processarUpload($inputName, $pastaDestino, $prefixo)
+{
     if (isset($_FILES[$inputName]) && $_FILES[$inputName]['error'] === UPLOAD_ERR_OK && !empty($_FILES[$inputName]['name'])) {
         $ext = strtolower(pathinfo($_FILES[$inputName]['name'], PATHINFO_EXTENSION));
-        if (in_array($ext, ['jpg','jpeg','png','gif'])) {
-            $novo = $prefixo.'_'.uniqid().'.'.$ext;
-            $dest = $pastaDestino.'/'.$novo;
+        if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif'])) {
+            $novo = $prefixo . '_' . uniqid() . '.' . $ext;
+            $dest = $pastaDestino . '/' . $novo;
             if (move_uploaded_file($_FILES[$inputName]['tmp_name'], $dest)) return $novo;
         }
     }
@@ -51,7 +63,7 @@ $logo_rel_nome = $pasta_img ? processarUpload('logo_rel', $pasta_img, 'rel') : '
 try {
     // Verifica se já existe algum registro
     $check = $pdo->query("SELECT id FROM configuracoes LIMIT 1")->fetch();
-    
+
     if ($check) {
         // ✅ UPDATE - já existe registro
         $sql = "UPDATE configuracoes SET 
@@ -63,33 +75,56 @@ try {
             estado_sistema=:estado_sistema, instagram_sistema=:instagram,
             tipo_relatorio=:tipoRel, contatoZap=:contatoZap,
             desenvolvedor=:dev, site_dev=:site, url_sistema=:url_sistema,
-            chave_pix=:chave_pix, tipo_chave=:tipo_chave";
-        
+            chave_pix=:chave_pix, tipo_chave=:tipo_chave,
+            multa_padrao=:multa_padrao, juros_padrao=:juros_padrao";
+
         $campos_img = [];
-        if ($logotipo_nome) { $sql .= ", logotipo=:logotipo"; $campos_img[':logotipo'] = $logotipo_nome; }
-        if ($icone_nome) { $sql .= ", icone=:icone"; $campos_img[':icone'] = $icone_nome; }
-        if ($logo_rel_nome) { $sql .= ", logo_rel=:logo_rel"; $campos_img[':logo_rel'] = $logo_rel_nome; }
-        
+        if ($logotipo_nome) {
+            $sql .= ", logotipo=:logotipo";
+            $campos_img[':logotipo'] = $logotipo_nome;
+        }
+        if ($icone_nome) {
+            $sql .= ", icone=:icone";
+            $campos_img[':icone'] = $icone_nome;
+        }
+        if ($logo_rel_nome) {
+            $sql .= ", logo_rel=:logo_rel";
+            $campos_img[':logo_rel'] = $logo_rel_nome;
+        }
+
         $sql .= " WHERE id=:id";
         $query = $pdo->prepare($sql);
-        
+
         // Bind comum
-        foreach ([
-            ':nome_sistema'=>$nome_sistema, ':email_sistema'=>$email_sistema,
-            ':telefone_sistema'=>$telefone_sistema, ':cnpj_sistema'=>$cnpj_sistema,
-            ':telefone_fixo'=>$telefone_fixo, ':cep_sistema'=>$cep_sistema,
-            ':rua_sistema'=>$rua_sistema, ':numero_sistema'=>$numero_sistema,
-            ':bairro_sistema'=>$bairro_sistema, ':cidade_sistema'=>$cidade_sistema,
-            ':estado_sistema'=>$estado_sistema, ':instagram'=>$instagram,
-            ':tipoRel'=>$tipoRel, ':contatoZap'=>$contatoZap,
-            ':dev'=>$dev, ':site'=>$site, ':url_sistema'=>$url_sistema,
-            ':chave_pix'=>$chave_pix, ':tipo_chave'=>$tipo_chave,
-            ':id'=>$check['id']
-        ] as $k=>$v) $query->bindValue($k, $v);
-        
+        foreach (
+            [
+                ':nome_sistema' => $nome_sistema,
+                ':email_sistema' => $email_sistema,
+                ':telefone_sistema' => $telefone_sistema,
+                ':cnpj_sistema' => $cnpj_sistema,
+                ':telefone_fixo' => $telefone_fixo,
+                ':cep_sistema' => $cep_sistema,
+                ':rua_sistema' => $rua_sistema,
+                ':numero_sistema' => $numero_sistema,
+                ':bairro_sistema' => $bairro_sistema,
+                ':cidade_sistema' => $cidade_sistema,
+                ':estado_sistema' => $estado_sistema,
+                ':instagram' => $instagram,
+                ':tipoRel' => $tipoRel,
+                ':contatoZap' => $contatoZap,
+                ':dev' => $dev,
+                ':site' => $site,
+                ':url_sistema' => $url_sistema,
+                ':chave_pix' => $chave_pix,
+                ':tipo_chave' => $tipo_chave,
+                ':multa_padrao' => $multa_padrao_num,
+                ':juros_padrao' => $juros_padrao_num,
+                ':id' => $check['id']
+            ] as $k => $v
+        ) $query->bindValue($k, $v);
+
         // Bind imagens
-        foreach ($campos_img as $k=>$v) $query->bindValue($k, $v);
-        
+        foreach ($campos_img as $k => $v) $query->bindValue($k, $v);
     } else {
         // ✅ INSERT - primeiro registro
         $query = $pdo->prepare("INSERT INTO configuracoes (
@@ -97,15 +132,17 @@ try {
             telefone_fixo, cep_sistema, rua_sistema, numero_sistema,
             bairro_sistema, cidade_sistema, estado_sistema, instagram_sistema,
             tipo_relatorio, contatoZap, desenvolvedor, site_dev,
-            url_sistema, chave_pix, tipo_chave, logotipo, icone, logo_rel
+            url_sistema, chave_pix, tipo_chave, multa_padrao, juros_padrao,
+            logotipo, icone, logo_rel
         ) VALUES (
             :nome_sistema, :email_sistema, :telefone_sistema, :cnpj_sistema,
             :telefone_fixo, :cep_sistema, :rua_sistema, :numero_sistema,
             :bairro_sistema, :cidade_sistema, :estado_sistema, :instagram,
             :tipoRel, :contatoZap, :dev, :site,
-            :url_sistema, :chave_pix, :tipo_chave, :logotipo, :icone, :logo_rel
+            :url_sistema, :chave_pix, :tipo_chave, :multa_padrao, :juros_padrao,
+            :logotipo, :icone, :logo_rel
         )");
-        
+
         $query->bindValue(':nome_sistema', $nome_sistema);
         $query->bindValue(':email_sistema', $email_sistema);
         $query->bindValue(':telefone_sistema', $telefone_sistema);
@@ -125,15 +162,15 @@ try {
         $query->bindValue(':url_sistema', $url_sistema);
         $query->bindValue(':chave_pix', $chave_pix);
         $query->bindValue(':tipo_chave', $tipo_chave);
+        $query->bindValue(':multa_padrao', $multa_padrao_num);
+        $query->bindValue(':juros_padrao', $juros_padrao_num);
         $query->bindValue(':logotipo', $logotipo_nome ?: 'logo_padrao.png');
         $query->bindValue(':icone', $icone_nome ?: 'ico_padrao.png');
         $query->bindValue(':logo_rel', $logo_rel_nome ?: 'rel_padrao.jpg');
     }
-    
+
     $query->execute();
     echo "Editado com Sucesso";
-    
 } catch (Exception $e) {
     echo "Erro: " . $e->getMessage();
 }
-?>

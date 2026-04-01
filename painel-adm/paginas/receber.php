@@ -2,6 +2,12 @@
 require_once('../conexao.php');
 require_once('verificar.php');
 $pag = 'receber';
+
+// ✅ Busca configurações de multa/juros para exibir na label
+$config_multa_juros = $pdo->query("SELECT multa_padrao, juros_padrao FROM configuracoes LIMIT 1")->fetch(PDO::FETCH_ASSOC);
+$multa_label = isset($config_multa_juros['multa_padrao']) ? number_format($config_multa_juros['multa_padrao'], 2, ',', '.') : '2,00';
+$juros_label = isset($config_multa_juros['juros_padrao']) ? number_format($config_multa_juros['juros_padrao'], 2, ',', '.') : '0,33';
+
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -100,7 +106,6 @@ $pag = 'receber';
                 margin: 5px 0 !important;
             }
         }
-
     </style>
 </head>
 
@@ -610,7 +615,11 @@ $pag = 'receber';
 
                 <div class="form-check">
                     <input type="checkbox" class="form-check-input" id="aplicar-multas-multiplo">
-                    <label class="form-check-label" for="aplicar-multas-multiplo">Aplicar multa (2%) e juros (1%/mês) se vencidas</label>
+                    <!-- <label class="form-check-label" for="aplicar-multas-multiplo">Aplicar multa (2%) e juros (1%/mês) se vencidas</label> -->
+                    <!-- ✅ DINÂMICO: usa valores da configuração -->
+                    <label class="form-check-label" for="aplicar-multas-multiplo">
+                        Aplicar multa (<?php echo $multa_label; ?>%) e juros (<?php echo $juros_label; ?>%/mês) se vencidas
+                    </label>
                 </div>
 
                 <div id="mensagem-baixar-multiplo" class="mt-2"></div>

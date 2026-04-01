@@ -1,20 +1,20 @@
 <?php
 require_once("../../../conexao.php");
 require_once("../../verificar.php");
+require_once("../../funcoes.php"); // ✅ Importa a função calcularDiasAtraso()
+
+// ✅ Busca configurações de multa/juros padrão do sistema
+$config = $pdo->query("SELECT multa_padrao, juros_padrao FROM configuracoes LIMIT 1")->fetch(PDO::FETCH_ASSOC);
+$multa_pct = $config['multa_padrao'] ?? 2.00;
+$juros_pct = $config['juros_padrao'] ?? 0.33;
 
 $ids = @$_POST['ids'] ?? [];
 $forma_pagamento = @$_POST['forma_pagamento'] ?? '';
 $data_pgto = @$_POST['data_pgto'] ?? date('Y-m-d');
 $aplicar_multas = @$_POST['aplicar_multas'] ?? 'nao';
 
-if (empty($ids) || !is_array($ids)) {
-    echo "Erro: Nenhum ID recebido!";
-    exit;
-}
-if (!$forma_pagamento) {
-    echo "Erro: Forma de pagamento não informada!";
-    exit;
-}
+if (empty($ids) || !is_array($ids)) { echo "Erro: Nenhum ID recebido!"; exit; }
+if (!$forma_pagamento) { echo "Erro: Forma de pagamento não informada!"; exit; }
 
 try {
     $contador = 0;
@@ -45,10 +45,7 @@ try {
         if ($valor <= 0) continue; // Já foi totalmente pago via resíduos
 
         $data_vencimento = $conta['data_vencimento'];
-        $multa = 0;
-        $juros = 0;
-        $desconto = 0;
-        $taxa = 0;
+        $multa = 0; $juros = 0; $desconto = 0; $taxa = 0;
 
         // Busca taxa da forma de pagamento
         $stmt_fp = $pdo->prepare("SELECT nome FROM forma_pagamento WHERE id = :id LIMIT 1");
@@ -57,11 +54,12 @@ try {
         if (strpos($fp_nome, 'débito') !== false || strpos($fp_nome, 'debito') !== false) $taxa = 3;
         elseif (strpos($fp_nome, 'crédito') !== false || strpos($fp_nome, 'credito') !== false) $taxa = 5;
 
-        // Aplica multa/juros se vencida
+        // Aplica multa/juros se vencida (USANDO FUNÇÃO REUTILIZÁVEL)
         if ($aplicar_multas == 'sim' && $data_pgto > $data_vencimento) {
-            $dias = (strtotime($data_pgto) - strtotime($data_vencimento)) / 86400;
-            $multa = $valor * 0.02;
-            $juros = $valor * 0.01 * ($dias / 30);
+            $multa = $valor * ($multa_pct / 100);
+            // ✅ Usa função centralizada (limita a 30 dias)
+            $dias_calculo = calcularDiasAtraso($data_vencimento, $data_pgto, 30);
+            $juros = $valor * ($juros_pct / 100) * ($dias_calculo / 30);
         }
 
         // Calcula subtotal sobre o valor RESTANTE
@@ -91,3 +89,4 @@ try {
 } catch (Exception $e) {
     echo "Erro: " . $e->getMessage();
 }
+?>
