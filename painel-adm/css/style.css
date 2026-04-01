@@ -22,6 +22,27 @@ p {
   text-align: right;
 }
 
+/* ✅ Estilos para lista de arquivos */
+#listar-arquivos .arquivo-item {
+  background: #f8f9fa;
+  border-radius: 4px;
+  margin-bottom: 8px;
+  transition: background 0.2s;
+}
+
+#listar-arquivos .arquivo-item:hover {
+  background: #e9ecef;
+}
+
+#listar-arquivos .arquivo-item small {
+  font-size: 11px;
+}
+
+#listar-arquivos .btn-sm {
+  padding: 2px 8px;
+  font-size: 11px;
+}
+
 html, body {
   font-family: 'Montserrat', sans-serif;
   font-size: 100%;
@@ -4040,8 +4061,8 @@ ul.bt-list li a {
 }
 
 .header-nav-title {
-    color: white;
-    font-size: 10px;
+  color: white;
+  font-size: 10px;
 }
 
 .centro-pequeno {
@@ -4051,7 +4072,7 @@ ul.bt-list li a {
 }
 
 .ocultar {
-    display: none !important;
+  display: none !important;
 }
 
 .centro {
@@ -4061,7 +4082,7 @@ ul.bt-list li a {
 }
 
 .mt-22 {
-    margin-top: 22px;
+  margin-top: 22px;
 }
 
 .tabela-pequena {
@@ -10012,8 +10033,8 @@ h4.asd label {
   }
 }
 
-@media (max-width: 768px) {
-    .ico-grande {
-        font-size: 12px !important;
-    }
+@media (max-width:768px) {
+  .ico-grande {
+    font-size: 12px !important;
+  }
 }

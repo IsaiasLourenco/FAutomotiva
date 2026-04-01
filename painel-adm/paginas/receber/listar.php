@@ -64,7 +64,6 @@ echo <<<HTML
             <th>Data Lançamento</th>
             <th class="esc">Data Pagamento</th>
             <th>Valor</th>
-            <th class="esc">Arquivo</th>
             <th>Ações</th>
         </tr> 
     </thead> 
@@ -196,7 +195,7 @@ if ($linhas > 0) {
         $e_usuario_lanc_nome = js_escape($usuario_lanc_nome);
         $e_usuario_pgto_nome = js_escape($usuario_pgto_nome);
 
-        echo <<<HTML
+echo <<<HTML
             <tr class="{$classe_status}">
                 <td><input type="checkbox" id="seletor-{$id}" class="form-check-input" onchange="selecionar('{$id}')"> {$descricao}</td>
                 <td>{$paciente_nome}</td>
@@ -206,19 +205,19 @@ if ($linhas > 0) {
                     <b>{$valorF}</b>
 HTML;
 
-        // ✅ Exibe "Recebido" apenas se houver ajustes (multa/juros/desconto/taxa)
-        if ($subtotal > 0 && $subtotal != $valor) {
-            echo <<<HTML
-        <br>
-        <small class="text-success font-weight-bold">
-            Recebido: {$subtotalF}
-        </small>
+        // ✅ Exibe "Recebido" APENAS se a conta estiver efetivamente paga
+        if (!empty($data_pagamento) && $data_pagamento != '0000-00-00' && $subtotal > 0 && $subtotal != $valor) {
+echo <<<HTML
+                    <br>
+                    <small class="text-success font-weight-bold">
+                    Recebido: {$subtotalF}
+                    </small>
 HTML;
         }
 
         // ✅ Exibe "Pago/Saldo" apenas se houver resíduos
         if ($total_residuos > 0) {
-            echo <<<HTML
+echo <<<HTML
         <br>
         <small class="text-muted">
             Pago: R$ {$total_residuosF} | 
@@ -227,9 +226,9 @@ HTML;
 HTML;
         }
 
-        echo <<<HTML
+echo <<<HTML
                 </td>
-                <td class="esc"><a href="images/receber/{$arquivo}" target="_blank"><img src="images/receber/{$arquivo}" width="25px"></a></td>
+                
                 <td>
                     <a href="#" onclick="editar('{$id}','{$e_descricao}','{$paciente_id}','{$e_valorF}','{$e_data_vencimento_iso}','{$e_data_lancamentoF}','{$e_data_pagamento_iso}','{$forma_pagamento_id}','{$frequencia_id}','{$e_obs}','{$e_arquivo}','{$e_multaF}','{$e_jurosF}','{$e_descontoF}','{$e_taxaF}','{$e_subtotalF}')" title="Editar Dados">
                         <i class="fa fa-edit text-primary ico-grande"></i>
@@ -276,7 +275,7 @@ HTML;
         $tem_relacionados = $stmt_relacionados->fetchColumn() > 0;
 
         if ($tem_relacionados) {
-            echo <<<HTML
+echo <<<HTML
                     <a href="#" onclick="mostrarRelacionados('{$id}', 
                                                              '{$e_descricao}')" title="Ver Parcelas e Resíduos">
                         <i class="fa-solid fa-diagram-project text-dark ico-grande"></i>
@@ -284,7 +283,7 @@ HTML;
 HTML;
         }
         if ($mostrarBotaoParcelar) {
-            echo <<<HTML
+echo <<<HTML
             <a href="#" onclick="parcelar('{$id}', 
                                           '{$e_valorF}', 
                                           '{$e_descricao}', 
@@ -297,23 +296,36 @@ HTML;
         }
 
         if ($mostrarBotaoBaixar) {
-            echo <<<HTML
+            $valor_restante = $valor - $total_residuos;
 
-            <input type="checkbox" class="check-baixar maozinha" data-id="{$id}" data-valor="{$valor}" title="Selecionar para baixa">
+echo <<<HTML
+
+            <input type="checkbox" class="check-baixar maozinha" data-id="{$id}" data-valor="{$valor_restante}" title="Selecionar para baixa">
+
+HTML;
+            $valor_restante = $valor - $total_residuos;
+            $valor_restanteF = 'R$ ' . number_format($valor_restante, 2, ',', '.');
+            $e_valor_restanteF = js_escape($valor_restanteF);
+echo <<<HTML
 
             <a href="#" onclick="baixar('{$id}', 
-                                        '{$e_valorF}', 
+                                        '{$e_valor_restanteF}', 
                                         '{$e_descricao}', 
                                         '{$e_forma_pagamento_nome}', 
                                         '{$data_vencimento_iso}')" title="Baixar valor">
                 <i class="fa-solid fa-square-check text-danger ico-grande"></i>
             </a>
+    
 HTML;
         }
 
-        echo <<<HTML
-                </td>
-            </tr>
+echo <<<HTML
+            <!-- ✅ Botão para abrir modal de arquivos -->
+            <a href="#" onclick="abrirArquivos('{$id}', '{$e_descricao}')" title="Arquivos">
+                <i class="fa-solid fa-paperclip text-secondary ico-grande"></i>
+            </a>
+        </td>
+    </tr>
 HTML;
     }
 }
@@ -326,7 +338,7 @@ echo <<<HTML
         </tbody>
         <tfoot>
             <tr>
-                <td colspan="7" class="text-end font-weight-bold">
+                <td colspan="6" class="text-end font-weight-bold">
                     <span class="text-danger">Total Pendentes: R$ {$total_pendentesF}</span> 
                     &nbsp;&nbsp;|&nbsp;&nbsp; 
                     <span class="text-success">Total Pago: R$ {$total_pagoF}</span>

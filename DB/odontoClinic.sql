@@ -136,3 +136,14 @@ ADD
     COLUMN taxa DECIMAL(10, 2) DEFAULT 0.00
 AFTER
     desconto;
+
+CREATE TABLE arquivos_conta (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    id_conta INT NOT NULL,
+    nome_arquivo VARCHAR(255),
+    tipo_arquivo VARCHAR(50), -- 'pdf', 'jpg', 'png', 'xlsx', 'docx'
+    caminho_arquivo VARCHAR(255),
+    data_upload DATETIME,
+    usuario_upload INT,
+    FOREIGN KEY (id_conta) REFERENCES receber(id)
+);

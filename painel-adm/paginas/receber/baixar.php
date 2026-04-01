@@ -119,7 +119,7 @@ try {
         $novo_valor = $conta['valor'] - $subtotal_residuo;
         $novo_subtotal = $conta['subtotal'] - $subtotal_residuo;
 
-        $stmt_update = $pdo->prepare("UPDATE receber SET valor = :novo_valor, subtotal = :novo_subtotalWHERE id = :id");
+        $stmt_update = $pdo->prepare("UPDATE receber SET valor = :novo_valor, subtotal = :novo_subtotal WHERE id = :id");
         $stmt_update->execute([':novo_valor' => round($novo_valor, 2), ':novo_subtotal' => round($novo_subtotal, 2), ':id' => $id]);
 
         echo "Sucesso: Resíduo de R$ " . number_format($valor_parcial_num, 2, ',', '.') . " registrado! Saldo restante: R$ " . number_format($novo_valor, 2, ',', '.');

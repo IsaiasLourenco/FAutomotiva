@@ -100,6 +100,7 @@ $pag = 'receber';
                 margin: 5px 0 !important;
             }
         }
+
     </style>
 </head>
 
@@ -175,65 +176,123 @@ $pag = 'receber';
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title"><span id="titulo_inserir"></span></h4><button id="btn-fechar" type="button" class="close mg-t--20" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">
+                    <span id="titulo_inserir"></span>
+                </h4>
+                <button id="btn-fechar" type="button" class="close mg-t--20" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
+
             <form id="form" enctype="multipart/form-data">
                 <div class="modal-body">
                     <div class="row">
-                        <div class="col-md-5"><label for="descricao">Descrição</label><input type="text" class="form-control" id="descricao-perfil" name="descricao" required></div>
-                        <div class="col-md-4"><label for="paciente">Paciente</label><select name="paciente" id="paciente-perfil" class="form-control">
-                                <option value="" selected disabled>Escolha um paciente...</option><?php $query = $pdo->query("SELECT * FROM pacientes ORDER BY nome asc");
-                                                                                                    $res = $query->fetchAll(PDO::FETCH_ASSOC);
-                                                                                                    $total_reg = @count($res);
-                                                                                                    if ($total_reg > 0) {
-                                                                                                        for ($i = 0; $i < $total_reg; $i++) {
-                                                                                                            echo '<option value="' . $res[$i]['id'] . '">' . $res[$i]['nome'] . '</option>';
-                                                                                                        }
-                                                                                                    } else {
-                                                                                                        echo '<option value="0" disabled>Cadastre um Paciente</option>';
-                                                                                                    } ?>
-                            </select></div>
-                        <div class="col-md-3"><label for="valor">Valor</label><input type="text" class="form-control moeda" id="valor-conta" name="valor" required></div>
+                        <div class="col-md-5">
+                            <label for="descricao">Descrição</label>
+                            <input type="text" class="form-control" id="descricao-perfil" name="descricao" required>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label for="paciente">Paciente</label>
+                            <select name="paciente" id="paciente-perfil" class="form-control">
+                                <option value="" selected disabled>Escolha um paciente...</option>
+                                <?php $query = $pdo->query("SELECT * FROM pacientes ORDER BY nome asc");
+                                $res = $query->fetchAll(PDO::FETCH_ASSOC);
+                                $total_reg = @count($res);
+                                if ($total_reg > 0) {
+                                    for ($i = 0; $i < $total_reg; $i++) {
+                                        echo '<option value="' . $res[$i]['id'] . '">' . $res[$i]['nome'] . '</option>';
+                                    }
+                                } else {
+                                    echo '<option value="0" disabled>Cadastre um Paciente</option>';
+                                } ?>
+                            </select>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label for="valor">Valor</label>
+                            <input type="text" class="form-control moeda" id="valor-conta" name="valor" required>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-3">
+                            <label for="vencimento">Vencimento</label>
+                            <input type="date" class="form-control" id="vencimento-conta" name="vencimento" value="<?php echo $data_atual ?>" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="pago">Pago em</label>
+                            <input type="date" class="form-control" id="pagamento-conta" name="pagamento">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="forma_pagamento">Forma de Pagamento</label>
+                            <select class="form-control" name="forma_pagamento" id="forma_pagamento" required>
+                                <option value="" selected disabled>Escolha uma forma de pagamento...</option>
+                                <?php $query = $pdo->query("SELECT * FROM forma_pagamento ORDER BY nome asc");
+                                $res = $query->fetchAll(PDO::FETCH_ASSOC);
+                                $total_reg = @count($res);
+                                if ($total_reg > 0) {
+                                    for ($i = 0; $i < $total_reg; $i++) {
+                                        echo '<option value="' . $res[$i]['id'] . '">' . $res[$i]['nome'] . '</option>';
+                                    }
+                                } else {
+                                    echo '<option value="0">Cadastre uma Forma de Pagamento</option>';
+                                } ?>
+                            </select>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label for="frequencia">Frequência</label>
+                            <select name="frequencia" id="frequencia" class="form-control" required>
+                                <option value="" selected disabled>Escolha uma frequência...</option>
+                                <?php $query = $pdo->query("SELECT * FROM frequencias ORDER BY frequencia asc");
+                                $res = $query->fetchAll(PDO::FETCH_ASSOC);
+                                $total_reg = @count($res);
+                                if ($total_reg > 0) {
+                                    for ($i = 0; $i < $total_reg; $i++) {
+                                        echo '<option value="' . $res[$i]['id'] . '">' . $res[$i]['frequencia'] . '</option>';
+                                    }
+                                } else {
+                                    echo '<option value="0">Cadastre uma Frequência</option>';
+                                } ?>
+                            </select>
+                        </div>
+
                     </div>
                     <div class="row">
-                        <div class="col-md-3"><label for="vencimento">Vencimento</label><input type="date" class="form-control" id="vencimento-conta" name="vencimento" value="<?php echo $data_atual ?>" required></div>
-                        <div class="col-md-3"><label for="pago">Pago em</label><input type="date" class="form-control" id="pagamento-conta" name="pagamento"></div>
-                        <div class="col-md-3"><label for="forma_pagamento">Forma de Pagamento</label><select class="form-control" name="forma_pagamento" id="forma_pagamento" required>
-                                <option value="" selected disabled>Escolha uma forma de pagamento...</option><?php $query = $pdo->query("SELECT * FROM forma_pagamento ORDER BY nome asc");
-                                                                                                                $res = $query->fetchAll(PDO::FETCH_ASSOC);
-                                                                                                                $total_reg = @count($res);
-                                                                                                                if ($total_reg > 0) {
-                                                                                                                    for ($i = 0; $i < $total_reg; $i++) {
-                                                                                                                        echo '<option value="' . $res[$i]['id'] . '">' . $res[$i]['nome'] . '</option>';
-                                                                                                                    }
-                                                                                                                } else {
-                                                                                                                    echo '<option value="0">Cadastre uma Forma de Pagamento</option>';
-                                                                                                                } ?>
-                            </select></div>
-                        <div class="col-md-3"><label for="frequencia">Frequência</label><select name="frequencia" id="frequencia" class="form-control" required>
-                                <option value="" selected disabled>Escolha uma frequência...</option><?php $query = $pdo->query("SELECT * FROM frequencias ORDER BY frequencia asc");
-                                                                                                        $res = $query->fetchAll(PDO::FETCH_ASSOC);
-                                                                                                        $total_reg = @count($res);
-                                                                                                        if ($total_reg > 0) {
-                                                                                                            for ($i = 0; $i < $total_reg; $i++) {
-                                                                                                                echo '<option value="' . $res[$i]['id'] . '">' . $res[$i]['frequencia'] . '</option>';
-                                                                                                            }
-                                                                                                        } else {
-                                                                                                            echo '<option value="0">Cadastre uma Frequência</option>';
-                                                                                                        } ?>
-                            </select></div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-5"><label for="obs">Observações</label><input type="text" class="form-control" id="obs-perfil" name="obs" required></div>
-                        <div class="col-md-5"><label for="arquivo">Arquivo</label><input type="file" class="form-control" id="arquivo-conta" name="arquivo" onchange="carregarImgReceber()"></div>
-                        <div class="col-md-2"><img src="./images/receber/sem-foto.png" alt="Foto do arquivo" style="width: 80px;" id="target-arquivo"></div><input type="hidden" name="id" id="id">
+                        <div class="col-md-5">
+                            <label for="obs">Observações</label>
+                            <input type="text" class="form-control" id="obs-perfil" name="obs" required>
+                        </div>
+                        <div class="col-md-5">
+                            <label for="arquivo">Arquivo</label>
+                            <input type="file" class="form-control" id="arquivo-conta" name="arquivo" onchange="carregarImgReceber()">
+                        </div>
+                        <div class="col-md-2">
+                            <img src="./images/receber/sem-foto.png" alt="Foto do arquivo" style="width: 80px;" id="target-arquivo">
+                        </div>
+                        <input type="hidden" name="id" id="id">
                     </div>
                     <div class="row mt-3 p-3 bg-light rounded">
-                        <div class="col-12"><b>Ajustes Financeiros (Opcional)</b></div>
-                        <div class="col-md-3 mt-2"><label>Multa</label><input type="text" class="form-control moeda" name="multa" id="multa-perfil" placeholder="Auto"></div>
-                        <div class="col-md-3 mt-2"><label>Juros</label><input type="text" class="form-control moeda" name="juros" id="juros-perfil" placeholder="Auto"></div>
-                        <div class="col-md-3 mt-2"><label>Desconto</label><input type="text" class="form-control moeda" name="desconto" id="desconto-perfil" placeholder="Auto"></div>
-                        <div class="col-md-3 mt-2"><label>Taxa</label><input type="text" class="form-control moeda" name="taxa" id="taxa-perfil" placeholder="R$ 2,50"></div>
+                        <div class="col-12">
+                            <strong>Ajustes Financeiros (Opcional)</strong>
+                        </div>
+                        <div class="col-md-3 mt-2">
+                            <label>Multa</label>
+                            <input type="text" class="form-control moeda" name="multa" id="multa-perfil" placeholder="Auto">
+                        </div>
+                        <div class="col-md-3 mt-2">
+                            <label>Juros</label>
+                            <input type="text" class="form-control moeda" name="juros" id="juros-perfil" placeholder="Auto">
+                        </div>
+                        <div class="col-md-3 mt-2">
+                            <label>Desconto</label>
+                            <input type="text" class="form-control moeda" name="desconto" id="desconto-perfil" placeholder="Auto">
+                        </div>
+                        <div class="col-md-3 mt-2">
+                            <label>Taxa</label>
+                            <input type="text" class="form-control moeda" name="taxa" id="taxa-perfil" placeholder="R$ 2,50">
+                        </div>
                     </div>
                     <div id="mensagem" class="centro-pequeno"></div>
                 </div>
@@ -272,7 +331,10 @@ $pag = 'receber';
                     <div class="col-12"><span><b>Arquivo/Comprovante: </b></span><br><a id="link-arquivo-dados" href="#" target="_blank" class="btn btn-sm btn-outline-primary mt-1"><i class="fa fa-eye"></i> Visualizar Arquivo</a><img id="target-arquivo-dados" src="./images/receber/sem-foto.png" alt="Comprovante" class="mt-2" style="max-width: 200px; border-radius: 4px;"></div>
                 </div>
                 <div class="row bg-light p-2 rounded">
-                    <div class="col-md-3"><small class="text-muted">Multa</small><br><span id="multa_dados-cli" class="font-weight-bold"></span></div>
+                    <div class="col-md-3">
+                        <small class="text-muted">Multa</small><br>
+                        <span id="multa_dados-cli" class="font-weight-bold"></span>
+                    </div>
                     <div class="col-md-3"><small class="text-muted">Juros</small><br><span id="juros_dados-cli" class="font-weight-bold"></span></div>
                     <div class="col-md-3"><small class="text-muted">Desconto</small><br><span id="desconto_dados-cli" class="font-weight-bold"></span></div>
                     <div class="col-md-3"><small class="text-muted">Taxa</small><br><span id="taxa_dados-cli" class="font-weight-bold"></span></div>
@@ -390,26 +452,27 @@ $pag = 'receber';
                 <div class="modal-body">
                     <p><b>Descrição:</b> <span id="descricao-baixar"></span></p>
                     <div class="row">
-                        <div class="col-md-6"><label>Valor</label><input type="text" class="form-control moeda" id="valor-baixar" name="valor" readonly></div>
-                        <div class="col-md-6"><label>Forma de Pagamento</label><select class="form-control" name="forma_pagamento" id="saida-baixar" required>
-                                <option value="">Selecione...</option><?php $query = $pdo->query("SELECT * FROM forma_pagamento ORDER BY nome ASC");
-                                                                        foreach ($query->fetchAll(PDO::FETCH_ASSOC) as $fp) {
-
-                                                                            $taxa = 0;
-                                                                            $nome = strtolower($fp['nome']);
-
-                                                                            if (strpos($nome, 'débito') !== false || strpos($nome, 'debito') !== false) {
-                                                                                $taxa = 3;
-                                                                            } elseif (strpos($nome, 'crédito') !== false || strpos($nome, 'credito') !== false) {
-                                                                                $taxa = 5;
-                                                                            }
-
-                                                                            echo "<option value='{$fp['id']}' data-taxa='{$taxa}'>{$fp['nome']}</option>";
-
-
-                                                                            // echo "<option value='{$fp['id']}'>{$fp['nome']}</option>";
-                                                                        } ?>
-                            </select></div>
+                        <div class="col-md-6">
+                            <label>Valor</label>
+                            <input type="text" class="form-control moeda" id="valor-baixar" name="valor" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label>Forma de Pagamento</label>
+                            <select class="form-control" name="forma_pagamento" id="saida-baixar" required>
+                                <option value="">Selecione...</option>
+                                <?php $query = $pdo->query("SELECT * FROM forma_pagamento ORDER BY nome ASC");
+                                foreach ($query->fetchAll(PDO::FETCH_ASSOC) as $fp) {
+                                    $taxa = 0;
+                                    $nome = strtolower($fp['nome']);
+                                    if (strpos($nome, 'débito') !== false || strpos($nome, 'debito') !== false) {
+                                        $taxa = 3;
+                                    } elseif (strpos($nome, 'crédito') !== false || strpos($nome, 'credito') !== false) {
+                                        $taxa = 5;
+                                    }
+                                    echo "<option value='{$fp['id']}' data-taxa='{$taxa}'>{$fp['nome']}</option>";
+                                } ?>
+                            </select>
+                        </div>
                     </div>
 
                     <!-- ✅ ADICIONE após o campo "Valor" -->
@@ -555,6 +618,86 @@ $pag = 'receber';
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
                 <button type="button" class="btn btn-success" id="btn-confirmar-baixar-multiplo">Confirmar Baixa</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ✅ Modal de Arquivos Adicionais -->
+<div class="modal fade" id="modalArquivos" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title">
+                    <i class="fa-solid fa-paperclip"></i> 📎 Arquivos Anexados
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body bg-light">
+
+                <!-- ✅ Título da conta -->
+                <div class="card mb-3 border-0 shadow-sm">
+                    <div class="card-body py-2">
+                        <h6 class="mb-0 text-primary"><i class="fa fa-folder-open"></i> Conta: <span id="titulo-arquivos" class="font-weight-bold"></span></h6>
+                    </div>
+                </div>
+
+                <!-- ✅ Tabela de arquivos -->
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white border-bottom">
+                        <h6 class="mb-0"><i class="fa fa-list"></i> Arquivos vinculados</h6>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover mb-0" id="tabela-arquivos">
+                                <thead class="bg-secondary text-white">
+                                    <tr>
+                                        <th width="5%" class="text-center">Tipo</th>
+                                        <th width="45%">Arquivo</th>
+                                        <th width="15%" class="text-center">Data</th>
+                                        <th width="15%" class="text-center">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="lista-arquivos">
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted py-3">Carregando...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ✅ Upload de novo arquivo -->
+                <div class="card border-0 shadow-sm mt-3">
+                    <div class="card-header bg-success text-white">
+                        <h6 class="mb-0"><i class="fa fa-upload"></i> Anexar novo arquivo</h6>
+                    </div>
+                    <div class="card-body">
+                        <form id="form-arquivo" enctype="multipart/form-data">
+                            <input type="hidden" id="id-conta-arquivos" name="id_conta">
+                            <div class="row align-items-end">
+                                <div class="col-md-8">
+                                    <label class="small text-muted mb-1">Selecione o arquivo</label>
+                                    <input type="file" class="form-control form-control-sm" id="arquivo-adicional" name="arquivo" required>
+                                    <small class="text-muted">PDF, JPG, PNG, XLS, DOC (máx. 5MB)</small>
+                                </div>
+                                <div class="col-md-4">
+                                    <button type="submit" class="btn btn-success btn-sm btn-block">
+                                        <i class="fa fa-upload"></i> Anexar
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="mensagem-arquivo" class="mt-2 small"></div>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"><i class="fa fa-times"></i> Fechar</button>
             </div>
         </div>
     </div>
@@ -1374,4 +1517,91 @@ $pag = 'receber';
             document.getElementById('totalContas').innerText = '';
         }
     });
+
+    // ✅ Abrir modal de arquivos
+    function abrirArquivos(id, descricao) {
+        $('#titulo-arquivos').text(descricao);
+        $('#id-conta-arquivos').val(id);
+        $('#lista-arquivos').html('<p class="text-center text-muted"><i class="fa fa-spinner fa-spin"></i> Carregando...</p>');
+        $('#mensagem-arquivo').text('');
+        $('#arquivo-adicional').val('');
+
+        // Carrega lista
+        carregarListaArquivos(id);
+
+        $('#modalArquivos').modal('show');
+    }
+
+    // ✅ Carregar lista de arquivos
+    function carregarListaArquivos(id) {
+        $.ajax({
+            url: 'paginas/receber/listar-arquivos.php',
+            method: 'POST',
+            data: {
+                id: id
+            },
+            dataType: 'html',
+            success: function(resposta) {
+                $('#lista-arquivos').html(resposta);
+            },
+            error: function() {
+                $('#lista-arquivos').html('<p class="text-danger text-center">Erro ao carregar arquivos</p>');
+            }
+        });
+    }
+
+    // ✅ Upload de novo arquivo
+    $('#form-arquivo').on('submit', function(e) {
+        e.preventDefault();
+
+        var id = $('#id-conta-arquivos').val();
+        var formData = new FormData(this);
+        formData.append('id_conta', id);
+
+        $.ajax({
+            url: 'paginas/receber/arquivos.php',
+            method: 'POST',
+            data: formData,
+            contentType: false,
+            processData: false,
+            dataType: 'html',
+            success: function(resposta) {
+                if (resposta.indexOf('Sucesso') !== -1) {
+                    $('#mensagem-arquivo').html('<span class="text-success">' + resposta + '</span>');
+                    $('#arquivo-adicional').val('');
+                    carregarListaArquivos(id);
+                } else {
+                    $('#mensagem-arquivo').html('<span class="text-danger">' + resposta + '</span>');
+                }
+            },
+            error: function() {
+                $('#mensagem-arquivo').html('<span class="text-danger">Erro na requisição</span>');
+            }
+        });
+    });
+
+    // ✅ Excluir arquivo
+    function excluirArquivo(id_arquivo, id_conta) {
+        if (!confirm('Confirmar exclusão deste arquivo?')) return;
+
+        $.ajax({
+            url: 'paginas/receber/excluir-arquivo.php',
+            method: 'POST',
+            data: {
+                id: id_arquivo,
+                id_conta: id_conta
+            },
+            dataType: 'html',
+            success: function(resposta) {
+                if (resposta.indexOf('Sucesso') !== -1) {
+                    carregarListaArquivos(id_conta);
+                } else {
+                    alert('Erro: ' + resposta);
+                }
+            },
+            error: function() {
+                alert('Erro na requisição');
+            }
+        });
+    }
 </script>
