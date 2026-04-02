@@ -30,6 +30,12 @@ ADD
 SET
     NULL ON UPDATE CASCADE;
 
+    ALTER TABLE usuarios 
+ADD COLUMN data_admissao DATE DEFAULT NULL COMMENT 'Data de admissão',
+ADD COLUMN cargo_funcional VARCHAR(50) DEFAULT NULL COMMENT 'Cargo na clínica',
+ADD COLUMN tipo_contrato ENUM('CLT','PJ','Estagiário','Autônomo') DEFAULT 'CLT',
+ADD COLUMN observacoes_func TEXT DEFAULT NULL COMMENT 'Observações de RH';
+
 CREATE TABLE configuracoes (
     id INT PRIMARY KEY AUTO_INCREMENT,
     nome_sistema VARCHAR(100),
@@ -147,3 +153,29 @@ CREATE TABLE arquivos_conta (
     usuario_upload INT,
     FOREIGN KEY (id_conta) REFERENCES receber(id)
 );
+
+CREATE TABLE `fornecedores` (
+  `id` int(11) NOT NULL,
+  `nome` varchar(100) NOT NULL,
+  `email` varchar(100) DEFAULT NULL,
+  `telefone` varchar(15) DEFAULT NULL,
+  `cnpj` varchar(18) NOT NULL,
+  `cep` varchar(9) DEFAULT NULL,
+  `rua` varchar(100) DEFAULT NULL,
+  `numero` varchar(10) DEFAULT NULL,
+  `bairro` varchar(100) DEFAULT NULL,
+  `cidade` varchar(100) DEFAULT NULL,
+  `estado` varchar(2) DEFAULT NULL,
+  `foto` varchar(255) DEFAULT NULL,
+  `ativo` varchar(5) DEFAULT '1',
+  `data_criacao` timestamp NOT NULL DEFAULT current_timestamp(),
+  `observacoes` text DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+ALTER TABLE `fornecedores`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `cnpj` (`cnpj`);
+
+ALTER TABLE `fornecedores`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;

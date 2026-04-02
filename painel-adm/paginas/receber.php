@@ -615,8 +615,6 @@ $juros_label = isset($config_multa_juros['juros_padrao']) ? number_format($confi
 
                 <div class="form-check">
                     <input type="checkbox" class="form-check-input" id="aplicar-multas-multiplo">
-                    <!-- <label class="form-check-label" for="aplicar-multas-multiplo">Aplicar multa (2%) e juros (1%/mês) se vencidas</label> -->
-                    <!-- ✅ DINÂMICO: usa valores da configuração -->
                     <label class="form-check-label" for="aplicar-multas-multiplo">
                         Aplicar multa (<?php echo $multa_label; ?>%) e juros (<?php echo $juros_label; ?>%/mês) se vencidas
                     </label>

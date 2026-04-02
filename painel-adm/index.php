@@ -222,6 +222,9 @@
                                     <ul class="treeview-menu">
                                         <li><a href="index.php?pagina=pacientes"><i class="fa fa-angle-right"></i> Pacientes</a></li>
                                     </ul>
+                                    <ul class="treeview-menu">
+                                        <li><a href="index.php?pagina=fornecedores"><i class="fa fa-angle-right"></i> Fornecedores</a></li>
+                                    </ul>
                                 </li>
                                 <li class="treeview <?php echo $menu_cadastros ?>">
                                     <a href="#">
