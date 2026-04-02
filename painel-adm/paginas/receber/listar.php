@@ -338,10 +338,10 @@ echo <<<HTML
         </tbody>
         <tfoot>
             <tr>
-                <td colspan="6" class="text-end font-weight-bold">
+                <td colspan="6FF" class="text-end font-weight-bold">
                     <span class="text-danger">Total Pendentes: R$ {$total_pendentesF}</span> 
                     &nbsp;&nbsp;|&nbsp;&nbsp; 
-                    <span class="text-success">Total Pago: R$ {$total_pagoF}</span>
+                    <span class="text-success">Total Recebido: R$ {$total_pagoF}</span>
                 </td>
             </tr>
         </tfoot>

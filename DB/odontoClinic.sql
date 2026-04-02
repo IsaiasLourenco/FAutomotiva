@@ -179,3 +179,32 @@ ALTER TABLE `fornecedores`
 
 ALTER TABLE `fornecedores`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+CREATE TABLE `pagar` (
+  `id` int(11) NOT NULL,
+  `descricao` varchar(100) NOT NULL,
+  `fornecedor` int(11) DEFAULT NULL COMMENT 'ID do fornecedor (tabela fornecedores)',
+  `valor` decimal(10,2) DEFAULT NULL,
+  `data_vencimento` date DEFAULT NULL,
+  `data_pagamento` date DEFAULT NULL,
+  `data_lancamento` date DEFAULT NULL,
+  `forma_pagamento` int(11) DEFAULT NULL,
+  `frequencia` int(11) DEFAULT NULL,
+  `obs` varchar(100) DEFAULT NULL,
+  `usuario_lanc` int(11) NOT NULL,
+  `usuario_pgto` int(11) DEFAULT NULL,
+  `arquivo` varchar(100) DEFAULT NULL,
+  `referencia` varchar(30) DEFAULT NULL,
+  `id_referencia` int(11) DEFAULT NULL,
+  `multa` decimal(10,2) DEFAULT NULL,
+  `juros` decimal(10,2) DEFAULT NULL,
+  `desconto` decimal(10,2) DEFAULT NULL,
+  `taxa` decimal(10,2) NOT NULL,
+  `subtotal` decimal(10,2) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+ALTER TABLE `pagar`
+  ADD PRIMARY KEY (`id`);
+
+ALTER TABLE `pagar`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;

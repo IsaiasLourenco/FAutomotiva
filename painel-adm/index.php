@@ -23,6 +23,7 @@
     $configuracoes = '';
     $usuarios = '';
     $pacientes = '';
+    $fornecedores = '';
     $grupo_acessos = '';
     $acessos = '';
     $cargos = '';
@@ -217,13 +218,15 @@
                                         <i class="fa fa-angle-left pull-right"></i>
                                     </a>
                                     <ul class="treeview-menu">
-                                        <li><a href="index.php?pagina=usuarios"><i class="fa fa-angle-right"></i> Usuários</a></li>
-                                    </ul>
-                                    <ul class="treeview-menu">
-                                        <li><a href="index.php?pagina=pacientes"><i class="fa fa-angle-right"></i> Pacientes</a></li>
-                                    </ul>
-                                    <ul class="treeview-menu">
-                                        <li><a href="index.php?pagina=fornecedores"><i class="fa fa-angle-right"></i> Fornecedores</a></li>
+                                        <?php if ($usuarios != 'ocultar') { ?>
+                                            <li><a href="index.php?pagina=usuarios"><i class="fa fa-angle-right"></i> Usuários</a></li>
+                                        <?php } ?>
+                                        <?php if ($pacientes != 'ocultar') { ?>
+                                            <li><a href="index.php?pagina=pacientes"><i class="fa fa-angle-right"></i> Pacientes</a></li>
+                                        <?php } ?>
+                                        <?php if ($fornecedores != 'ocultar') { ?>
+                                            <li><a href="index.php?pagina=fornecedores"><i class="fa fa-angle-right"></i> Fornecedores</a></li>
+                                        <?php } ?>
                                     </ul>
                                 </li>
                                 <li class="treeview <?php echo $menu_cadastros ?>">

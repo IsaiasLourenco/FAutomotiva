@@ -10,21 +10,27 @@ if (!isset($_SESSION['id_user'])) {
 }
 
 // Recebe os dados do formulário
-$id          = @$_POST['id'];
-$nome        = $_POST['nome'];
-$email       = $_POST['email'];
-$cpf         = $_POST['cpf'];
-$telefone    = $_POST['telefone'];
-$cep         = $_POST['cep'];
-$rua         = $_POST['rua'];
-$numero      = $_POST['numero'];
-$bairro      = $_POST['bairro'];
-$cidade      = $_POST['cidade'];
-$estado      = $_POST['estado'];
-$senha       = trim($_POST['senha'] ?? '');
-$conf_senha  = trim($_POST['conf-senha'] ?? '');
-$nivel       = $_POST['nivel'];
-$ativo       = $_POST['ativo'];
+$id               = @$_POST['id'];
+$nome             = $_POST['nome'] ?? '';
+$email            = $_POST['email'] ?? '';
+$cpf              = $_POST['cpf'] ?? '';
+$telefone         = $_POST['telefone'] ?? '';
+$cep              = $_POST['cep'] ?? '';
+$rua              = $_POST['rua'] ?? '';
+$numero           = $_POST['numero'] ?? '';
+$bairro           = $_POST['bairro'] ?? '';
+$cidade           = $_POST['cidade'] ?? '';
+$estado           = $_POST['estado'] ?? '';
+$senha            = trim($_POST['senha'] ?? '');
+$conf_senha       = trim($_POST['conf-senha'] ?? '');
+$nivel            = $_POST['nivel'] ?? '';
+$ativo            = $_POST['ativo'] ?? 'Sim';
+
+// ✅ Campos de funcionário (opcionais)
+$data_admissao    = $_POST['data_admissao'] ?? null;
+$cargo_funcional  = $_POST['cargo_funcional'] ?? null;
+$tipo_contrato    = $_POST['tipo_contrato'] ?? 'CLT';
+$observacoes_func = $_POST['observacoes_func'] ?? null;
 
 // Validações básicas
 if (empty($nome) || empty($email) || empty($cpf) || empty($nivel)) {
@@ -32,10 +38,10 @@ if (empty($nome) || empty($email) || empty($cpf) || empty($nivel)) {
     exit;
 }
 
-// Validação de senha: obrigatória apenas para INSERT (novo usuário)
+// Validação de senha
 $senha_hash = null;
 if (empty($id) || $id == 0) {
-    // INSERT: senha é obrigatória
+    // INSERT: senha obrigatória
     if (empty($senha) || empty($conf_senha)) {
         echo "Preencha os campos de senha!";
         exit;
@@ -46,7 +52,7 @@ if (empty($id) || $id == 0) {
     }
     $senha_hash = password_hash($senha, PASSWORD_DEFAULT);
 } else {
-    // UPDATE: senha é opcional, só valida se pelo menos um campo foi preenchido
+    // UPDATE: senha opcional
     if (!empty($senha) || !empty($conf_senha)) {
         if (empty($senha) || empty($conf_senha)) {
             echo "Preencha ambos os campos de senha!";
@@ -58,8 +64,6 @@ if (empty($id) || $id == 0) {
         }
         $senha_hash = password_hash($senha, PASSWORD_DEFAULT);
     }
-    // Se nenhum campo de senha foi preenchido, $senha_hash permanece null
-    // e no UPDATE a senha antiga será mantida
 }
 
 // Validação de email único
@@ -92,7 +96,7 @@ if ($resultado_cpf && $resultado_cpf['id'] != $id) {
     exit;
 }
 
-// Upload da foto (se enviado)
+// Upload da foto
 $foto_nome = '';
 if (isset($_FILES['foto']) && $_FILES['foto']['error'] === UPLOAD_ERR_OK && !empty($_FILES['foto']['name'])) {
     $extensoes_permitidas = ['jpg', 'jpeg', 'png', 'gif'];
@@ -100,19 +104,12 @@ if (isset($_FILES['foto']) && $_FILES['foto']['error'] === UPLOAD_ERR_OK && !emp
     $extensao = strtolower(pathinfo($nome_arquivo, PATHINFO_EXTENSION));
 
     if (in_array($extensao, $extensoes_permitidas)) {
-        // ✅ Usa o ID do usuário como nome da foto (sempre o mesmo!)
         $foto_nome = 'usuario_' . $id . '.' . $extensao;
-
-        // Caminho absoluto usando __DIR__
         $pasta_destino = realpath(__DIR__ . '/../../images/perfil/');
 
         if ($pasta_destino && is_dir($pasta_destino)) {
             $caminho_destino = $pasta_destino . DIRECTORY_SEPARATOR . $foto_nome;
-
-            // ✅ Move e sobrescreve automaticamente se já existir
-            if (move_uploaded_file($_FILES['foto']['tmp_name'], $caminho_destino)) {
-                // Foto salva com sucesso (antiga foi sobrescrita)
-            } else {
+            if (!move_uploaded_file($_FILES['foto']['tmp_name'], $caminho_destino)) {
                 error_log("Erro ao mover arquivo para: " . $caminho_destino);
                 echo "Erro ao salvar a foto!";
                 exit;
@@ -129,84 +126,83 @@ if (isset($_FILES['foto']) && $_FILES['foto']['error'] === UPLOAD_ERR_OK && !emp
 
 try {
     if (!empty($id) && $id != 0) {
-        // UPDATE - Atualizar usuário existente
-
+        // ✅ UPDATE - Atualizar usuário existente
+        
+        // Campos base do UPDATE (comuns a todas as variações)
+        $campos_base = "nome = :nome, email = :email, cpf = :cpf, telefone = :telefone,
+                        cep = :cep, rua = :rua, numero = :numero, bairro = :bairro,
+                        cidade = :cidade, estado = :estado, cargo = :cargo, ativo = :ativo,
+                        data_admissao = :data_admissao, cargo_funcional = :cargo_funcional,
+                        tipo_contrato = :tipo_contrato, observacoes_func = :observacoes_func";
+        
         if ($senha_hash !== null) {
-            // Atualiza com nova senha
+            // Com nova senha
             if (!empty($foto_nome)) {
-                // Com foto nova
-                $query = $pdo->prepare("UPDATE $tabela SET 
-                    nome = :nome, email = :email, cpf = :cpf, telefone = :telefone,
-                    cep = :cep, rua = :rua, numero = :numero, bairro = :bairro,
-                    cidade = :cidade, estado = :estado, senha = :senha,
-                    cargo = :cargo, ativo = :ativo, foto = :foto 
-                    WHERE id = :id");
-                $query->bindValue(":foto", "$foto_nome");
+                // Com nova senha + nova foto
+                $query = $pdo->prepare("UPDATE $tabela SET $campos_base, senha = :senha, foto = :foto WHERE id = :id");
+                $query->bindValue(":senha", $senha_hash);
+                $query->bindValue(":foto", $foto_nome);
             } else {
-                // Sem foto nova
-                $query = $pdo->prepare("UPDATE $tabela SET 
-                    nome = :nome, email = :email, cpf = :cpf, telefone = :telefone,
-                    cep = :cep, rua = :rua, numero = :numero, bairro = :bairro,
-                    cidade = :cidade, estado = :estado, senha = :senha,
-                    cargo = :cargo, ativo = :ativo 
-                    WHERE id = :id");
+                // Com nova senha, sem nova foto
+                $query = $pdo->prepare("UPDATE $tabela SET $campos_base, senha = :senha WHERE id = :id");
+                $query->bindValue(":senha", $senha_hash);
             }
-            $query->bindValue(":senha", "$senha_hash");
         } else {
-            // Atualiza sem alterar senha
+            // Sem alterar senha
             if (!empty($foto_nome)) {
-                $query = $pdo->prepare("UPDATE $tabela SET 
-                    nome = :nome, email = :email, cpf = :cpf, telefone = :telefone,
-                    cep = :cep, rua = :rua, numero = :numero, bairro = :bairro,
-                    cidade = :cidade, estado = :estado,
-                    cargo = :cargo, ativo = :ativo, foto = :foto 
-                    WHERE id = :id");
-                $query->bindValue(":foto", "$foto_nome");
+                // Sem nova senha, com nova foto
+                $query = $pdo->prepare("UPDATE $tabela SET $campos_base, foto = :foto WHERE id = :id");
+                $query->bindValue(":foto", $foto_nome);
             } else {
-                $query = $pdo->prepare("UPDATE $tabela SET 
-                    nome = :nome, email = :email, cpf = :cpf, telefone = :telefone,
-                    cep = :cep, rua = :rua, numero = :numero, bairro = :bairro,
-                    cidade = :cidade, estado = :estado,
-                    cargo = :cargo, ativo = :ativo 
-                    WHERE id = :id");
+                // Sem nova senha, sem nova foto
+                $query = $pdo->prepare("UPDATE $tabela SET $campos_base WHERE id = :id");
             }
         }
-
-        $query->bindValue(":id", "$id", PDO::PARAM_INT);
+        $query->bindValue(":id", $id, PDO::PARAM_INT);
+        
     } else {
-        // INSERT - Cadastrar novo usuário
-
-        // Define foto padrão se não foi enviada
+        // ✅ INSERT - Cadastrar novo usuário
+        
         if (empty($foto_nome)) {
             $foto_nome = "sem-foto.jpg";
         }
 
         $query = $pdo->prepare("INSERT INTO $tabela 
-            (nome, email, senha, cpf, telefone, cep, rua, numero, bairro, cidade, estado, cargo, ativo, foto, data_criacao) 
+            (nome, email, senha, cpf, telefone, cep, rua, numero, bairro, cidade, estado, cargo, ativo, foto, 
+             data_admissao, cargo_funcional, tipo_contrato, observacoes_func, data_criacao) 
             VALUES 
-            (:nome, :email, :senha, :cpf, :telefone, :cep, :rua, :numero, :bairro, :cidade, :estado, :cargo, :ativo, :foto, NOW())");
+            (:nome, :email, :senha, :cpf, :telefone, :cep, :rua, :numero, :bairro, :cidade, :estado, :cargo, :ativo, :foto, 
+             :data_admissao, :cargo_funcional, :tipo_contrato, :observacoes_func, NOW())");
 
-        $query->bindValue(":senha", "$senha_hash");
-        $query->bindValue(":foto", "$foto_nome");
+        $query->bindValue(":senha", $senha_hash);
+        $query->bindValue(":foto", $foto_nome);
     }
 
-    // Bind dos campos comuns
-    $query->bindValue(":nome", "$nome");
-    $query->bindValue(":email", "$email");
-    $query->bindValue(":cpf", "$cpf");
-    $query->bindValue(":telefone", "$telefone");
-    $query->bindValue(":cep", "$cep");
-    $query->bindValue(":rua", "$rua");
-    $query->bindValue(":numero", "$numero");
-    $query->bindValue(":bairro", "$bairro");
-    $query->bindValue(":cidade", "$cidade");
-    $query->bindValue(":estado", "$estado");
-    $query->bindValue(":cargo", "$nivel", PDO::PARAM_INT);
-    $query->bindValue(":ativo", "$ativo");
+    // ✅ Bind dos campos comuns (para INSERT e UPDATE)
+    $query->bindValue(":nome", $nome);
+    $query->bindValue(":email", $email);
+    $query->bindValue(":cpf", $cpf);
+    $query->bindValue(":telefone", $telefone);
+    $query->bindValue(":cep", $cep);
+    $query->bindValue(":rua", $rua);
+    $query->bindValue(":numero", $numero);
+    $query->bindValue(":bairro", $bairro);
+    $query->bindValue(":cidade", $cidade);
+    $query->bindValue(":estado", $estado);
+    $query->bindValue(":cargo", $nivel, PDO::PARAM_INT);
+    $query->bindValue(":ativo", $ativo);
+    
+    // ✅ Bind dos campos de funcionário
+    $query->bindValue(":data_admissao", $data_admissao);
+    $query->bindValue(":cargo_funcional", $cargo_funcional);
+    $query->bindValue(":tipo_contrato", $tipo_contrato);
+    $query->bindValue(":observacoes_func", $observacoes_func);
 
     $query->execute();
 
     echo "Salvo com Sucesso";
+    
 } catch (Exception $e) {
     echo "Erro ao salvar: " . $e->getMessage();
 }
+?>

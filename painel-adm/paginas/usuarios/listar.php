@@ -47,6 +47,12 @@ HTML;
         $ativo = $res[$i]['ativo'];
         $data = $res[$i]['data_criacao'];
         $foto = $res[$i]['foto'];
+        
+        // ✅ NOVOS CAMPOS DE FUNCIONÁRIO
+        $data_admissao = $res[$i]['data_admissao'] ?? '';
+        $cargo_funcional = $res[$i]['cargo_funcional'] ?? '';
+        $tipo_contrato = $res[$i]['tipo_contrato'] ?? 'CLT';
+        $observacoes_func = $res[$i]['observacoes_func'] ?? '';
 
         $cargo = $pdo->prepare("SELECT * FROM cargos WHERE id = :id");
         $cargo->bindValue(":id", $nivel);
@@ -55,6 +61,9 @@ HTML;
         $cargo_nome = $res_cargo[0]['nome'] ?? 'Nível Desconecido';
 
         $dataF = date('d/m/Y', strtotime($data));
+        
+        // ✅ Formata data_admissao para BR (se existir)
+        $data_admissaoF = !empty($data_admissao) ? date('d/m/Y', strtotime($data_admissao)) : '';
 
         if ($ativo == 'Sim') {
             $icone = 'fa-square-check';
@@ -101,7 +110,11 @@ HTML;
                                                 '{$estado}',
                                                 '{$ativo}',
                                                 '{$dataF}',
-                                                '{$foto}')" title="Editar Dados">
+                                                '{$foto}',
+                                                '{$data_admissaoF}',
+                                                '{$cargo_funcional}',
+                                                '{$tipo_contrato}',
+                                                '{$observacoes_func}')" title="Editar Dados">
                                                     <i class="fa fa-edit text-primary ico-grande"></i>
                     </a>
 
@@ -138,7 +151,11 @@ HTML;
                                                 '{$estado}',
                                                 '{$ativo}',
                                                 '{$dataF}',
-                                                '{$foto}')" title="Mostrar Dados">
+                                                '{$foto}',
+                                                '{$data_admissaoF}',
+                                                '{$cargo_funcional}',
+                                                '{$tipo_contrato}',
+                                                '{$observacoes_func}')" title="Mostrar Dados">
                                                     <i class="fa fa-info-circle text-dark ico-grande"></i>
                     </a>
 
@@ -189,7 +206,9 @@ HTML;
 </script>
 
 <script type="text/javascript">
-    function editar(id, nome, email, senha, cargo_nome, telefone, cpf, cep, rua, numero, bairro, cidade, estado, ativo, data, foto) {
+    // ✅ Função editar com novos parâmetros de funcionário
+    function editar(id, nome, email, senha, cargo_nome, telefone, cpf, cep, rua, numero, bairro, cidade, estado, ativo, data, foto, 
+                    data_admissao, cargo_funcional, tipo_contrato, observacoes_func) {
         $('#mensagem').text('');
         $('#titulo_inserir').text('Editar Registro');
 
@@ -210,30 +229,37 @@ HTML;
         $('#estado-perfil').val(estado);
 
         // Cargo/Nível e status
-        $('#nivel').val(cargo_nome); // Se for select pelo nome, ou use o ID se tiver
+        $('#nivel').val(cargo_nome);
         $('#ativo').val(ativo);
 
         // Data e foto
-        $('#data_dados').text(data); // Ajuste o ID conforme seu modal
+        $('#data_dados').text(data);
         $('#target-usu').attr("src", "images/perfil/" + foto);
+        
+        // ✅ Campos de funcionário
+        $('#data_admissao').val(data_admissao || '');
+        $('#cargo_funcional').val(cargo_funcional || '');
+        $('#tipo_contrato').val(tipo_contrato || 'CLT');
+        $('#observacoes_func').val(observacoes_func || '');
 
         // Abre o modal
-        $('#modalForm').modal('show'); // Ou $('#modalPerfil').modal('show') se for o mesmo modal
+        $('#modalForm').modal('show');
     }
 
+    // ✅ Função mostrar com novos parâmetros de funcionário
     function mostrar(nome, email, senha, cargo_nome, telefone, cpf, cep, rua, numero,
-        bairro, cidade, estado, ativo, data, foto) {
+        bairro, cidade, estado, ativo, data, foto,
+        data_admissao, cargo_funcional, tipo_contrato, observacoes_func) {
 
         // Dados básicos
         $('#nome_dados-cli').text(nome);
-        $('#email_dados-cli').text(email); // ← Adicionar este campo no modal (veja abaixo)
+        $('#email_dados-cli').text(email);
         $('#cpf_dados-cli').text(cpf);
         $('#telefone_dados-cli').text(telefone);
-        $('#cargo_dados-cli').text(cargo_nome); // ← Adicionar este campo no modal (veja abaixo)
-
+        $('#cargo_dados-cli').text(cargo_nome);
 
         // Endereço
-        $('#cep_dados-cli').text(cep); // ← Corrigido: era 'ep_dados-cli'
+        $('#cep_dados-cli').text(cep);
         $('#rua_dados-cli').text(rua);
         $('#numero_dados-cli').text(numero);
         $('#bairro_dados-cli').text(bairro);
@@ -242,17 +268,22 @@ HTML;
 
         // Status e data
         $('#ativo_dados-cli').text(ativo);
-        $('#data_dados-cli').text(data); // ← Corrigido: era '.text(ativo)'
+        $('#data_dados-cli').text(data);
 
-        // Foto (opcional, se quiser exibir)
-        // ✅ Atualiza a foto
+        // Foto
         if (foto && foto !== 'sem-foto.jpg') {
             $('#foto_dados-cli').attr('src', 'images/perfil/' + foto);
         } else {
             $('#foto_dados-cli').attr('src', 'images/perfil/sem-foto.jpg');
         }
+        
+        // ✅ Dados de funcionário no modal de visualização
+        $('#data_admissao_dados').text(data_admissao || '-');
+        $('#cargo_funcional_dados').text(cargo_funcional || '-');
+        $('#tipo_contrato_dados').text(tipo_contrato || '-');
+        $('#observacoes_func_dados').text(observacoes_func || '-');
 
-        // Abre o modal CORRETO
+        // Abre o modal
         $('#modalDados').modal('show');
     }
 
@@ -274,54 +305,45 @@ HTML;
         $('#cidade-perfil').val('');
         $('#estado-perfil').val('');
 
-        // Cargo/Nível e status (reseta para o primeiro option)
+        // Cargo/Nível e status
         $('#nivel').prop('selectedIndex', 0).change();
         $('#ativo').val('Sim').change();
 
-        // Foto (reseta input file e preview)
+        // Foto
         $('#foto-perfil').val('');
         $('#target-usu').attr('src', 'images/perfil/sem-foto.jpg');
+        
+        // ✅ Limpar campos de funcionário
+        $('#data_admissao').val('');
+        $('#cargo_funcional').val('');
+        $('#tipo_contrato').val('CLT');
+        $('#observacoes_func').val('');
 
-        // Mensagem de erro/sucesso
+        // Mensagem
         $('#mensagem').text('').removeClass('text-danger');
     }
 
     function selecionar(id) {
-
         var ids = $('#ids').val();
-
-        if ($('#seletor-' + id).is(":checked") == true) {
-            var novo_id = ids + id + '-';
-            $('#ids').val(novo_id);
+        if ($('#seletor-' + id).is(":checked")) {
+            $('#ids').val(ids + id + '-');
         } else {
-            var retirar = ids.replace(id + '-', '');
-            $('#ids').val(retirar);
+            $('#ids').val(ids.replace(id + '-', ''));
         }
-
-        var ids_final = $('#ids').val();
-        if (ids_final == "") {
-            $('#btn-deletar').hide();
-        } else {
-            $('#btn-deletar').show();
-        }
+        $('#btn-deletar').toggle($('#ids').val() !== "");
     }
 
     function deletarSel() {
-        var ids = $('#ids').val();
-        var id = ids.split("-");
-
-        for (i = 0; i < id.length - 1; i++) {
-            excluir(id[i]);
+        var ids = $('#ids').val().split("-");
+        for (var i = 0; i < ids.length - 1; i++) {
+            if (ids[i]) excluir(ids[i]);
         }
-
         limparCampos();
     }
 
     function permissoes(id, nome) {
-
         $('#id_permissoes').val(id);
         $('#nome_permissoes').text(nome);
-
         $('#modalPermissoes').modal('show');
         listarPermissoes(id);
     }
@@ -330,11 +352,8 @@ HTML;
         $.ajax({
             url: 'paginas/' + pag + "/listar_permissoes.php",
             method: 'POST',
-            data: {
-                id
-            },
+            data: { id: id },
             dataType: "html",
-
             success: function(result) {
                 $('#listar_permissoes').html(result);
                 $('#mensagem_permissao').text('');
@@ -346,13 +365,9 @@ HTML;
         $.ajax({
             url: 'paginas/' + pag + "/add_permissoes.php",
             method: 'POST',
-            data: {
-                id: id,
-                acesso: acesso
-            },
+            data: { id: id, acesso: acesso },
             dataType: "text",
             success: function(result) {
-                // Só recarrega a lista se a gravação confirmou
                 if (result.trim() === 'inserido' || result.trim() === 'removido') {
                     listarPermissoes(id);
                 } else {
@@ -365,19 +380,15 @@ HTML;
                 $('#mensagem_permissao').addClass('text-danger').text('Erro de conexão');
             }
         });
-    }''
+    }
 
     function marcarTodos() {
         var id_user = $('#id_permissoes').val();
-        var marcado = $('#input_todos').is(':checked'); // ← Verifica se está marcado
-
+        var marcado = $('#input_todos').is(':checked');
         $.ajax({
             url: 'paginas/' + pag + "/add_all_permissoes.php",
             method: 'POST',
-            data: {
-                id: id_user,
-                acao: marcado ? 'marcar_todos' : 'desmarcar_todos' // ← Envia a ação correta
-            },
+            data: { id: id_user, acao: marcado ? 'marcar_todos' : 'desmarcar_todos' },
             dataType: "html",
             success: function(result) {
                 listarPermissoes(id_user);
@@ -389,17 +400,13 @@ HTML;
         $.ajax({
             url: 'paginas/' + pag + "/excluir.php",
             method: 'POST',
-            data: {
-                id
-            },
+            data: { id: id },
             dataType: "html",
-
             success: function(mensagem) {
                 if (mensagem.trim() == "Excluído com Sucesso") {
                     listar();
                 } else {
-                    $('#mensagem-excluir').addClass('text-danger')
-                    $('#mensagem-excluir').text(mensagem)
+                    $('#mensagem-excluir').addClass('text-danger').text(mensagem);
                 }
             }
         });

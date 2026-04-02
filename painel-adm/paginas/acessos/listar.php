@@ -30,7 +30,7 @@ HTML;
         $nome_grupo = $result[0]['nome_grupo'] ?? 'Sem Grupos';
         echo <<<HTML
             <tr>
-                <td><input type="checkbox" id="seletor-{$id}" class="form-check-input" onchange="selecionar('{$id}')">0{$nome}</td>
+                <td><input type="checkbox" id="seletor-{$id}" class="form-check-input" onchange="selecionar('{$id}')">&nbsp;{$nome}</td>
                 <td>{$chave}</td>
                 <td>{$nome_grupo}</td>
                 <td>

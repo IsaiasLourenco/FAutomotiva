@@ -1,6 +1,6 @@
 <?php
 require_once("../../../conexao.php");
-$tabela = 'receber';
+$tabela = 'pagar';
 
 $id = $_POST['id'];
 
@@ -10,7 +10,7 @@ $total_reg = @count($res);
 $arquivo = $res[0]['arquivo'];
 
 if ($arquivo != "sem-foto.png") {
-    unlink('../../images/receber/' . $arquivo);}
+    unlink('../../images/pagar/' . $arquivo);}
 
 $pdo->query("DELETE FROM $tabela WHERE id = '$id'");
 echo 'Excluído com Sucesso';

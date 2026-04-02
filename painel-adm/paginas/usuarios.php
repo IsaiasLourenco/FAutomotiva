@@ -21,15 +21,18 @@ $pag = 'usuarios';
         #tabela.tabela-pequena td {
             font-size: 12px !important;
         }
+
         #tabela_wrapper {
             font-size: 12px !important;
             line-height: 1.4 !important;
         }
+
         #tabela_wrapper .dataTables_length,
         #tabela_wrapper .dataTables_filter {
             font-size: 12px !important;
             margin-bottom: 5px !important;
         }
+
         #tabela_wrapper .dataTables_length select,
         #tabela_wrapper .dataTables_filter input {
             font-size: 12px !important;
@@ -40,6 +43,7 @@ $pag = 'usuarios';
             width: auto !important;
             max-width: 80px !important;
         }
+
         #tabela_wrapper .dataTables_length label,
         #tabela_wrapper .dataTables_filter label {
             font-size: 12px !important;
@@ -49,15 +53,18 @@ $pag = 'usuarios';
             align-items: center !important;
             gap: 5px !important;
         }
+
         #tabela_wrapper .dataTables_info {
             font-size: 12px !important;
             padding-top: 5px !important;
             line-height: 1.4 !important;
         }
+
         #tabela_wrapper .dataTables_paginate {
             font-size: 12px !important;
             padding-top: 5px !important;
         }
+
         #tabela_wrapper .dataTables_paginate .paginate_button {
             font-size: 12px !important;
             padding: 3px 8px !important;
@@ -67,13 +74,16 @@ $pag = 'usuarios';
             line-height: 1.2 !important;
             border-radius: 2px !important;
         }
+
         #tabela_wrapper .dataTables_paginate .paginate_button.current,
         #tabela_wrapper .dataTables_paginate .paginate_button:hover {
             font-size: 12px !important;
         }
+
         #tabela_wrapper .row {
             margin: 0 !important;
         }
+
         #tabela_wrapper .col-sm-6,
         #tabela_wrapper .col-sm-12 {
             padding: 0 !important;
@@ -81,7 +91,9 @@ $pag = 'usuarios';
             float: none !important;
             text-align: center !important;
         }
+
         @media (max-width: 768px) {
+
             #tabela_wrapper .dataTables_length,
             #tabela_wrapper .dataTables_filter,
             #tabela_wrapper .dataTables_info,
@@ -129,6 +141,7 @@ $pag = 'usuarios';
     <input type="hidden" id="ids">
 
 </body>
+
 </html>
 
 <!-- Modal Inserir-->
@@ -235,6 +248,35 @@ $pag = 'usuarios';
                         </div>
                         <input type="hidden" name="id" id="id">
                     </div>
+
+                    <!-- ✅ SEÇÃO FUNCIONÁRIO (campos adicionados) -->
+                    <div class="row border-top pt-3 mt-3">
+                        <div class="col-12">
+                            <h6 class="text-primary mb-3">👔 Dados de Funcionário <small class="text-muted">(Opcional)</small></h6>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="data_admissao">Data de Admissão</label>
+                            <input type="date" class="form-control" id="data_admissao" name="data_admissao">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="cargo_funcional">Cargo na Clínica</label>
+                            <input type="text" class="form-control" id="cargo_funcional" name="cargo_funcional" placeholder="Ex: Recepcionista, ASB...">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="tipo_contrato">Tipo de Contrato</label>
+                            <select class="form-control" id="tipo_contrato" name="tipo_contrato">
+                                <option value="CLT">CLT</option>
+                                <option value="PJ">PJ</option>
+                                <option value="Estagiário">Estagiário</option>
+                                <option value="Autônomo">Autônomo</option>
+                            </select>
+                        </div>
+                        <div class="col-md-12 mt-2">
+                            <label for="observacoes_func">Observações de RH</label>
+                            <textarea class="form-control" id="observacoes_func" name="observacoes_func" rows="2" placeholder="Anotações internas..."></textarea>
+                        </div>
+                    </div>
+
                     <div id="mensagem" class="centro-pequeno"></div>
                 </div>
                 <div class="modal-footer centro">
@@ -320,6 +362,30 @@ $pag = 'usuarios';
                 <div class="row text-center mt-3">
                     <img id="foto_dados-cli" src="images/perfil/" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover;">
                 </div>
+
+                <!-- ✅ SEÇÃO FUNCIONÁRIO NO MODAL DE VISUALIZAÇÃO -->
+                <div class="row border-top pt-3 mt-3">
+                    <div class="col-12">
+                        <h6 class="text-primary mb-3">👔 Dados de Funcionário</h6>
+                    </div>
+                    <div class="col-md-6">
+                        <span><b>Data de Admissão: </b></span>
+                        <span id="data_admissao_dados"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <span><b>Cargo: </b></span>
+                        <span id="cargo_funcional_dados"></span>
+                    </div>
+                    <div class="col-md-6 mt-2">
+                        <span><b>Tipo de Contrato: </b></span>
+                        <span id="tipo_contrato_dados"></span>
+                    </div>
+                    <div class="col-12 mt-2">
+                        <span><b>Observações de RH: </b></span>
+                        <p class="small text-muted mb-0" id="observacoes_func_dados"></p>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
@@ -350,7 +416,7 @@ $pag = 'usuarios';
                 <input type="hidden" name="id" id="id_permissoes">
                 <div id="mensagem_permissao" class="mt-3 centro-pequeno"></div>
             </div>
-            
+
         </div>
     </div>
 </div>

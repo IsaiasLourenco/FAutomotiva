@@ -1,23 +1,37 @@
 <?php
-if (defined('PERMISSOES_JA_CARREGADAS')) { return; }
+if (defined('PERMISSOES_JA_CARREGADAS')) {
+    return;
+}
 define('PERMISSOES_JA_CARREGADAS', true);
 @session_start();
 require_once("../conexao.php");
 $id_user = $_SESSION['id_user'];
 
 // Inicializa todas como 'ocultar' (padrão: sem acesso)
+// menu superior
 $home = 'ocultar';
 $configuracoes = 'ocultar';
+$perfil_modal = 'ocultar';
+
+// grupo pessoas
+$menu_pessoas = 'ocultar';
 $usuarios = 'ocultar';
+$pacientes = 'ocultar';
+$fornecedores = 'ocultar';
+
+//grupo cadastros
+$menu_cadastros = 'ocultar';
+$formas_pagamento = 'ocultar';
+$frequencias = 'ocultar';
+$cargos = 'ocultar';
 $grupo_acessos = 'ocultar';
 $acessos = 'ocultar';
-$cargos = 'ocultar';
+
+//grupo financeiro
+$menu_financeiro = 'ocultar';
 $pagar = 'ocultar';
 $receber = 'ocultar';
-$menu_pessoas = 'ocultar';
-$menu_cadastros = 'ocultar';
-$menu_financeiro = 'ocultar';
-$perfil_modal = 'ocultar';
+
 
 // Busca permissões do usuário
 $permissoes = $pdo->query("SELECT * FROM permissoes WHERE usuario = '$id_user'");
@@ -30,7 +44,7 @@ if ($total_permissoes > 0) {
 
         $user_acessos = $pdo->query("SELECT * FROM acessos WHERE id = '$permissao'");
         $acessos_permitidos = $user_acessos->fetchAll(PDO::FETCH_ASSOC);
-        
+
         if (count($acessos_permitidos) > 0) {
             $chave_acesso = $acessos_permitidos[0]['chave'];
 
@@ -38,20 +52,28 @@ if ($total_permissoes > 0) {
                 $home = '';
             } else if ($chave_acesso == 'configuracoes') {
                 $configuracoes = '';  // ← Controla MENU lateral E modal Config
+            } else if ($chave_acesso == 'perfil') {
+                $perfil_modal = '';  // ← Controla modal Perfil
             } else if ($chave_acesso == 'usuarios') {
                 $usuarios = '';
+            } else if ($chave_acesso == 'pacientes') {
+                $pacientes = '';
+            } else if ($chave_acesso == 'fornecedores') {
+                $fornecedores = '';
+            } else if ($chave_acesso == 'formas_pagamento') {
+                $formas_pagamento = '';
+            } else if ($chave_acesso == 'frequencias') {
+                $frequencias = '';
+            } else if ($chave_acesso == 'cargos') {
+                $cargos = '';
             } else if ($chave_acesso == 'grupo_acessos') {
                 $grupo_acessos = '';
             } else if ($chave_acesso == 'acessos') {
                 $acessos = '';
-            } else if ($chave_acesso == 'cargos') {
-                $cargos = '';
             } else if ($chave_acesso == 'pagar') {
-                $pagar = '';
+                $pagar = '';  // ← Controla página Pagar
             } else if ($chave_acesso == 'receber') {
-                $receber = '';
-            } else if ($chave_acesso == 'perfil') {
-                $perfil_modal = '';  // ← Controla modal Perfil
+                $receber = '';  // ← Controla página Receber
             }
         }
     }
@@ -60,12 +82,26 @@ if ($total_permissoes > 0) {
 // ✅ Define página inicial baseada nas permissões (SOMENTE páginas reais)
 if ($home != 'ocultar') {
     $pag_inicial = 'home';
+} else if ($perfil_modal != 'ocultar') {
+    $pag_inicial = 'perfil';
 } else if ($usuarios != 'ocultar') {
     $pag_inicial = 'usuarios';
+} else if ($pacientes != 'ocultar') {
+    $pag_inicial = 'pacientes';
+} else if ($fornecedores != 'ocultar') {
+    $pag_inicial = 'fornecedores';
+} else if ($formas_pagamento != 'ocultar') {
+    $pag_inicial = 'formas_pagamento';
+} else if ($frequencias != 'ocultar') {
+    $pag_inicial = 'frequencias';
 } else if ($cargos != 'ocultar') {
     $pag_inicial = 'cargos';
 } else if ($grupo_acessos != 'ocultar') {
     $pag_inicial = 'grupo_acessos';
+} else if ($pagar != 'ocultar') {
+    $pag_inicial = 'pagar';
+} else if ($receber != 'ocultar') {
+    $pag_inicial = 'receber';
 } else if ($acessos != 'ocultar') {
     $pag_inicial = 'acessos';
 } else if ($configuracoes != 'ocultar') {
@@ -74,16 +110,29 @@ if ($home != 'ocultar') {
     $pag_inicial = 'home';  // Fallback seguro
 }
 
-// Define visibilidade dos grupos de menu
-if ($usuarios == 'ocultar') {
+// ✅ Define visibilidade do grupo PESSOAS
+if ($usuarios == 'ocultar' and $pacientes == 'ocultar' and $fornecedores == 'ocultar') {
     $menu_pessoas = 'ocultar';
 } else {
     $menu_pessoas = '';
 }
 
-if ($grupo_acessos == 'ocultar' AND $acessos == 'ocultar' AND $cargos == 'ocultar') {
+// ✅ Define visibilidade do grupo CADASTROS (CORREÇÃO: inclui todos os itens)
+if (
+    $formas_pagamento == 'ocultar'
+    and $frequencias == 'ocultar'
+    and $cargos == 'ocultar'
+    and $grupo_acessos == 'ocultar'
+    and $acessos == 'ocultar'
+) {
     $menu_cadastros = 'ocultar';
 } else {
     $menu_cadastros = '';
 }
-?>
+
+// ✅ Define visibilidade do grupo FINANCEIRO (NOVO - não existia!)
+if ($pagar == 'ocultar' and $receber == 'ocultar') {
+    $menu_financeiro = 'ocultar';
+} else {
+    $menu_financeiro = '';
+}
