@@ -1,76 +1,86 @@
 <?php
-// ✅ Headers ANTES de qualquer output
 header('Content-Type: application/json; charset=UTF-8');
-header('Cache-Control: no-cache, no-store, must-revalidate');
 
-// ✅ Logs para debug (remove depois)
-error_reporting(E_ALL);
-ini_set('display_errors', 0); // Não mostra erro na tela, mas loga
-ini_set('log_errors', 1);
-ini_set('error_log', __DIR__ . '/erro-recuperar.log');
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
+require_once __DIR__ . '/vendor/autoload.php';
+require_once __DIR__ . '/conexao.php';
 
 try {
-    // ✅ Conexão com try-catch
-    if (!file_exists(__DIR__ . '/conexao.php')) {
-        throw new Exception('Arquivo conexao.php não encontrado!');
-    }
-    require_once(__DIR__ . '/conexao.php');
-
-    if (!isset($pdo) || !$pdo) {
-        throw new Exception('Conexão com banco não estabelecida ($pdo não definido)');
-    }
-
     $email = trim($_POST['email'] ?? '');
 
-    if (empty($email)) {
-        echo json_encode(['status' => 'error', 'message' => 'Email não informado!']);
+    if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        echo json_encode(['status' => 'error', 'message' => 'E-mail inválido.']);
         exit;
     }
 
-    // ✅ Busca usuário
-    $query = $pdo->prepare("SELECT id, email FROM usuarios WHERE email = :email LIMIT 1");
-    $query->bindValue(":email", $email, PDO::PARAM_STR);
-    $query->execute();
-    $res = $query->fetch(PDO::FETCH_ASSOC);
+    // Busca usuário
+    $query = $pdo->prepare("SELECT id, nome FROM usuarios WHERE email = :email LIMIT 1");
+    $query->execute([':email' => $email]);
+    $usuario = $query->fetch(PDO::FETCH_ASSOC);
 
-    if (!$res) {
-        // ✅ Por segurança, não revela se email existe ou não (opcional)
-        echo json_encode(['status' => 'error', 'message' => 'Esse email não está cadastrado!']);
+    // Mensagem genérica por segurança
+    if (!$usuario) {
+        echo json_encode(['status' => 'success', 'message' => 'Se o e-mail existir, você receberá o link.']);
         exit;
     }
 
-    // ✅ Gera token
+    // Gera token seguro (64 caracteres)
     $token = bin2hex(random_bytes(32));
-    $token_expira = date('Y-m-d H:i:s', strtotime('+24 hours'));
+    $expira = date('Y-m-d H:i:s', strtotime('+2 hours'));
 
-    // ✅ Atualiza token no banco
+    // Salva token no banco
     $upd = $pdo->prepare("UPDATE usuarios SET token = :token, token_expira = :expira WHERE email = :email");
     $upd->execute([
         ':token' => $token,
-        ':expira' => $token_expira,
+        ':expira' => $expira,
         ':email' => $email
     ]);
 
-    // ✅ Monta link
-    $base = !empty($url_sistema)
-        ? rtrim($url_sistema, '/')
-        : 'http://' . $_SERVER['HTTP_HOST'] . '/OdontoClinic'; // ✅ Ajuste para sua pasta
+    // Link correto (ajuste se estiver em subpasta)
+    $link = "http://" . $_SERVER['HTTP_HOST'] . "/OdontoClinic/alterar-senha.php?email=" . urlencode($email) . "&token=" . $token;
 
-    $link = $base . '/alterar-senha.php?email=' . urlencode($email) . '&token=' . $token;
+    // Configura PHPMailer
+    $mail = new PHPMailer(true);
+    $mail->isSMTP();
+    $mail->Host = 'smtp.gmail.com';
+    $mail->SMTPAuth = true;
+    $mail->Username = 'isaiaslourenco2020@gmail.com';
+    $mail->Password = 'akqq jzvz ndwd dvqg'; // ✅ Sua App Password
+    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+    $mail->Port = 587;
+    $mail->CharSet = 'UTF-8';
 
-    // ✅ Resposta de sucesso
-    echo json_encode([
-        'status' => 'success',
-        'message' => 'Link gerado com sucesso!',
-        'link' => $link
-    ]);
-    exit;
+    $mail->setFrom('isaiaslourenco2020@gmail.com', $nome_sistema ?? 'Sistema');
+    $mail->addAddress($email);
+
+    $mail->isHTML(true);
+    $mail->Subject = 'Recuperação de Senha - ' . ($nome_sistema ?? 'Sistema');
+    $mail->Body = "
+        <html>
+        <body style='font-family: Arial, sans-serif; line-height: 1.6; color: #333;'>
+            <h2>Olá, " . htmlspecialchars($usuario['nome']) . "!</h2>
+            <p>Você solicitou a recuperação de senha.</p>
+            <p>Clique no link abaixo para redefinir sua senha:</p>
+            <p style='text-align: center; margin: 30px 0;'>
+                <a href='{$link}' style='background: #0d6efd; color: #fff; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-weight: bold;'>Redefinir Senha</a>
+            </p>
+            <p>Ou copie e cole este link:</p>
+            <p style='background: #f8f9fa; padding: 10px; border-radius: 4px; word-break: break-all;'>{$link}</p>
+            <p><strong>⚠️ Este link expira em 2 horas.</strong></p>
+            <p>Se você não solicitou esta recuperação, ignore este e-mail.</p>
+        </body>
+        </html>
+    ";
+    $mail->AltBody = "Redefina sua senha: {$link}";
+
+    $mail->send();
+
+    echo json_encode(['status' => 'success', 'message' => 'Se o e-mail existir, você receberá o link.']);
+
 } catch (Exception $e) {
-    // ✅ Loga erro e retorna JSON seguro
-    error_log('Erro recuperar-senha: ' . $e->getMessage());
-    echo json_encode([
-        'status' => 'error',
-        'message' => 'Erro interno: ' . $e->getMessage() // ✅ Em produção, use apenas 'Erro ao processar'
-    ]);
-    exit;
+    error_log("Erro PHPMailer: " . $mail->ErrorInfo);
+    echo json_encode(['status' => 'error', 'message' => 'Erro ao enviar e-mail. Verifique os logs.']);
 }
+?>
