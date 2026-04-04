@@ -82,7 +82,7 @@
         $res_cargo = $cargo->fetchAll(PDO::FETCH_ASSOC);
         $nome_cargo_usuario = $res_cargo[0]['nome'];
     }
-
+    
     ?>
     <!DOCTYPE HTML>
     <html>
@@ -708,7 +708,7 @@
                             </div>
                             <div class="col-md-2">
                                 <label for="estado-sistema">Estado</label>
-                                <input type="text" class="form-control" id="estado-sistema" name="estado-sistema" value="<?php echo $estado_sistema ?>" readonly>
+                                <input type="text" class="form-control" id="estado-sistema" name="estado_sistema" value="<?php echo $estado_sistema ?>" readonly>
                             </div>
                             <div class="col-md-5">
                                 <label for="instagram">Instagram</label>

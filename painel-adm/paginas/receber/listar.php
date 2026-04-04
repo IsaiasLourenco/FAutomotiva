@@ -10,9 +10,10 @@ function js_escape($str)
 
 $dataInicial = @$_POST['p1'] ?? '';
 $dataFinal   = @$_POST['p2'] ?? '';
-$pago        = @$_POST['p3'] ?? '';
+$pago        = @$_POST['p3'] ?? '';  // Recebe: '', 'pagas', 'pendentes', 'vencidas'
 $tipoData    = @$_POST['p4'] ?? '';
 
+// Normaliza valores
 if ($dataInicial === 'undefined' || $dataInicial === '') $dataInicial = '';
 if ($dataFinal === 'undefined' || $dataFinal === '') $dataFinal = '';
 if ($pago === 'undefined' || $pago === '') $pago = '';
@@ -24,10 +25,13 @@ $mapaColunas = [
     'lancamento'   => 'data_lancamento'
 ];
 $colunaData = $mapaColunas[$tipoData] ?? 'data_vencimento';
+$hoje = date('Y-m-d');
 
+// ✅ QUERY BASE
 $query = "SELECT * FROM $tabela WHERE 1=1";
 $params = [];
 
+// Filtro de período
 if (!empty($dataInicial)) {
     $query .= " AND $colunaData >= :data_inicial";
     $params[':data_inicial'] = $dataInicial;
@@ -36,11 +40,26 @@ if (!empty($dataFinal)) {
     $query .= " AND $colunaData <= :data_final";
     $params[':data_final'] = $dataFinal;
 }
-if ($pago === 'Sim') {
-    $query .= " AND (data_pagamento IS NOT NULL AND data_pagamento != '' AND data_pagamento != '0000-00-00')";
-} elseif ($pago === 'Não') {
-    $query .= " AND (data_pagamento IS NULL OR data_pagamento = '' OR data_pagamento = '0000-00-00')";
+
+// ✅ FILTRO DE STATUS (CORRIGIDO)
+if ($pago === 'pagas') {
+    // Pagas: data_pagamento preenchida
+    $query .= " AND data_pagamento IS NOT NULL 
+                AND data_pagamento != '' 
+                AND data_pagamento != '0000-00-00'";
+} elseif ($pago === 'pendentes') {
+    // Pendentes: ainda não venceram E não foram pagas
+    $query .= " AND data_vencimento >= :hoje
+                AND (data_pagamento IS NULL OR data_pagamento = '' OR data_pagamento = '0000-00-00')";
+    $params[':hoje'] = $hoje;
+} elseif ($pago === 'vencidas') {
+    // Vencidas: já venceram E não foram pagas
+    $query .= " AND data_vencimento < :hoje
+                AND (data_pagamento IS NULL OR data_pagamento = '' OR data_pagamento = '0000-00-00')";
+    $params[':hoje'] = $hoje;
 }
+// Se $pago for vazio, não aplica filtro de status (mostra todas)
+
 $query .= " ORDER BY id DESC";
 
 $stmt = $pdo->prepare($query);
@@ -61,8 +80,9 @@ echo <<<HTML
         <tr> 
             <th>Descrição</th>
             <th>Paciente</th>
-            <th>Data Lançamento</th>
-            <th class="esc">Data Pagamento</th>
+            <th>Lançamento</th>
+            <th>Vencimento</th>
+            <th class="esc">Pagamento</th>
             <th>Valor</th>
             <th>Ações</th>
         </tr> 
@@ -195,11 +215,12 @@ if ($linhas > 0) {
         $e_usuario_lanc_nome = js_escape($usuario_lanc_nome);
         $e_usuario_pgto_nome = js_escape($usuario_pgto_nome);
 
-echo <<<HTML
+        echo <<<HTML
             <tr class="{$classe_status}">
                 <td><input type="checkbox" id="seletor-{$id}" class="form-check-input" onchange="selecionar('{$id}')"> {$descricao}</td>
                 <td>{$paciente_nome}</td>
                 <td>{$data_lancamentoF}</td>
+                <td>{$data_vencimentoF}</td>
                 <td class="esc">{$data_pagamentoF_tabela}</td>
                 <td>
                     <b>{$valorF}</b>
@@ -207,7 +228,7 @@ HTML;
 
         // ✅ Exibe "Recebido" APENAS se a conta estiver efetivamente paga
         if (!empty($data_pagamento) && $data_pagamento != '0000-00-00' && $subtotal > 0 && $subtotal != $valor) {
-echo <<<HTML
+            echo <<<HTML
                     <br>
                     <small class="text-success font-weight-bold">
                     Recebido: {$subtotalF}
@@ -217,7 +238,7 @@ HTML;
 
         // ✅ Exibe "Pago/Saldo" apenas se houver resíduos
         if ($total_residuos > 0) {
-echo <<<HTML
+            echo <<<HTML
         <br>
         <small class="text-muted">
             Pago: R$ {$total_residuosF} | 
@@ -226,7 +247,7 @@ echo <<<HTML
 HTML;
         }
 
-echo <<<HTML
+        echo <<<HTML
                 </td>
                 
                 <td>
@@ -275,7 +296,7 @@ HTML;
         $tem_relacionados = $stmt_relacionados->fetchColumn() > 0;
 
         if ($tem_relacionados) {
-echo <<<HTML
+            echo <<<HTML
                     <a href="#" onclick="mostrarRelacionados('{$id}', 
                                                              '{$e_descricao}')" title="Ver Parcelas e Resíduos">
                         <i class="fa-solid fa-diagram-project text-dark ico-grande"></i>
@@ -283,7 +304,7 @@ echo <<<HTML
 HTML;
         }
         if ($mostrarBotaoParcelar) {
-echo <<<HTML
+            echo <<<HTML
             <a href="#" onclick="parcelar('{$id}', 
                                           '{$e_valorF}', 
                                           '{$e_descricao}', 
@@ -298,7 +319,7 @@ HTML;
         if ($mostrarBotaoBaixar) {
             $valor_restante = $valor - $total_residuos;
 
-echo <<<HTML
+            echo <<<HTML
 
             <input type="checkbox" class="check-baixar maozinha" data-id="{$id}" data-valor="{$valor_restante}" title="Selecionar para baixa">
 
@@ -306,7 +327,7 @@ HTML;
             $valor_restante = $valor - $total_residuos;
             $valor_restanteF = 'R$ ' . number_format($valor_restante, 2, ',', '.');
             $e_valor_restanteF = js_escape($valor_restanteF);
-echo <<<HTML
+            echo <<<HTML
 
             <a href="#" onclick="baixar('{$id}', 
                                         '{$e_valor_restanteF}', 
@@ -319,7 +340,7 @@ echo <<<HTML
 HTML;
         }
 
-echo <<<HTML
+        echo <<<HTML
             <!-- ✅ Botão para abrir modal de arquivos -->
             <a href="#" onclick="abrirArquivos('{$id}', '{$e_descricao}')" title="Arquivos">
                 <i class="fa-solid fa-paperclip text-secondary ico-grande"></i>

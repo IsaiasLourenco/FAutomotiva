@@ -34,7 +34,7 @@ $_GET['multa_atraso'] = $multa_atraso;
 $_GET['juros_atraso'] = $juros_atraso;
 $_GET['data_hoje'] = date('Y-m-d');
 
-// ✅ 6. Incluir relatório DIRETAMENTE (não usar file_get_contents!)
+// ✅ 6. Incluir relatório DIRETAMENTE
 include __DIR__ . '/rel_receber.php';
 $html = ob_get_clean();
 
@@ -43,7 +43,7 @@ use Dompdf\Dompdf;
 use Dompdf\Options;
 
 $options = new Options();
-$options->setIsRemoteEnabled(false);  // ✅ Usar caminhos locais
+$options->setIsRemoteEnabled(false);
 $options->set('defaultFont', 'DejaVu Sans');
 $options->set('chroot', [
     realpath(__DIR__ . '/../../'),

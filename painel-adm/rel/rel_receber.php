@@ -33,6 +33,18 @@ if ($tipo_data === 'vencimento') {
     $texto_tipo_data = 'Data de Vencimento';
 }
 
+// ✅ 4. Receber filtros do POST
+$dataInicial = $_POST['dataInicial'] ?? '';
+$dataFinal = $_POST['dataFinal'] ?? '';
+$pago = $_POST['pago'] ?? '';
+$tipo_data = $_POST['tipo_data'] ?? 'vencimento';
+
+// ✅ SE DATAS VAZIAS, USA MÊS ATUAL
+if (empty($dataInicial) || empty($dataFinal)) {
+    $dataInicial = date('Y-m-01');  // Primeiro dia do mês
+    $dataFinal = date('Y-m-t');     // Último dia do mês
+}
+
 setlocale(LC_TIME, 'pt_BR', 'ptb', 'pt_BR.UTF-8');
 $data_extenso = strftime('%A, %d de %B de %Y', strtotime(date('Y-m-d')));
 $data_extenso = ucfirst($data_extenso);
@@ -44,6 +56,12 @@ $telefone_sistema = $config['telefone_sistema'] ?? '';
 $instagram_sistema = $config['instagram_sistema'] ?? '';
 $desenvolvedor = $config['desenvolvedor'] ?? '';
 $site_dev = $config['site_dev'] ?? '';
+
+// ✅ INICIALIZA TOTAIS ANTES (FORA DO TRY)
+$total_pendentes = 0;
+$total_pago = 0;
+$total_geral = 0;
+$contas = [];
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -120,11 +138,6 @@ $site_dev = $config['site_dev'] ?? '';
             border-top: 1px dashed #bdc3c7;
         }
 
-        .header-date-fix {
-            font-weight: bold;
-            color: #2c3e50;
-        }
-
         .filters {
             width: 100%;
             margin-bottom: 15px;
@@ -151,7 +164,6 @@ $site_dev = $config['site_dev'] ?? '';
             display: inline-block;
         }
 
-        /* ✅ TABELA - CSS SIMPLIFICADO PARA DOMPDF */
         table.relatorio {
             width: 100%;
             border-collapse: collapse;
@@ -161,9 +173,7 @@ $site_dev = $config['site_dev'] ?? '';
 
         table.relatorio thead th {
             background-color: #2c3e50;
-            /* ✅ COR SÓLIDA EM VEZ DE GRADIENTE */
             color: #ffffff !important;
-            /* ✅ FORÇAR COR BRANCA */
             padding: 8px 5px;
             text-align: left;
             font-size: 8px;
@@ -232,12 +242,9 @@ $site_dev = $config['site_dev'] ?? '';
             display: inline-block;
         }
 
-        /* ✅ RODAPÉ DA TABELA - COR SÓLIDA */
         table.relatorio tfoot td {
             background-color: #2c3e50;
-            /* ✅ COR SÓLIDA */
             color: #ffffff !important;
-            /* ✅ FORÇAR BRANCO */
             font-weight: bold;
             padding: 8px 5px;
             border: 1px solid #2c3e50;
@@ -246,7 +253,6 @@ $site_dev = $config['site_dev'] ?? '';
 
         .total-destaque {
             background-color: #27ae60 !important;
-            /* ✅ COR SÓLIDA VERDE */
             font-size: 11px !important;
             text-align: right;
         }
@@ -328,7 +334,7 @@ $site_dev = $config['site_dev'] ?? '';
                 </div>
             </div>
             <div class="header-date">
-                <span class="header-date-fix">Gerado em: </span><strong><?php echo $data_extenso; ?></strong>
+                <strong><?php echo $data_extenso; ?></strong>
             </div>
         </div>
         <div class="filters">
@@ -354,8 +360,8 @@ $site_dev = $config['site_dev'] ?? '';
                     <th class="col-paciente">Paciente</th>
                     <th class="col-vencimento">Vencimento</th>
                     <th class="col-pago">Pago em</th>
-                    <th class="col-forma">Forma Pgto</th>
                     <th class="col-valor">Valor</th>
+                    <th class="col-forma">Forma Pgto</th>
                     <th class="col-subtotal">Subtotal</th>
                 </tr>
             </thead>
@@ -367,55 +373,74 @@ $site_dev = $config['site_dev'] ?? '';
                         'pagamento' => 'data_pagamento',
                         default => 'data_vencimento'
                     };
+
                     $sql = "SELECT r.*, p.nome as paciente_nome, fp.nome as forma_nome 
                             FROM receber r
                             LEFT JOIN pacientes p ON r.paciente = p.id
                             LEFT JOIN forma_pagamento fp ON r.forma_pagamento = fp.id
                             WHERE $coluna >= :ini AND $coluna <= :fim";
+
                     if ($pago === 'pagas') {
                         $sql .= " AND r.data_pagamento IS NOT NULL AND r.data_pagamento != '' AND r.data_pagamento != '0000-00-00'";
                     } elseif ($pago === 'pendentes') {
                         $sql .= " AND (r.data_pagamento IS NULL OR r.data_pagamento = '' OR r.data_pagamento = '0000-00-00')";
+                    } elseif ($pago === 'vencidas') {
+                        $sql .= " AND r.data_vencimento < :hoje AND (r.data_pagamento IS NULL OR r.data_pagamento = '' OR r.data_pagamento = '0000-00-00')";
                     }
+
                     $sql .= " ORDER BY r.id DESC";
                     $stmt = $pdo->prepare($sql);
-                    $stmt->execute([':ini' => $dataInicial, ':fim' => $dataFinal]);
+
+                    if ($pago === 'vencidas') {
+                        $stmt->execute([':ini' => $dataInicial, ':fim' => $dataFinal, ':hoje' => date('Y-m-d')]);
+                    } else {
+                        $stmt->execute([':ini' => $dataInicial, ':fim' => $dataFinal]);
+                    }
+
                     $contas = $stmt->fetchAll(PDO::FETCH_ASSOC);
-                    $total_pendentes = 0;
-                    $total_pago = 0;
-                    foreach ($contas as $c):
+
+                    // ✅ CALCULA TOTAIS DENTRO DO TRY
+                    foreach ($contas as $c) {
                         $pago_status = (!empty($c['data_pagamento']) && $c['data_pagamento'] != '0000-00-00') ? 'pago' : 'pendente';
-                        $valorF = 'R$ ' . number_format($c['valor'] ?? 0, 2, ',', '.');
-                        $subtotalF = 'R$ ' . number_format($c['subtotal'] ?? $c['valor'] ?? 0, 2, ',', '.');
-                        $vencF = (!empty($c['data_vencimento']) && $c['data_vencimento'] != '0000-00-00') ? date('d/m/Y', strtotime($c['data_vencimento'])) : '-';
-                        $pgtoF = (!empty($c['data_pagamento']) && $c['data_pagamento'] != '0000-00-00') ? date('d/m/Y', strtotime($c['data_pagamento'])) : 'Não pago';
+
                         if ($pago_status === 'pago') {
-                            $total_pago += $c['subtotal'] ?? $c['valor'];
-                            $classe = 'status-pago';
+                            $total_pago += $c['subtotal'] ?? $c['valor'] ?? 0;
                         } else {
-                            $total_pendentes += $c['valor'];
-                            $classe = 'status-pendente';
+                            $total_pendentes += $c['valor'] ?? 0;
                         }
-                ?>
-                        <tr>
-                            <td class="col-descricao"><?php echo htmlspecialchars($c['descricao'] ?? '') ?></td>
-                            <td class="col-paciente"><?php echo htmlspecialchars($c['paciente_nome'] ?? '') ?></td>
-                            <td class="col-vencimento" style="text-align: center;"><?php echo $vencF ?></td>
-                            <td class="col-pago" style="text-align: center;"><span class="<?php echo $classe ?>"><?php echo $pgtoF ?></span></td>
-                            <td class="col-forma"><?php echo htmlspecialchars($c['forma_nome'] ?? '') ?></td>
-                            <td class="col-valor"><?php echo $valorF ?></td>
-                            <td class="col-subtotal"><?php echo $subtotalF ?></td>
-                        </tr>
-                <?php endforeach;
+                    }
+
+                    $total_geral = $total_pago + $total_pendentes;
                 } catch (Exception $e) {
                     echo '<tr><td colspan="7" style="text-align:center;color:#e74c3c;padding:20px;">Erro: ' . htmlspecialchars($e->getMessage()) . '</td></tr>';
-                } ?>
+                    $total_geral = 0;
+                }
+
+                // ✅ EXIBE OS DADOS
+                foreach ($contas as $c):
+                    $pago_status = (!empty($c['data_pagamento']) && $c['data_pagamento'] != '0000-00-00') ? 'pago' : 'pendente';
+                    $valorF = 'R$ ' . number_format($c['valor'] ?? 0, 2, ',', '.');
+                    $subtotalF = 'R$ ' . number_format($c['subtotal'] ?? $c['valor'] ?? 0, 2, ',', '.');
+                    $vencF = (!empty($c['data_vencimento']) && $c['data_vencimento'] != '0000-00-00') ? date('d/m/Y', strtotime($c['data_vencimento'])) : '-';
+                    $pgtoF = (!empty($c['data_pagamento']) && $c['data_pagamento'] != '0000-00-00') ? date('d/m/Y', strtotime($c['data_pagamento'])) : 'Não pago';
+                    $classe = ($pago_status === 'pago') ? 'status-pago' : 'status-pendente';
+                ?>
+                    <tr>
+                        <td class="col-descricao"><?php echo htmlspecialchars($c['descricao'] ?? '') ?></td>
+                        <td class="col-paciente"><?php echo htmlspecialchars($c['paciente_nome'] ?? '') ?></td>
+                        <td class="col-vencimento" style="text-align: center;"><?php echo $vencF ?></td>
+                        <td class="col-pago" style="text-align: center;"><span class="<?php echo $classe ?>"><?php echo $pgtoF ?></span></td>
+                        <td class="col-forma"><?php echo htmlspecialchars($c['forma_nome'] ?? '') ?></td>
+                        <td class="col-valor"><?php echo $valorF ?></td>
+                        <td class="col-subtotal"><?php echo $subtotalF ?></td>
+                    </tr>
+                <?php endforeach; ?>
             </tbody>
             <tfoot>
                 <tr>
                     <td colspan="5" style="text-align: right; font-weight: bold;">TOTAL GERAL:</td>
                     <td colspan="2" class="total-destaque" style="text-align: right; font-size: 12px; font-weight: bold;">
-                        R$ <?php echo number_format($total_geral ?? 0, 2, ',', '.'); ?>
+                        R$ <?php echo number_format($total_geral, 2, ',', '.'); ?>
                     </td>
                 </tr>
             </tfoot>
