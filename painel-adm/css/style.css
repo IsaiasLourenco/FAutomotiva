@@ -22,6 +22,30 @@ p {
   text-align: right;
 }
 
+.margens {
+    margin-left: 50px;
+    margin-top: 20px;
+}
+
+.btn-receber {
+    background: #00c292 !important; /* verde */
+    color: white !important;
+    padding: 10px;
+    border-radius: 50%;
+}
+
+.btn-pagar {
+    background: #e74c3c !important; /* vermelho */
+    color: white !important;
+    padding: 10px;
+    border-radius: 50%;
+}
+
+/* Remove o fundo azul padrão */
+.nofitications-dropdown li a {
+    background: transparent !important;
+}
+
 /* ✅ Estilos para lista de arquivos */
 #listar-arquivos .arquivo-item {
   background: #f8f9fa;
@@ -4086,7 +4110,7 @@ ul.bt-list li a {
 }
 
 .tabela-pequena {
-  font-size: 12px;
+  font-size: 10px;
 }
 
 .ico-grande {

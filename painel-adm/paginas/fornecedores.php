@@ -19,20 +19,20 @@ $pag = 'fornecedores';
         #tabela.tabela-pequena,
         #tabela.tabela-pequena th,
         #tabela.tabela-pequena td {
-            font-size: 12px !important;
+            font-size: 10px !important;
         }
         #tabela_wrapper {
-            font-size: 12px !important;
+            font-size: 10px !important;
             line-height: 1.4 !important;
         }
         #tabela_wrapper .dataTables_length,
         #tabela_wrapper .dataTables_filter {
-            font-size: 12px !important;
+            font-size: 10px !important;
             margin-bottom: 5px !important;
         }
         #tabela_wrapper .dataTables_length select,
         #tabela_wrapper .dataTables_filter input {
-            font-size: 12px !important;
+            font-size: 10px !important;
             padding: 2px 5px !important;
             height: 25px !important;
             margin: 0 5px !important;
@@ -42,7 +42,7 @@ $pag = 'fornecedores';
         }
         #tabela_wrapper .dataTables_length label,
         #tabela_wrapper .dataTables_filter label {
-            font-size: 12px !important;
+            font-size: 10px !important;
             margin: 0 !important;
             font-weight: normal !important;
             display: inline-flex !important;
@@ -50,16 +50,16 @@ $pag = 'fornecedores';
             gap: 5px !important;
         }
         #tabela_wrapper .dataTables_info {
-            font-size: 12px !important;
+            font-size: 10px !important;
             padding-top: 5px !important;
             line-height: 1.4 !important;
         }
         #tabela_wrapper .dataTables_paginate {
-            font-size: 12px !important;
+            font-size: 10px !important;
             padding-top: 5px !important;
         }
         #tabela_wrapper .dataTables_paginate .paginate_button {
-            font-size: 12px !important;
+            font-size: 10px !important;
             padding: 3px 8px !important;
             margin: 0 2px !important;
             min-width: 25px !important;
@@ -69,7 +69,7 @@ $pag = 'fornecedores';
         }
         #tabela_wrapper .dataTables_paginate .paginate_button.current,
         #tabela_wrapper .dataTables_paginate .paginate_button:hover {
-            font-size: 12px !important;
+            font-size: 10px !important;
         }
         #tabela_wrapper .row {
             margin: 0 !important;
@@ -208,7 +208,9 @@ $pag = 'fornecedores';
                     <div id="mensagem" class="centro-pequeno"></div>
                 </div>
                 <div class="modal-footer centro">
-                    <button type="submit" class="btn btn-primary">Salvar</button>
+                    <button type="submit" class="btn btn-primary" id="btn_salvar">
+                        Salvar
+                    </button>
                 </div>
             </form>
         </div>

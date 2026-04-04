@@ -21,25 +21,25 @@ $pag = 'acessos';
         #tabela.tabela-pequena,
         #tabela.tabela-pequena th,
         #tabela.tabela-pequena td {
-            font-size: 12px !important;
+            font-size: 10px !important;
         }
 
         /* Wrapper do DataTables específico para #tabela */
         #tabela_wrapper {
-            font-size: 12px !important;
+            font-size: 10px !important;
             line-height: 1.4 !important;
         }
 
         /* Controles: busca, seleção de registros */
         #tabela_wrapper .dataTables_length,
         #tabela_wrapper .dataTables_filter {
-            font-size: 12px !important;
+            font-size: 10px !important;
             margin-bottom: 5px !important;
         }
 
         #tabela_wrapper .dataTables_length select,
         #tabela_wrapper .dataTables_filter input {
-            font-size: 12px !important;
+            font-size: 10px !important;
             padding: 2px 5px !important;
             height: 25px !important;
             margin: 0 5px !important;
@@ -61,19 +61,19 @@ $pag = 'acessos';
 
         /* Texto de informação */
         #tabela_wrapper .dataTables_info {
-            font-size: 12px !important;
+            font-size: 10px !important;
             padding-top: 5px !important;
             line-height: 1.4 !important;
         }
 
         /* Botões de paginação */
         #tabela_wrapper .dataTables_paginate {
-            font-size: 12px !important;
+            font-size: 10px !important;
             padding-top: 5px !important;
         }
 
         #tabela_wrapper .dataTables_paginate .paginate_button {
-            font-size: 12px !important;
+            font-size: 10px !important;
             padding: 3px 8px !important;
             margin: 0 2px !important;
             min-width: 25px !important;
@@ -193,7 +193,9 @@ $pag = 'acessos';
                             </select>
                         </div>
                         <div class="col-md-3 mt-22">
-                            <button type="submit" class="btn btn-primary">Salvar</button>
+                            <button type="submit" class="btn btn-primary" id="btn_salvar">
+                                Salvar
+                            </button>
                             <input type="hidden" name="id" id="id">
                         </div>
                     </div>

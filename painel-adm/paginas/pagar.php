@@ -25,23 +25,23 @@ $juros_label = isset($config_multa_juros['juros_padrao'])
         #tabela.tabela-pequena,
         #tabela.tabela-pequena th,
         #tabela.tabela-pequena td {
-            font-size: 12px !important;
+            font-size: 10px !important;
         }
 
         #tabela_wrapper {
-            font-size: 12px !important;
+            font-size: 10px !important;
             line-height: 1.4 !important;
         }
 
         #tabela_wrapper .dataTables_length,
         #tabela_wrapper .dataTables_filter {
-            font-size: 12px !important;
+            font-size: 10px !important;
             margin-bottom: 5px !important;
         }
 
         #tabela_wrapper .dataTables_length select,
         #tabela_wrapper .dataTables_filter input {
-            font-size: 12px !important;
+            font-size: 10px !important;
             padding: 2px 5px !important;
             height: 25px !important;
             margin: 0 5px !important;
@@ -52,7 +52,7 @@ $juros_label = isset($config_multa_juros['juros_padrao'])
 
         #tabela_wrapper .dataTables_length label,
         #tabela_wrapper .dataTables_filter label {
-            font-size: 12px !important;
+            font-size: 10px !important;
             margin: 0 !important;
             font-weight: normal !important;
             display: inline-flex !important;
@@ -61,18 +61,18 @@ $juros_label = isset($config_multa_juros['juros_padrao'])
         }
 
         #tabela_wrapper .dataTables_info {
-            font-size: 12px !important;
+            font-size: 10px !important;
             padding-top: 5px !important;
             line-height: 1.4 !important;
         }
 
         #tabela_wrapper .dataTables_paginate {
-            font-size: 12px !important;
+            font-size: 10px !important;
             padding-top: 5px !important;
         }
 
         #tabela_wrapper .dataTables_paginate .paginate_button {
-            font-size: 12px !important;
+            font-size: 10px !important;
             padding: 3px 8px !important;
             margin: 0 2px !important;
             min-width: 25px !important;
@@ -83,7 +83,7 @@ $juros_label = isset($config_multa_juros['juros_padrao'])
 
         #tabela_wrapper .dataTables_paginate .paginate_button.current,
         #tabela_wrapper .dataTables_paginate .paginate_button:hover {
-            font-size: 12px !important;
+            font-size: 10px !important;
         }
 
         #tabela_wrapper .row {
@@ -113,8 +113,10 @@ $juros_label = isset($config_multa_juros['juros_padrao'])
 </head>
 
 <body>
-    <div class="row mb-3 align-items-center">
-        <div class="col-md-4 col-sm-12 mb-2 mb-md-0">
+    <div class="row mb-3 align-items-center d-flex flex-wrap">
+
+        <div class="col-md-4 col-sm-12 d-flex align-items-center flex-wrap gap-2 mb-2">
+
             <a onclick="inserir()" href="#" class="btn btn-primary mr-3 btn-sm">
                 <span class="fa fa-plus"></span> Conta
             </a>
@@ -152,38 +154,46 @@ $juros_label = isset($config_multa_juros['juros_padrao'])
                 </ul>
             </li>
         </div>
-        <div class="col-md-8 col-sm-12">
-            <div class="row align-items-center">
-                <div class="col-md-2 col-sm-6 mb-2 mb-md-0">
-                    <label class="small text-muted mb-1">De:</label>
-                    <input type="date" name="dataInicial" id="dataInicial" class="form-control form-control-sm" value="" onchange="buscarData()">
-                </div>
-                <div class="col-md-2 col-sm-6 mb-2 mb-md-0">
-                    <label class="small text-muted mb-1">Até:</label>
-                    <input type="date" name="dataFinal" id="dataFinal" class="form-control form-control-sm" value="" onchange="buscarData()">
-                </div>
-                <div class="col-md-2 col-sm-6 mb-2 mb-md-0">
-                    <label class="small text-muted mb-1">Status:</label>
-                    <select name="pago" id="pago" class="form-control form-control-sm">
-                        <option value="">Todas</option>
-                        <option value="Sim">Pagas</option>
-                        <option value="Não">Pendentes</option>
-                    </select>
-                </div>
-                <div class="col-md-3 col-sm-12 mb-2 mb-md-0">
-                    <label class="small text-muted mb-1">&nbsp;</label>
-                    <span class="d-inline-flex align-items-center gap-1 text-nowrap filtro-rapido">
-                        <a href="#" onclick="trocarData('mes')" class="text-decoration-none small">Mês</a>
-                        <span class="text-muted">|</span>
-                        <a href="#" onclick="trocarData('hoje')" class="text-decoration-none small">Hoje</a>
-                        <span class="text-muted">|</span>
-                        <a href="#" onclick="trocarData('ontem')" class="text-decoration-none small">Ontem</a>
-                        <span class="text-muted">|</span>
-                        <a href="#" onclick="trocarData('amanha')" class="text-decoration-none small">Amanhã</a>
-                    </span>
-                </div>
+        <form action="rel/rel_receber_class.php" method="post" target="_blank"
+            class="col-md-8 col-sm-12 d-flex align-items-end flex-wrap gap-2">
+
+            <div class="col-md-3 col-sm-6 mb-2">
+                <label class="small text-muted mb-1">De:</label>
+                <input type="date" name="dataInicial" id="dataInicial" class="form-control form-control-sm" value="" onchange="buscarData()">
             </div>
-        </div>
+
+            <div class="col-md-3 col-sm-6 mb-2">
+                <label class="small text-muted mb-1">Até:</label>
+                <input type="date" name="dataFinal" id="dataFinal" class="form-control form-control-sm" value="" onchange="buscarData()">
+            </div>
+
+            <div class="col-md-3 col-sm-6 mb-2">
+                <label class="small text-muted mb-1">Status:</label>
+                <select name="pago" id="pago" class="form-control form-control-sm">
+                    <option value="">Todas</option>
+                    <option value="Sim">Pagas</option>
+                    <option value="Não">Pendentes</option>
+                </select>
+            </div>
+
+            <div class="col-md-2 col-sm-12 mb-2">
+                <label class="small text-muted mb-1">&nbsp;</label>
+                <span class="d-inline-flex align-items-center gap-1 text-nowrap filtro-rapido">
+                    <a href="#" onclick="trocarData('mes')" class="text-decoration-none small">Mês</a>
+                    <span class="text-muted">|</span>
+                    <a href="#" onclick="trocarData('hoje')" class="text-decoration-none small">Hoje</a>
+                    <span class="text-muted">|</span>
+                    <a href="#" onclick="trocarData('ontem')" class="text-decoration-none small">Ontem</a>
+                    <span class="text-muted">|</span>
+                    <a href="#" onclick="trocarData('amanha')" class="text-decoration-none small">Amanhã</a>
+                </span>
+            </div>
+            <div class="ms-auto mb-2">
+                <button type="submit" class="btn btn-danger btn-sm" title="Relatório PDF">
+                    <i class="fa-solid fa-file-pdf"></i>
+                </button>
+            </div>
+        </form>
     </div>
     <div class="bs-example widget-shadow table-primary" id="listar"></div>
     <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>

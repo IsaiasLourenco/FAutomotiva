@@ -59,6 +59,9 @@ if (!isset($nome_sistema)) {
     $logotipo = 'logo_padrao.png';
     $icone = 'ico_padrao.png';
     $logo_rel = 'rel_padrao.jpg';
+    $multa_padrao = '0,00';
+    $juros_padrao = '0,00';
+    $marca_dagua_rel = 'rel_padrao.jpg';
 }
 
 // | ENDEREÇO FORMATADO

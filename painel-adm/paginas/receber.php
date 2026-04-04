@@ -5,9 +5,12 @@ $pag = 'receber';
 
 // ✅ Busca configurações de multa/juros para exibir na label
 $config_multa_juros = $pdo->query("SELECT multa_padrao, juros_padrao FROM configuracoes LIMIT 1")->fetch(PDO::FETCH_ASSOC);
-$multa_label = isset($config_multa_juros['multa_padrao']) ? number_format($config_multa_juros['multa_padrao'], 2, ',', '.') : '2,00';
-$juros_label = isset($config_multa_juros['juros_padrao']) ? number_format($config_multa_juros['juros_padrao'], 2, ',', '.') : '0,33';
-
+$multa_label = isset($config_multa_juros['multa_padrao'])
+    ? number_format($config_multa_juros['multa_padrao'], 2, ',', '.')
+    : '2,00';
+$juros_label = isset($config_multa_juros['juros_padrao'])
+    ? number_format($config_multa_juros['juros_padrao'], 2, ',', '.')
+    : '0,33';
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -22,23 +25,23 @@ $juros_label = isset($config_multa_juros['juros_padrao']) ? number_format($confi
         #tabela.tabela-pequena,
         #tabela.tabela-pequena th,
         #tabela.tabela-pequena td {
-            font-size: 12px !important;
+            font-size: 10px !important;
         }
 
         #tabela_wrapper {
-            font-size: 12px !important;
+            font-size: 10px !important;
             line-height: 1.4 !important;
         }
 
         #tabela_wrapper .dataTables_length,
         #tabela_wrapper .dataTables_filter {
-            font-size: 12px !important;
+            font-size: 10px !important;
             margin-bottom: 5px !important;
         }
 
         #tabela_wrapper .dataTables_length select,
         #tabela_wrapper .dataTables_filter input {
-            font-size: 12px !important;
+            font-size: 10px !important;
             padding: 2px 5px !important;
             height: 25px !important;
             margin: 0 5px !important;
@@ -49,7 +52,7 @@ $juros_label = isset($config_multa_juros['juros_padrao']) ? number_format($confi
 
         #tabela_wrapper .dataTables_length label,
         #tabela_wrapper .dataTables_filter label {
-            font-size: 12px !important;
+            font-size: 10px !important;
             margin: 0 !important;
             font-weight: normal !important;
             display: inline-flex !important;
@@ -58,18 +61,18 @@ $juros_label = isset($config_multa_juros['juros_padrao']) ? number_format($confi
         }
 
         #tabela_wrapper .dataTables_info {
-            font-size: 12px !important;
+            font-size: 10px !important;
             padding-top: 5px !important;
             line-height: 1.4 !important;
         }
 
         #tabela_wrapper .dataTables_paginate {
-            font-size: 12px !important;
+            font-size: 10px !important;
             padding-top: 5px !important;
         }
 
         #tabela_wrapper .dataTables_paginate .paginate_button {
-            font-size: 12px !important;
+            font-size: 10px !important;
             padding: 3px 8px !important;
             margin: 0 2px !important;
             min-width: 25px !important;
@@ -80,7 +83,7 @@ $juros_label = isset($config_multa_juros['juros_padrao']) ? number_format($confi
 
         #tabela_wrapper .dataTables_paginate .paginate_button.current,
         #tabela_wrapper .dataTables_paginate .paginate_button:hover {
-            font-size: 12px !important;
+            font-size: 10px !important;
         }
 
         #tabela_wrapper .row {
@@ -110,11 +113,17 @@ $juros_label = isset($config_multa_juros['juros_padrao']) ? number_format($confi
 </head>
 
 <body>
-    <div class="row mb-3 align-items-center">
-        <div class="col-md-4 col-sm-12 mb-2 mb-md-0">
-            <a onclick="inserir()" href="#" class="btn btn-primary mr-3 btn-sm"><span class="fa fa-plus"></span> Conta</a>
 
-            <li class="dropdown head-dpdn2" style="display: inline-block;" id="btn-deletar">
+    <div class="row mb-3 align-items-center d-flex flex-wrap">
+
+        <!-- BOTÕES DA ESQUERDA -->
+        <div class="col-md-4 col-sm-12 d-flex align-items-center flex-wrap gap-2 mb-2">
+
+            <a onclick="inserir()" href="#" class="btn btn-primary btn-sm">
+                <span class="fa fa-plus"></span> Conta
+            </a>
+
+            <li class="dropdown head-dpdn2" id="btn-deletar" style="display:inline-block;">
                 <a href="#" class="btn btn-danger dropdown-toggle btn-sm" data-toggle="dropdown">
                     <span class="fa-solid fa-trash-can"></span> Excluir Conta
                 </a>
@@ -131,41 +140,76 @@ $juros_label = isset($config_multa_juros['juros_padrao']) ? number_format($confi
                 </ul>
             </li>
 
-            <li class="dropdown head-dpdn2" style="display: inline-block;" id="btn-baixar">
+            <li class="dropdown head-dpdn2" id="btn-baixar" style="display:inline-block;">
                 <a href="#" class="btn btn-success dropdown-toggle btn-sm" data-toggle="dropdown">
                     <span class="fa-solid fa-check-square"></span> Baixar Conta
                 </a>
                 <ul class="dropdown-menu">
                     <li>
                         <div class="notification_desc2">
-                            <p class="mb-1">Confirmar Baixa das contas selecionadas?
+                            <p class="mb-1">Confirmar Baixa?
                                 <a href="#" onclick="baixarSel()" class="btn btn-success btn-xs">
                                     <span class="fa fa-check"></span> Sim, Baixar
                                 </a>
                             </p>
-                            <p>
-                                <strong>Total das Contas:</strong>
-                                <span id="totalContas"></span>
-                            </p>
+                            <p><strong>Total:</strong> <span id="totalContas"></span></p>
                         </div>
                     </li>
                 </ul>
             </li>
 
         </div>
-        <div class="col-md-8 col-sm-12">
-            <div class="row align-items-center">
-                <div class="col-md-2 col-sm-6 mb-2 mb-md-0"><label class="small text-muted mb-1">De:</label><input type="date" name="dataInicial" id="dataInicial" class="form-control form-control-sm" value="" onchange="buscarData()"></div>
-                <div class="col-md-2 col-sm-6 mb-2 mb-md-0"><label class="small text-muted mb-1">Até:</label><input type="date" name="dataFinal" id="dataFinal" class="form-control form-control-sm" value="" onchange="buscarData()"></div>
-                <div class="col-md-2 col-sm-6 mb-2 mb-md-0"><label class="small text-muted mb-1">Status:</label><select name="pago" id="pago" class="form-control form-control-sm">
-                        <option value="">Todas</option>
-                        <option value="Sim">Pagas</option>
-                        <option value="Não">Pendentes</option>
-                    </select></div>
-                <div class="col-md-3 col-sm-12 mb-2 mb-md-0"><label class="small text-muted mb-1">&nbsp;</label><span class="d-inline-flex align-items-center gap-1 text-nowrap filtro-rapido"><a href="#" onclick="trocarData('mes')" class="text-decoration-none small">Mês</a><span class="text-muted">|</span><a href="#" onclick="trocarData('hoje')" class="text-decoration-none small">Hoje</a><span class="text-muted">|</span><a href="#" onclick="trocarData('ontem')" class="text-decoration-none small">Ontem</a><span class="text-muted">|</span><a href="#" onclick="trocarData('amanha')" class="text-decoration-none small">Amanhã</a></span></div>
+
+        <!-- FORM + FILTROS + BOTÃO PDF -->
+        <form action="rel/rel_receber_class.php" method="post" target="_blank"
+            class="col-md-8 col-sm-12 d-flex align-items-end flex-wrap gap-2">
+
+            <div class="col-md-3 col-sm-6 mb-2">
+                <label class="small text-muted mb-1">De:</label>
+                <input type="date" name="dataInicial" id="dataInicial"
+                    class="form-control form-control-sm" onchange="buscarData()">
             </div>
-        </div>
+
+            <div class="col-md-3 col-sm-6 mb-2">
+                <label class="small text-muted mb-1">Até:</label>
+                <input type="date" name="dataFinal" id="dataFinal"
+                    class="form-control form-control-sm" onchange="buscarData()">
+            </div>
+
+            <div class="col-md-3 col-sm-6 mb-2">
+                <label class="small text-muted mb-1">Status:</label>
+                <select name="pago" id="pago" class="form-control form-control-sm">
+                    <option value="">Todas</option>
+                    <option value="pagas">Pagas</option>
+                    <option value="pendentes">Pendentes</option>
+                    <option value="vencidas">Vencidas</option>
+                </select>
+            </div>
+
+            <div class="col-md-2 col-sm-12 mb-2">
+                <label class="small text-muted mb-1">&nbsp;</label>
+                <span class="d-inline-flex align-items-center gap-1 text-nowrap filtro-rapido">
+                    <a href="#" onclick="trocarData('mes')" class="text-decoration-none small">Mês</a>
+                    <span class="text-muted">|</span>
+                    <a href="#" onclick="trocarData('hoje')" class="text-decoration-none small">Hoje</a>
+                    <span class="text-muted">|</span>
+                    <a href="#" onclick="trocarData('ontem')" class="text-decoration-none small">Ontem</a>
+                    <span class="text-muted">|</span>
+                    <a href="#" onclick="trocarData('amanha')" class="text-decoration-none small">Amanhã</a>
+                </span>
+            </div>
+            <input type="hidden" name="tipo_data" id="tipo_data_rel" value="vencimento">
+            <!-- BOTÃO PDF SEMPRE NO CANTO DIREITO -->
+            <div class="ms-auto mb-2">
+                <button type="submit" class="btn btn-danger btn-sm" title="Relatório PDF">
+                    <i class="fa-solid fa-file-pdf"></i>
+                </button>
+            </div>
+
+        </form>
+
     </div>
+
     <div class="bs-example widget-shadow table-primary" id="listar"></div>
     <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
     <script type="text/javascript">
@@ -301,7 +345,11 @@ $juros_label = isset($config_multa_juros['juros_padrao']) ? number_format($confi
                     </div>
                     <div id="mensagem" class="centro-pequeno"></div>
                 </div>
-                <div class="modal-footer centro"><button type="submit" class="btn btn-primary">Salvar</button></div>
+                <div class="modal-footer centro">
+                    <button type="submit" class="btn btn-primary" id="btn_salvar">
+                        Salvar
+                    </button>
+                </div>
             </form>
         </div>
     </div>
@@ -765,27 +813,32 @@ $juros_label = isset($config_multa_juros['juros_padrao']) ? number_format($confi
             $('#dataInicial').val(dataInicioMes);
             $('#dataFinal').val(dataFimMes);
             $('#tipoData').val('lancamento');
+            $('#tipo_data_rel').val('lancamento');
         }
         if (tipo == 'hoje') {
             $('#dataInicial').val(dataHoje);
             $('#dataFinal').val(dataHoje);
             $('#tipoData').val('lancamento');
+            $('#tipo_data_rel').val('lancamento');
         }
         if (tipo == 'ontem') {
             $('#dataInicial').val(dataOntem);
             $('#dataFinal').val(dataOntem);
             $('#tipoData').val('lancamento');
+            $('#tipo_data_rel').val('lancamento');
         }
         if (tipo == 'amanha') {
             $('#dataInicial').val(dataAmanha);
             $('#dataFinal').val(dataAmanha);
             $('#tipoData').val('lancamento');
+            $('#tipo_data_rel').val('lancamento');
         }
         buscarData();
     }
 
     function porData(tipo) {
         $('#tipoData').val(tipo);
+        $('#tipo_data_rel').val(tipo);
         if (tipo == 'vencimento') {
             $('#pago').val('Não');
         }

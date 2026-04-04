@@ -24,6 +24,32 @@ body {
   text-align: right;
 }
 
+.btn-receber {
+  background: #00c292 !important;
+  /* verde */
+  color: white !important;
+  padding: 10px;
+  border-radius: 50%;
+}
+
+.btn-pagar {
+  background: #e74c3c !important;
+  /* vermelho */
+  color: white !important;
+  padding: 10px;
+  border-radius: 50%;
+}
+
+.margens {
+  margin-left: 80px;
+  margin-top: 20px;
+}
+
+/* Remove o fundo azul padrão */
+.nofitications-dropdown li a {
+  background: transparent !important;
+}
+
 /* ✅ Estilos para lista de arquivos */
 #listar-arquivos .arquivo-item {
   background: #f8f9fa;
@@ -173,7 +199,7 @@ body {
   color: #363636;
 }
 
-/* ✅ Links de filtro - TODOS os estados sem sublinhado */
+/* Links de filtro - TODOS os estados sem sublinhado */
 .filtro-rapido a,
 .filtro-rapido a:visited,
   .filtro-rapido a:active,
@@ -187,6 +213,21 @@ body {
 .filtro-rapido a:hover {
   font-weight: 900 !important;
   font-size: 10px;
+}
+
+/* 🔥 Ajuste REAL que resolve o problema do PDF */
+.filtro-rapido {
+  display: flex;
+  align-items: center;
+  /* alinha verticalmente com os inputs */
+  height: 30px;
+  /* mesma altura do input-sm */
+  line-height: 1;
+  /* evita esticar verticalmente */
+  padding: 0;
+  /* remove espaço extra */
+  margin-top: 6px;
+  /* alinha perfeitamente com os labels */
 }
 
 /* ✅ Reduz fonte dos inputs de data */

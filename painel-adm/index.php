@@ -280,53 +280,101 @@
             <div class="sticky-header header-section ">
                 <div class="header-left">
                     <!--toggle button start-->
-                    <button id="showLeftPush" data-toggle="collapse" data-target=".collapse"><i class="fa fa-bars"></i></button>
+                    <button title="Esconder/Mostrar Menu Lateral" id="showLeftPush" data-toggle="collapse" data-target=".collapse">
+                        <i class="fa fa-bars"></i>
+                    </button>
                     <!--toggle button end-->
+                    <?php
+                    $query = $pdo->query("SELECT * FROM receber WHERE data_pagamento IS NULL ORDER BY data_vencimento");
+                    $res = $query->fetchAll(PDO::FETCH_ASSOC);
+                    $linhas = count($res);
+                    $linhasF = str_pad($linhas, 2, '0', STR_PAD_LEFT);
+                    ?>
                     <div class="profile_details_left"><!--notifications of menu start -->
                         <ul class="nofitications-dropdown">
                             <li class="dropdown head-dpdn">
-                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><i class="fa fa-envelope"></i><span class="badge">4</span></a>
-                                <ul class="dropdown-menu">
+                                <a href="#" title="Contas à receber" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                    <i class="fa-solid fa-money-bills btn-receber"></i>
+                                    <span class="badge"><?php echo $linhas; ?></span>
+                                </a>
+                                <ul class="dropdown-menu" style="background: beige;">
                                     <li>
                                         <div class="notification_header">
-                                            <h3>You have 3 new messages</h3>
+                                            <h3>Você possui <strong><?php echo $linhasF; ?></strong> conta(s) à receber</h3>
                                         </div>
                                     </li>
-                                    <li><a href="#">
-                                            <div class="user_img"><img src="images/1.jpg" alt=""></div>
-                                            <div class="notification_desc">
-                                                <p>Lorem ipsum dolor amet</p>
-                                                <p><span>1 hour ago</span></p>
-                                            </div>
-                                            <div class="clearfix"></div>
-                                        </a></li>
-                                    <li class="odd"><a href="#">
-                                            <div class="user_img"><img src="images/4.jpg" alt=""></div>
-                                            <div class="notification_desc">
-                                                <p>Lorem ipsum dolor amet </p>
-                                                <p><span>1 hour ago</span></p>
-                                            </div>
-                                            <div class="clearfix"></div>
-                                        </a></li>
-                                    <li><a href="#">
-                                            <div class="user_img"><img src="images/3.jpg" alt=""></div>
-                                            <div class="notification_desc">
-                                                <p>Lorem ipsum dolor amet </p>
-                                                <p><span>1 hour ago</span></p>
-                                            </div>
-                                            <div class="clearfix"></div>
-                                        </a></li>
-                                    <li><a href="#">
-                                            <div class="user_img"><img src="images/2.jpg" alt=""></div>
-                                            <div class="notification_desc">
-                                                <p>Lorem ipsum dolor amet </p>
-                                                <p><span>1 hour ago</span></p>
-                                            </div>
-                                            <div class="clearfix"></div>
-                                        </a></li>
+                                    <?php
+                                    $query = $pdo->query("SELECT * FROM receber WHERE data_pagamento IS NULL ORDER BY data_vencimento ASC LIMIT 5");
+                                    $res = $query->fetchAll(PDO::FETCH_ASSOC);
+                                    for ($i = 0; $i < count($res); $i++) {
+                                    ?>
+                                        <li>
+                                            <a href="#">
+                                                <div class="notification_desc">
+                                                    <p>
+                                                        <span class="text-danger" style="color: red !important; font-weight: bold;">
+                                                            <?php echo 'R$ ' . number_format($res[$i]['valor'], 2, ',', '.'); ?>
+                                                        </span> |
+                                                        <?php echo $res[$i]['descricao']; ?>
+                                                        <!-- <?php echo date('d/m/Y', strtotime($res[$i]['data_vencimento'])); ?> -->
+                                                    </p>
+                                                </div>
+                                                <div class="clearfix"></div>
+                                            </a>
+                                        </li>
+                                    <?php } ?>
                                     <li>
                                         <div class="notification_bottom">
-                                            <a href="#">See all messages</a>
+                                            <a href="index.php?pagina=receber">Ver todas as contas</a>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                        <div class="clearfix"> </div>
+                    </div>
+
+                    <div class="profile_details_left"><!--notifications of menu start -->
+                        <?php
+                        $query = $pdo->query("SELECT * FROM pagar WHERE data_pagamento IS NULL ORDER BY data_vencimento ASC");
+                        $resP = $query->fetchAll(PDO::FETCH_ASSOC);
+                        $linhasP = count($resP);
+                        $linhasPF = str_pad($linhasP, 2, '0', STR_PAD_LEFT);
+                        ?>
+                        <ul class="nofitications-dropdown">
+                            <li class="dropdown head-dpdn">
+                                <a href="#" title="Contas à pagar" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                    <i class="fa-solid fa-money-bills btn-pagar"></i>
+                                    <span class="badge" style="background:red"><?php echo $linhasP; ?></span>
+                                </a>
+                                <ul class="dropdown-menu" style="background: beige;">
+                                    <li>
+                                        <div class="notification_header">
+                                            <h3>Você possui <strong><?php echo $linhasPF; ?></strong> conta(s) à pagar</h3>
+                                        </div>
+                                    </li>
+                                    <?php
+                                    $query = $pdo->query("SELECT * FROM pagar WHERE data_pagamento IS NULL ORDER BY data_vencimento ASC LIMIT 5");
+                                    $resP = $query->fetchAll(PDO::FETCH_ASSOC);
+                                    for ($i = 0; $i < count($resP); $i++) {
+                                    ?>
+                                        <li>
+                                            <a href="#">
+                                                <div class="notification_desc">
+                                                    <p>
+                                                        <span class="text-danger" style="color: red !important; font-weight: bold;">
+                                                            <?php echo 'R$ ' . number_format($resP[$i]['valor'], 2, ',', '.'); ?>
+                                                        </span> |
+                                                        <?php echo $resP[$i]['descricao']; ?>
+                                                    </p>
+                                                </div>
+                                                <div class="clearfix"></div>
+                                            </a>
+                                        </li>
+                                    <?php } ?>
+                                    <li>
+                                        <div class="notification_bottom">
+                                            <a href="index.php?pagina=pagar">Ver todas as contas</a>
                                         </div>
                                     </li>
                                 </ul>
@@ -336,6 +384,9 @@
                     </div>
 
                 </div>
+
+
+
                 <div class="header-right">
 
                     <div class="profile_details">
@@ -754,6 +805,13 @@
                             <div class="col-md-2">
                                 <img src="../../img/<?php echo $logo_rel; ?>" alt="Logotipo do Relatório" style="width: 80px;"
                                     id="target-logo-rel">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="marca_dagua_rel">Marca D'Água(Rel)</label>
+                                <select name="marca_dagua_rel" id="marca_dagua_rel" class="form-control">
+                                    <option value="sim"<?php if ($marca_dagua == 'sim') { ?> selected <?php } ?>>Sim</option>
+                                    <option value="nao"<?php if ($marca_dagua == 'nao') { ?> selected <?php } ?>>Não</option>
+                                </select>
                             </div>
                         </div>
                         <div id="msg-config" class="centro"></div>
