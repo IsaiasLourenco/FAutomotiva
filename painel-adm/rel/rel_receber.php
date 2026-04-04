@@ -1,5 +1,8 @@
 <?php
-require_once __DIR__ . '/../../conexao.php';
+if (!isset($pdo)) {
+    require_once __DIR__ . '/../../conexao.php';
+}
+
 $dataInicial = $_GET['dataInicial'] ?? '';
 $dataFinal = $_GET['dataFinal'] ?? '';
 $pago = $_GET['pago'] ?? '';
@@ -13,7 +16,7 @@ if ($pago === 'pagas') {
     $texto_pago = 'Contas Pagas';
 } elseif ($pago === 'pendentes') {
     $texto_pago = 'Contas Pendentes';
-} else if ($pago === 'vencidas') {
+} elseif ($pago === 'vencidas') {
     $texto_pago = 'Contas Vencidas';
 } else {
     $texto_pago = 'Todas';
@@ -30,21 +33,25 @@ if ($tipo_data === 'vencimento') {
     $texto_tipo_data = 'Data de Vencimento';
 }
 
-// ✅ Data completa por extenso
 setlocale(LC_TIME, 'pt_BR', 'ptb', 'pt_BR.UTF-8');
 $data_extenso = strftime('%A, %d de %B de %Y', strtotime(date('Y-m-d')));
 $data_extenso = ucfirst($data_extenso);
-?>
 
+$config = $pdo->query("SELECT * FROM configuracoes LIMIT 1")->fetch(PDO::FETCH_ASSOC);
+$nome_sistema = $config['nome_sistema'] ?? 'Sistema';
+$endereco_sistema = $config['endereco_sistema'] ?? '';
+$telefone_sistema = $config['telefone_sistema'] ?? '';
+$instagram_sistema = $config['instagram_sistema'] ?? '';
+$desenvolvedor = $config['desenvolvedor'] ?? '';
+$site_dev = $config['site_dev'] ?? '';
+?>
 <!DOCTYPE html>
 <html lang="pt-br">
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Relatório de Contas a Receber</title>
     <style>
-        /* ✅ RESET E BASE */
         * {
             margin: 0;
             padding: 0;
@@ -53,18 +60,17 @@ $data_extenso = ucfirst($data_extenso);
 
         body {
             font-family: DejaVu Sans, sans-serif;
-            font-size: 10px;
+            font-size: 9px;
             color: #2c3e50;
-            line-height: 1.5;
-            background: #ffffff;
+            line-height: 1.4;
+            padding: 20px;
         }
 
-        /* ✅ CABEÇALHO PRINCIPAL */
         .header {
             width: 100%;
-            margin-bottom: 20px;
-            border-bottom: 3px solid #2c3e50;
-            padding-bottom: 15px;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #2c3e50;
+            padding-bottom: 10px;
         }
 
         .header-top {
@@ -75,14 +81,13 @@ $data_extenso = ucfirst($data_extenso);
 
         .header-logo {
             display: table-cell;
-            width: 180px;
+            width: 400px;
             vertical-align: middle;
         }
 
         .header-logo img {
-            max-width: 180px;
-            max-height: 70px;
-            object-fit: contain;
+            max-width: 200px;
+            max-height: 80px;
         }
 
         .header-title {
@@ -93,120 +98,96 @@ $data_extenso = ucfirst($data_extenso);
         }
 
         .header-title h1 {
-            font-size: 18px;
+            font-size: 16px;
             color: #2c3e50;
-            margin-bottom: 5px;
+            margin-bottom: 3px;
             text-transform: uppercase;
-            letter-spacing: 1.5px;
             font-weight: bold;
         }
 
         .header-title p {
-            font-size: 10px;
-            color: #7f8c8d;
-            font-style: italic;
+            font-size: 9px;
+            color: #1b474a;
         }
 
         .header-date {
             text-align: center;
             font-size: 9px;
-            color: #424a44;
+            color: #7f8c8d;
             font-style: italic;
-            margin-top: 8px;
-            padding-top: 8px;
+            margin-top: 5px;
+            padding-top: 5px;
             border-top: 1px dashed #bdc3c7;
         }
 
-        .marca {
-            position: fixed;
-            left: 50;
-            top: 100;
-            width: 80%;
-            opacity: 8%;
+        .header-date-fix {
+            font-weight: bold;
+            color: #2c3e50;
         }
 
-        /* ✅ BOX DE FILTROS */
-        .filters-box {
+        .filters {
             width: 100%;
-            margin-bottom: 20px;
-            background: linear-gradient(135deg, #ecf0f1 0%, #d5dbdb 100%);
-            padding: 12px;
+            margin-bottom: 15px;
+            background: #ecf0f1;
+            padding: 10px;
             border-left: 4px solid #2c3e50;
-            border-radius: 0 5px 5px 0;
-        }
-
-        .filters-box table {
-            width: 100%;
-            border: none;
-        }
-
-        .filters-box td {
-            padding: 4px 8px;
-            border: none;
             font-size: 9px;
         }
 
-        .filters-box strong {
+        .filters table {
+            width: 100%;
+            border: none;
+        }
+
+        .filters td {
+            padding: 4px 6px;
+            border: none;
+        }
+
+        .filters strong {
             color: #2c3e50;
             font-weight: bold;
             min-width: 100px;
             display: inline-block;
         }
 
-        .filters-box span {
-            color: #34495e;
-        }
-
-        /* ✅ TABELA PRINCIPAL */
+        /* ✅ TABELA - CSS SIMPLIFICADO PARA DOMPDF */
         table.relatorio {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 15px;
+            border: 1px solid #2c3e50;
         }
 
         table.relatorio thead th {
-            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-            color: #ffffff;
-            padding: 10px 6px;
+            background-color: #2c3e50;
+            /* ✅ COR SÓLIDA EM VEZ DE GRADIENTE */
+            color: #ffffff !important;
+            /* ✅ FORÇAR COR BRANCA */
+            padding: 8px 5px;
             text-align: left;
-            font-size: 9px;
+            font-size: 8px;
             text-transform: uppercase;
-            letter-spacing: 0.8px;
             border: 1px solid #2c3e50;
             font-weight: bold;
         }
 
-        table.relatorio thead th:first-child {
-            border-top-left-radius: 5px;
-        }
-
-        table.relatorio thead th:last-child {
-            border-top-right-radius: 5px;
-        }
-
         table.relatorio tbody td {
-            padding: 8px 6px;
+            padding: 6px 5px;
             border: 1px solid #d5dbdb;
             font-size: 9px;
-            vertical-align: middle;
         }
 
         table.relatorio tbody tr:nth-child(even) {
-            background: #f8f9fa;
+            background-color: #f8f9fa;
         }
 
-        table.relatorio tbody tr:nth-child(odd) {
-            background: #ffffff;
-        }
-
-        /* ✅ COLUNAS ESPECÍFICAS */
         .col-descricao {
-            width: 28%;
+            width: 25%;
         }
 
         .col-paciente {
-            width: 22%;
+            width: 20%;
         }
 
         .col-vencimento {
@@ -224,258 +205,236 @@ $data_extenso = ucfirst($data_extenso);
         }
 
         .col-valor {
-            width: 10%;
+            width: 12%;
             text-align: right;
+            font-weight: bold;
         }
 
         .col-subtotal {
-            width: 10%;
+            width: 13%;
             text-align: right;
             font-weight: bold;
         }
 
-        /* ✅ STATUS */
         .status-pago {
             color: #27ae60;
             font-weight: bold;
-            background: #d5f4e6;
-            padding: 2px 6px;
-            border-radius: 3px;
+            background-color: #d5f4e6;
+            padding: 3px 8px;
             display: inline-block;
         }
 
         .status-pendente {
             color: #e74c3c;
             font-weight: bold;
-            background: #fadbd8;
-            padding: 2px 6px;
-            border-radius: 3px;
+            background-color: #fadbd8;
+            padding: 3px 8px;
             display: inline-block;
         }
 
-        .status-vencido {
-            color: #e67e22;
-            font-weight: bold;
-            background: #fdebd0;
-            padding: 2px 6px;
-            border-radius: 3px;
-            display: inline-block;
-        }
-
-        /* ✅ RODAPÉ DA TABELA (TOTAIS) */
+        /* ✅ RODAPÉ DA TABELA - COR SÓLIDA */
         table.relatorio tfoot td {
-            background: #2c3e50;
-            color: #ffffff;
+            background-color: #2c3e50;
+            /* ✅ COR SÓLIDA */
+            color: #ffffff !important;
+            /* ✅ FORÇAR BRANCO */
             font-weight: bold;
-            padding: 10px 6px;
+            padding: 8px 5px;
             border: 1px solid #2c3e50;
             font-size: 10px;
         }
 
-        table.relatorio tfoot td:first-child {
-            border-bottom-left-radius: 5px;
-        }
-
-        table.relatorio tfoot td:last-child {
-            border-bottom-right-radius: 5px;
-        }
-
-        .total-label {
+        .total-destaque {
+            background-color: #27ae60 !important;
+            /* ✅ COR SÓLIDA VERDE */
+            font-size: 11px !important;
             text-align: right;
-            background: #34495e !important;
         }
 
-        .total-valor {
-            background: linear-gradient(135deg, #27ae60 0%, #229954 100%) !important;
-            font-size: 12px !important;
-            text-align: right;
-            padding: 12px 6px !important;
-        }
-
-        /* ✅ RODAPÉ DO SISTEMA */
         .footer-sistema {
             width: 100%;
-            margin-top: 30px;
-            padding: 15px;
-            border-top: 3px solid #2c3e50;
-            background: linear-gradient(135deg, #f8f9fa 0%, #ecf0f1 100%);
+            margin-top: 25px;
+            padding: 15px 0;
+            border-top: 2px solid #2c3e50;
+            background-color: #f8f9fa;
             text-align: center;
-            page-break-inside: avoid;
+            font-size: 8px;
+            color: #555;
         }
 
         .footer-nome {
-            font-size: 11px;
+            font-size: 10px;
             font-weight: bold;
             color: #2c3e50;
-            margin-bottom: 5px;
+            margin-bottom: 4px;
             text-transform: uppercase;
-            letter-spacing: 1px;
         }
 
         .footer-endereco {
-            font-size: 9px;
-            color: #454c63;
-            margin-bottom: 8px;
-            line-height: 1.4;
+            font-size: 8px;
+            color: #1b6e74;
+            margin-bottom: 6px;
         }
 
         .footer-contato {
-            margin: 8px 0;
-            font-size: 9px;
+            margin: 5px 0;
+            font-size: 8px;
         }
 
         .footer-contato a {
-            color: #27ae60;
+            color: #0ca44b;
             text-decoration: none;
             font-weight: bold;
-            margin: 0 10px;
+            margin: 0 8px;
         }
 
         .footer-instagram {
             color: #E1306C !important;
         }
 
-
-        .footer-labelDev {
-            color: #11204f;
-            font-size: 8px;
-        }
-
         .footer-dev {
-            margin-top: 15px;
-            padding-top: 10px;
+            margin-top: 10px;
+            padding-top: 8px;
             border-top: 1px dashed #bdc3c7;
-            font-size: 8px;
-            color: #4d5f94;
+            font-size: 7px;
+            color: #1e3536;
         }
 
         .footer-dev a {
-            color: #306ee1;
+            color: #1458d7;
             text-decoration: none;
             font-weight: bold;
         }
 
         .footer-data {
-            margin-top: 8px;
+            margin-top: 5px;
             font-size: 7px;
-            color: #344037;
+            color: #14232d;
             font-style: italic;
-        }
-
-        /* ✅ UTILITÁRIOS */
-        .text-right {
-            text-align: right;
-        }
-
-        .text-center {
-            text-align: center;
-        }
-
-        .text-left {
-            text-align: left;
-        }
-
-        .font-bold {
-            font-weight: bold;
-        }
-
-        .text-muted {
-            color: #95a5a6;
-        }
-
-        /* ✅ VALORES MONETÁRIOS */
-        .valor {
-            font-family: 'Courier New', monospace;
-            font-weight: 600;
-        }
-
-        .valor-positivo {
-            color: #27ae60;
-        }
-
-        .valor-negativo {
-            color: #e74c3c;
         }
     </style>
 </head>
 
 <body>
-    <?php
-        if ($marca_dagua == 'Sim') { ?>
-            <img class="marca" src="<?php echo $url_sistema ?>img/logo.png" alt="Marca D'Água">
-        <?php } ?>
-    ?>
-    <!-- Cabeçalho -->
-    <div class="header">
-        <div class="header-top">
-            <div class="header-logo">
-                <img src="..." alt="Logo">
+    <div class="content-wrapper">
+        <div class="header">
+            <div class="header-top">
+                <div class="header-logo">
+                    <img src="C:/xampp/htdocs/OdontoClinic/img/Logo.png" alt="Logotipo">
+                </div>
+                <div class="header-title">
+                    <h1>Relatório de Contas a Receber</h1>
+                    <p><?php echo $texto_pago; ?> • <?php echo $texto_tipo_data; ?></p>
+                </div>
             </div>
-            <div class="header-title">
-                <h1>Relatório de Contas a Receber</h1>
-                <p>Contas Pagas • Data de Lançamento</p>
+            <div class="header-date">
+                <span class="header-date-fix">Gerado em: </span><strong><?php echo $data_extenso; ?></strong>
             </div>
         </div>
-        <div class="header-date">
-            Gerado em: Sábado, 04 de abril de 2026
+        <div class="filters">
+            <table>
+                <tr>
+                    <td><strong>Período:</strong></td>
+                    <td><?php echo !empty($dataInicialF) ? $dataInicialF : '...' ?> até <?php echo !empty($dataFinalF) ? $dataFinalF : '...' ?></td>
+                </tr>
+                <tr>
+                    <td><strong>Status:</strong></td>
+                    <td><?php echo $texto_pago; ?></td>
+                </tr>
+                <tr>
+                    <td><strong>Tipo de Data:</strong></td>
+                    <td><?php echo $texto_tipo_data; ?></td>
+                </tr>
+            </table>
         </div>
-    </div>
-
-    <!-- Filtros -->
-    <div class="filters-box">
-        <table>
-            <tr>
-                <td><strong>Período:</strong></td>
-                <td><span>01/04/2026 até 30/04/2026</span></td>
-            </tr>
-            <tr>
-                <td><strong>Status:</strong></td>
-                <td><span>Contas Pagas</span></td>
-            </tr>
-            <tr>
-                <td><strong>Tipo de Data:</strong></td>
-                <td><span>Data de Lançamento</span></td>
-            </tr>
+        <table class="relatorio">
+            <thead>
+                <tr>
+                    <th class="col-descricao">Descrição</th>
+                    <th class="col-paciente">Paciente</th>
+                    <th class="col-vencimento">Vencimento</th>
+                    <th class="col-pago">Pago em</th>
+                    <th class="col-forma">Forma Pgto</th>
+                    <th class="col-valor">Valor</th>
+                    <th class="col-subtotal">Subtotal</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php
+                try {
+                    $coluna = match ($tipo_data) {
+                        'lancamento' => 'data_lancamento',
+                        'pagamento' => 'data_pagamento',
+                        default => 'data_vencimento'
+                    };
+                    $sql = "SELECT r.*, p.nome as paciente_nome, fp.nome as forma_nome 
+                            FROM receber r
+                            LEFT JOIN pacientes p ON r.paciente = p.id
+                            LEFT JOIN forma_pagamento fp ON r.forma_pagamento = fp.id
+                            WHERE $coluna >= :ini AND $coluna <= :fim";
+                    if ($pago === 'pagas') {
+                        $sql .= " AND r.data_pagamento IS NOT NULL AND r.data_pagamento != '' AND r.data_pagamento != '0000-00-00'";
+                    } elseif ($pago === 'pendentes') {
+                        $sql .= " AND (r.data_pagamento IS NULL OR r.data_pagamento = '' OR r.data_pagamento = '0000-00-00')";
+                    }
+                    $sql .= " ORDER BY r.id DESC";
+                    $stmt = $pdo->prepare($sql);
+                    $stmt->execute([':ini' => $dataInicial, ':fim' => $dataFinal]);
+                    $contas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                    $total_pendentes = 0;
+                    $total_pago = 0;
+                    foreach ($contas as $c):
+                        $pago_status = (!empty($c['data_pagamento']) && $c['data_pagamento'] != '0000-00-00') ? 'pago' : 'pendente';
+                        $valorF = 'R$ ' . number_format($c['valor'] ?? 0, 2, ',', '.');
+                        $subtotalF = 'R$ ' . number_format($c['subtotal'] ?? $c['valor'] ?? 0, 2, ',', '.');
+                        $vencF = (!empty($c['data_vencimento']) && $c['data_vencimento'] != '0000-00-00') ? date('d/m/Y', strtotime($c['data_vencimento'])) : '-';
+                        $pgtoF = (!empty($c['data_pagamento']) && $c['data_pagamento'] != '0000-00-00') ? date('d/m/Y', strtotime($c['data_pagamento'])) : 'Não pago';
+                        if ($pago_status === 'pago') {
+                            $total_pago += $c['subtotal'] ?? $c['valor'];
+                            $classe = 'status-pago';
+                        } else {
+                            $total_pendentes += $c['valor'];
+                            $classe = 'status-pendente';
+                        }
+                ?>
+                        <tr>
+                            <td class="col-descricao"><?php echo htmlspecialchars($c['descricao'] ?? '') ?></td>
+                            <td class="col-paciente"><?php echo htmlspecialchars($c['paciente_nome'] ?? '') ?></td>
+                            <td class="col-vencimento" style="text-align: center;"><?php echo $vencF ?></td>
+                            <td class="col-pago" style="text-align: center;"><span class="<?php echo $classe ?>"><?php echo $pgtoF ?></span></td>
+                            <td class="col-forma"><?php echo htmlspecialchars($c['forma_nome'] ?? '') ?></td>
+                            <td class="col-valor"><?php echo $valorF ?></td>
+                            <td class="col-subtotal"><?php echo $subtotalF ?></td>
+                        </tr>
+                <?php endforeach;
+                } catch (Exception $e) {
+                    echo '<tr><td colspan="7" style="text-align:center;color:#e74c3c;padding:20px;">Erro: ' . htmlspecialchars($e->getMessage()) . '</td></tr>';
+                } ?>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="5" style="text-align: right; font-weight: bold;">TOTAL GERAL:</td>
+                    <td colspan="2" class="total-destaque" style="text-align: right; font-size: 12px; font-weight: bold;">
+                        R$ <?php echo number_format($total_geral ?? 0, 2, ',', '.'); ?>
+                    </td>
+                </tr>
+            </tfoot>
         </table>
-    </div>
-
-    <!-- Tabela -->
-    <table class="relatorio">
-        <thead>
-            <tr>
-                <th class="col-descricao">Descrição</th>
-                <th class="col-paciente">Paciente</th>
-                <th class="col-vencimento">Vencimento</th>
-                <th class="col-pago">Pago em</th>
-                <th class="col-forma">Forma Pgto</th>
-                <th class="col-valor">Valor</th>
-                <th class="col-subtotal">Subtotal</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- Seus dados aqui -->
-        </tbody>
-        <tfoot>
-            <tr>
-                <td colspan="5" class="total-label">TOTAL GERAL:</td>
-                <td colspan="2" class="total-valor">R$ 0,00</td>
-            </tr>
-        </tfoot>
-    </table>
-
-    <!-- Rodapé -->
-    <div class="footer-sistema">
-        <div class="footer-nome">FG Odontologia e Estética</div>
-        <div class="footer-endereco">Rua São José, 20 - Vila Júlia - Mogi Guaçu/SP</div>
-        <div class="footer-contato">
-            <a href="tel:...">📱 (19) 38916-797</a>
-            <a href="..." class="footer-instagram">📷 Instagram</a>
-        </div>
-        <div class="footer-dev">
-            <span class="footer-labelDev">Desenvolvido por: </span><a href="https://vetor256.com">Vetor256</a>
-        </div>
-        <div class="footer-data">
-            Relatório gerado em 04/04/2026 às 09:44:55
+        <div class="footer-sistema">
+            <div class="footer-nome"><?php echo htmlspecialchars($nome_sistema); ?></div>
+            <div class="footer-endereco"><?php echo htmlspecialchars($endereco_sistema); ?></div>
+            <div class="footer-contato">
+                <a href="tel:<?php echo preg_replace('/[^0-9]/', '', $telefone_sistema); ?>">📱 <?php echo htmlspecialchars($telefone_sistema); ?></a>
+                <?php if (!empty($instagram_sistema)): ?>
+                    <a href="<?php echo htmlspecialchars($instagram_sistema); ?>" class="footer-instagram" target="_blank">📷 Instagram</a>
+                <?php endif; ?>
+            </div>
+            <div class="footer-dev">
+                Desenvolvido por: <a href="<?php echo htmlspecialchars($site_dev ?: '#'); ?>" target="_blank"><?php echo htmlspecialchars($desenvolvedor ?: 'Sua Empresa'); ?></a>
+            </div>
+            <div class="footer-data">
+                Relatório gerado em <?php echo date('d/m/Y \à\s H:i:s'); ?>
+            </div>
         </div>
     </div>
 </body>

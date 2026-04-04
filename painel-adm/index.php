@@ -806,13 +806,6 @@
                                 <img src="../../img/<?php echo $logo_rel; ?>" alt="Logotipo do Relatório" style="width: 80px;"
                                     id="target-logo-rel">
                             </div>
-                            <div class="col-md-3">
-                                <label for="marca_dagua_rel">Marca D'Água(Rel)</label>
-                                <select name="marca_dagua_rel" id="marca_dagua_rel" class="form-control">
-                                    <option value="sim"<?php if ($marca_dagua == 'sim') { ?> selected <?php } ?>>Sim</option>
-                                    <option value="nao"<?php if ($marca_dagua == 'nao') { ?> selected <?php } ?>>Não</option>
-                                </select>
-                            </div>
                         </div>
                         <div id="msg-config" class="centro"></div>
                     </div>
