@@ -3,8 +3,8 @@ if (!isset($pdo)) {
     require_once __DIR__ . '/../../conexao.php';
 }
 
-$dataInicial = $_GET['dataInicial'] ?? '';
-$dataFinal = $_GET['dataFinal'] ?? '';
+$dataInicial = !empty($_GET['dataInicial']) ? $_GET['dataInicial'] : date('Y-m-01');
+$dataFinal   = !empty($_GET['dataFinal'])   ? $_GET['dataFinal']   : date('Y-m-t');
 $pago = $_GET['pago'] ?? '';
 $tipo_data = $_GET['tipo_data'] ?? 'vencimento';
 
@@ -32,12 +32,6 @@ if ($tipo_data === 'vencimento') {
 } else {
     $texto_tipo_data = 'Data de Vencimento';
 }
-
-// ✅ 4. Receber filtros do POST
-$dataInicial = $_POST['dataInicial'] ?? '';
-$dataFinal = $_POST['dataFinal'] ?? '';
-$pago = $_POST['pago'] ?? '';
-$tipo_data = $_POST['tipo_data'] ?? 'vencimento';
 
 // ✅ SE DATAS VAZIAS, USA MÊS ATUAL
 if (empty($dataInicial) || empty($dataFinal)) {
@@ -378,15 +372,19 @@ $contas = [];
                             FROM receber r
                             LEFT JOIN pacientes p ON r.paciente = p.id
                             LEFT JOIN forma_pagamento fp ON r.forma_pagamento = fp.id
-                            WHERE $coluna >= :ini AND $coluna <= :fim";
+                            WHERE $coluna IS NOT NULL
+                            AND $coluna BETWEEN :ini AND :fim";
 
                     if ($pago === 'pagas') {
-                        $sql .= " AND r.data_pagamento IS NOT NULL AND r.data_pagamento != '' AND r.data_pagamento != '0000-00-00'";
+                        $sql .= " AND r.data_pagamento IS NOT NULL";
                     } elseif ($pago === 'pendentes') {
-                        $sql .= " AND (r.data_pagamento IS NULL OR r.data_pagamento = '' OR r.data_pagamento = '0000-00-00')";
+                        $sql .= " AND r.data_pagamento IS NULL";
                     } elseif ($pago === 'vencidas') {
-                        $sql .= " AND r.data_vencimento < :hoje AND (r.data_pagamento IS NULL OR r.data_pagamento = '' OR r.data_pagamento = '0000-00-00')";
+                        $sql .= " AND r.data_vencimento < :hoje AND r.data_pagamento IS NULL";
                     }
+
+                    $dataInicial = !empty($dataInicial) ? $dataInicial : date('Y-m-01');
+                    $dataFinal   = !empty($dataFinal)   ? $dataFinal   : date('Y-m-t');
 
                     $sql .= " ORDER BY r.id DESC";
                     $stmt = $pdo->prepare($sql);

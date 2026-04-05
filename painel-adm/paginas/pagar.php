@@ -154,7 +154,7 @@ $juros_label = isset($config_multa_juros['juros_padrao'])
                 </ul>
             </li>
         </div>
-        <form action="rel/rel_receber_class.php" method="post" target="_blank"
+        <form action="rel/rel_pagar_class.php" method="post" target="_blank"
             class="col-md-8 col-sm-12 d-flex align-items-end flex-wrap gap-2">
 
             <div class="col-md-3 col-sm-6 mb-2">

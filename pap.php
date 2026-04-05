@@ -1,8 +1,8 @@
 <?php
 $tabela = 'receber';
-
 require_once("../../../conexao.php");
 
+// ✅ FUNÇÃO NECESSÁRIA PARA ESCAPAR STRINGS JAVASCRIPT
 function js_escape($str)
 {
     if ($str === null) return '';
@@ -15,10 +15,10 @@ $pago        = @$_POST['p3'] ?? '';
 $tipoData    = @$_POST['p4'] ?? '';
 
 // Normaliza valores
-if ($dataInicial === 'undefined' || $dataInicial === '') $dataInicial = '';
-if ($dataFinal === 'undefined' || $dataFinal === '') $dataFinal = '';
-if ($pago === 'undefined' || $pago === '') $pago = '';
-if ($tipoData === 'undefined' || $tipoData === '') $tipoData = 'vencimento';
+if ($dataInicial === 'undefined') $dataInicial = '';
+if ($dataFinal === 'undefined') $dataFinal = '';
+if ($pago === 'undefined') $pago = '';
+if ($tipoData === 'undefined') $tipoData = 'vencimento';
 
 $mapaColunas = [
     'vencimento'   => 'data_vencimento',
@@ -28,12 +28,12 @@ $mapaColunas = [
 $colunaData = $mapaColunas[$tipoData] ?? 'data_vencimento';
 $hoje = date('Y-m-d');
 
-// ✅ QUERY BASE
+// ✅ INICIALIZA QUERY
 $query = "SELECT * FROM $tabela WHERE 1=1";
 $params = [];
 
-// ✅ FILTRO DE PERÍODO (SÓ ADICIONA SE DATAS FOREM PREENCHIDAS)
-if (!empty($dataInicial) && !empty($dataFinal)) {
+// ✅ SÓ ADICIONA FILTRO DE DATA SE AMBAS FOREM PREENCHIDAS
+if (!empty($dataInicial) && $dataInicial !== '' && !empty($dataFinal) && $dataFinal !== '') {
     $query .= " AND $colunaData >= :data_inicial AND $colunaData <= :data_final";
     $params[':data_inicial'] = $dataInicial;
     $params[':data_final'] = $dataFinal;
@@ -41,14 +41,12 @@ if (!empty($dataInicial) && !empty($dataFinal)) {
 
 // ✅ FILTRO DE STATUS
 if ($pago === 'pagas') {
-    $query .= " AND data_pagamento IS NOT NULL";
+    $query .= " AND data_pagamento IS NOT NULL AND data_pagamento != '' AND data_pagamento != '0000-00-00'";
 } elseif ($pago === 'pendentes') {
-    $query .= " AND data_vencimento >= :hoje
-                AND data_pagamento IS NULL";
+    $query .= " AND data_vencimento >= :hoje AND (data_pagamento IS NULL OR data_pagamento = '' OR data_pagamento = '0000-00-00')";
     $params[':hoje'] = $hoje;
 } elseif ($pago === 'vencidas') {
-    $query .= " AND data_vencimento < :hoje
-                AND data_pagamento IS NULL";
+    $query .= " AND data_vencimento < :hoje AND (data_pagamento IS NULL OR data_pagamento = '' OR data_pagamento = '0000-00-00')";
     $params[':hoje'] = $hoje;
 }
 
@@ -59,7 +57,6 @@ foreach ($params as $key => $value) {
     $stmt->bindValue($key, $value);
 }
 $stmt->execute();
-
 $res = $stmt->fetchAll(PDO::FETCH_ASSOC);
 $linhas = @count($res);
 
@@ -102,8 +99,8 @@ if ($linhas > 0) {
         $taxa = $res[$i]['taxa'] ?? 0;
         $subtotal = $res[$i]['subtotal'] ?? 0;
 
-        // ✅ Acumula totais (AGORA COM VARIÁVEIS JÁ DEFINIDAS)
-        if (!is_null($data_pagamento)) {
+        // ✅ Acumula totais
+        if (!empty($data_pagamento) && $data_pagamento != '0000-00-00') {
             $total_pago += $valor;
         } else {
             $total_pendentes += $valor;
@@ -123,7 +120,7 @@ if ($linhas > 0) {
         $data_vencimento_iso = (!empty($data_vencimento) && $data_vencimento != '0000-00-00') ? date('Y-m-d', strtotime($data_vencimento)) : '';
         $data_pagamento_iso = (!empty($data_pagamento) && $data_pagamento != '0000-00-00') ? date('Y-m-d', strtotime($data_pagamento)) : '';
 
-        // ✅ LÓGICA CORRIGIDA: controle separado para cada botão
+        // ✅ LÓGICA: controle separado para cada botão
         if (!empty($data_pagamento) && $data_pagamento != '0000-00-00') {
             $classe_status = 'conta-paga';
             $mostrarBotaoParcelar = false;
@@ -175,7 +172,7 @@ if ($linhas > 0) {
             $usuario_pgto_nome = $ru2['nome'] ?? 'Não encontrado';
         }
 
-        // ✅ Busca total de resíduos já pagos para esta conta (se for conta original)
+        // ✅ Busca total de resíduos já pagos para esta conta
         $total_residuos = 0;
         if (empty($res[$i]['referencia']) || $res[$i]['referencia'] != 'Resíduo') {
             $stmt_residuos = $pdo->prepare("SELECT COALESCE(SUM(subtotal), 0) as total_residuos FROM receber WHERE id_referencia = :id AND referencia = 'Resíduo'");
@@ -183,7 +180,7 @@ if ($linhas > 0) {
             $total_residuos = $stmt_residuos->fetchColumn();
         }
 
-        // ✅ Formata valores para exibição (FAZER ANTES DO HEREDOC)
+        // ✅ Formata valores para exibição
         $total_residuosF = number_format($total_residuos, 2, ',', '.');
         $saldo_restante = $valor - $total_residuos;
         $saldo_restanteF = number_format($saldo_restante, 2, ',', '.');
@@ -219,7 +216,6 @@ if ($linhas > 0) {
                     <b>{$valorF}</b>
 HTML;
 
-        // ✅ Exibe "Recebido" APENAS se a conta estiver efetivamente paga
         if (!empty($data_pagamento) && $data_pagamento != '0000-00-00' && $subtotal > 0 && $subtotal != $valor) {
             echo <<<HTML
                     <br>
@@ -229,7 +225,6 @@ HTML;
 HTML;
         }
 
-        // ✅ Exibe "Pago/Saldo" apenas se houver resíduos
         if ($total_residuos > 0) {
             echo <<<HTML
         <br>
@@ -283,7 +278,6 @@ HTML;
                         <i class="fa fa-info-circle text-dark ico-grande"></i>
                     </a>
 HTML;
-        // ✅ Verifica se esta conta tem parcelas ou resíduos vinculados
         $stmt_relacionados = $pdo->prepare("SELECT COUNT(*) as total FROM receber WHERE id_referencia = :id AND referencia IN ('Parcela', 'Resíduo')");
         $stmt_relacionados->execute([':id' => $id]);
         $tem_relacionados = $stmt_relacionados->fetchColumn() > 0;
@@ -311,17 +305,10 @@ HTML;
 
         if ($mostrarBotaoBaixar) {
             $valor_restante = $valor - $total_residuos;
-
-            echo <<<HTML
-
-            <input type="checkbox" class="check-baixar maozinha" data-id="{$id}" data-valor="{$valor_restante}" title="Selecionar para baixa">
-
-HTML;
-            $valor_restante = $valor - $total_residuos;
             $valor_restanteF = 'R$ ' . number_format($valor_restante, 2, ',', '.');
             $e_valor_restanteF = js_escape($valor_restanteF);
             echo <<<HTML
-
+            <input type="checkbox" class="check-baixar maozinha" data-id="{$id}" data-valor="{$valor_restante}" title="Selecionar para baixa">
             <a href="#" onclick="baixar('{$id}', 
                                         '{$e_valor_restanteF}', 
                                         '{$e_descricao}', 
@@ -329,12 +316,10 @@ HTML;
                                         '{$data_vencimento_iso}')" title="Baixar valor">
                 <i class="fa-solid fa-square-check text-danger ico-grande"></i>
             </a>
-    
 HTML;
         }
 
         echo <<<HTML
-            <!-- ✅ Botão para abrir modal de arquivos -->
             <a href="#" onclick="abrirArquivos('{$id}', '{$e_descricao}')" title="Arquivos">
                 <i class="fa-solid fa-paperclip text-secondary ico-grande"></i>
             </a>
@@ -344,7 +329,6 @@ HTML;
     }
 }
 
-// ✅ Formata totais para exibição
 $total_pendentesF = number_format($total_pendentes, 2, ',', '.');
 $total_pagoF = number_format($total_pago, 2, ',', '.');
 
@@ -352,7 +336,7 @@ echo <<<HTML
         </tbody>
         <tfoot>
             <tr>
-                <td colspan="7" class="text-end font-weight-bold">
+                <td colspan="6" class="text-end font-weight-bold">
                     <span class="text-danger">Total Pendentes: R$ {$total_pendentesF}</span> 
                     &nbsp;&nbsp;|&nbsp;&nbsp; 
                     <span class="text-success">Total Recebido: R$ {$total_pagoF}</span>
@@ -431,8 +415,7 @@ HTML;
 </script>
 
 <script type="text/javascript">
-    function editar(id, descricao, paciente, valor, data_vencimento, data_lancamento, data_pagamento, forma_pagamento, frequencia, obs, arquivo, multa,
-        juros, desconto, taxa, subtotal) {
+    function editar(id, descricao, paciente, valor, data_vencimento, data_lancamento, data_pagamento, forma_pagamento, frequencia, obs, arquivo, multa, juros, desconto, taxa, subtotal) {
         $('#mensagem').text('');
         $('#titulo_inserir').text('Editar Registro');
         $('#id').val(id);
@@ -456,8 +439,7 @@ HTML;
         $('#modalForm').modal('show');
     }
 
-    function mostrar(descricao, paciente, valor, data_vencimento, data_lancamento, data_pagamento, forma_pagamento, frequencia, obs, arquivo, multa, juros,
-        desconto, taxa, subtotal, usuario_lanc, usuario_pgto) {
+    function mostrar(descricao, paciente, valor, data_vencimento, data_lancamento, data_pagamento, forma_pagamento, frequencia, obs, arquivo, multa, juros, desconto, taxa, subtotal, usuario_lanc, usuario_pgto) {
         $('#titulo_dados').text('Detalhes: ' + descricao);
         $('#descricao_dados-cli').text(descricao);
         $('#paciente_dados-cli').text(paciente);
