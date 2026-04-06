@@ -312,6 +312,24 @@ $contas = [];
             color: #14232d;
             font-style: italic;
         }
+
+        @page {
+            margin: 20mm;
+        }
+
+        #footer-paginacao {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 10px;
+            color: #555;
+        }
+
+        .page-number:after {
+            content: counter(page, decimal-leading-zero);
+        }
     </style>
 </head>
 
@@ -397,7 +415,7 @@ $contas = [];
 
                     $contas = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     $qtd_pendentes = 0;
-                    $qtd_pagas = 0; 
+                    $qtd_pagas = 0;
                     // ✅ CALCULA TOTAIS DENTRO DO TRY
                     foreach ($contas as $c) {
                         $pago_status = (!empty($c['data_pagamento']) && $c['data_pagamento'] != '0000-00-00') ? 'pago' : 'pendente';
@@ -407,12 +425,11 @@ $contas = [];
                             $qtd_pagas++;
                         } else {
                             $total_pendentes += $c['valor'] ?? 0;
-                            $qtd_pendentes++; 
+                            $qtd_pendentes++;
                         }
                     }
 
                     $total_geral = $total_pago + $total_pendentes;
-
                 } catch (Exception $e) {
                     echo '<tr><td colspan="7" style="text-align:center;color:#e74c3c;padding:20px;">Erro: ' . htmlspecialchars($e->getMessage()) . '</td></tr>';
                     $total_geral = 0;
@@ -442,13 +459,13 @@ $contas = [];
                 <!-- ✅ NOVA LINHA: Quantidades e Valores -->
                 <tr>
                     <td colspan="7" style="text-align: right; font-size: 9px; padding: 4px 5px; background: #f8f9fa;">
-                        <span style="color: #e74c3c; font-weight: bold;">Pendentes: <?php echo $qtd_pendentes; ?></span> | 
-                        <span style="color: #27ae60; font-weight: bold;">Pagas: <?php echo $qtd_pagas; ?></span> | 
-                        <span style="color: #e74c3c; font-weight: bold;">Pendentes: R$ <?php echo number_format($total_pendentes, 2, ',', '.'); ?></span> | 
+                        <span style="color: #e74c3c; font-weight: bold;">Pendentes: <?php echo $qtd_pendentes; ?></span> |
+                        <span style="color: #27ae60; font-weight: bold;">Pagas: <?php echo $qtd_pagas; ?></span> |
+                        <span style="color: #e74c3c; font-weight: bold;">Pendentes: R$ <?php echo number_format($total_pendentes, 2, ',', '.'); ?></span> |
                         <span style="color: #27ae60; font-weight: bold;">Pagas: R$ <?php echo number_format($total_pago, 2, ',', '.'); ?></span>
                     </td>
                 </tr>
-    
+
                 <!-- ✅ LINHA EXISTENTE: Total Geral (mantida) -->
                 <tr>
                     <td colspan="5" style="text-align: right; font-weight: bold;">TOTAL GERAL:</td>
@@ -474,6 +491,9 @@ $contas = [];
                 Relatório gerado em <?php echo date('d/m/Y \à\s H:i:s'); ?>
             </div>
         </div>
+    </div>
+    <div id="footer-paginacao">
+        <span class="page-number"></span>
     </div>
 </body>
 

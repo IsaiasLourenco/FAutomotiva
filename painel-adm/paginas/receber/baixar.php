@@ -102,7 +102,7 @@ try {
             ':obs' => 'Pagamento parcial - Resíduo',
             ':usuario_lanc' => $_SESSION['id_usuario'] ?? 1,
             ':usuario_pgto' => $_SESSION['id_usuario'] ?? 1,
-            ':arquivo' => $conta['arquivo'] ?? 'aPagar.png',
+            ':arquivo' => !empty($conta['arquivo']) ? 'residuo_' . $conta['arquivo'] : 'aPagar.png',
             ':id_referencia' => $id,
             ':multa' => round($multa_num, 2),
             ':juros' => round($juros_num, 2),

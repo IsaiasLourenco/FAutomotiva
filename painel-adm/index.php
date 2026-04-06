@@ -840,7 +840,7 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <form method="POST" action="rel/financeiro_class.php" target="_blank">
+                <form method="POST" action="rel/rel_fin_class.php" target="_blank">
                     <div class="modal-body">
                         <div class="row">
                             <div class="col-md-4">
