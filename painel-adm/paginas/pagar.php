@@ -171,9 +171,11 @@ $juros_label = isset($config_multa_juros['juros_padrao'])
                 <label class="small text-muted mb-1">Status:</label>
                 <select name="pago" id="pago" class="form-control form-control-sm">
                     <option value="">Todas</option>
-                    <option value="Sim">Pagas</option>
-                    <option value="Não">Pendentes</option>
+                    <option value="pagas">Pagas</option>
+                    <option value="pendentes">Pendentes</option>
+                    <option value="vencidas">Vencidas</option>
                 </select>
+                <input type="hidden" name="tipo_data" id="tipoData" value="vencimento">
             </div>
 
             <div class="col-md-2 col-sm-12 mb-2">
@@ -763,7 +765,9 @@ $juros_label = isset($config_multa_juros['juros_padrao'])
         listar();
         $('#btn-deletar').hide();
         $('#btn-baixar').hide();
+        setTimeout(restaurarCheckboxesBaixar, 500);
     });
+
 
     function restaurarCheckboxesBaixar() {
         idsBaixarSelecionados.forEach(function(item) {
@@ -773,12 +777,6 @@ $juros_label = isset($config_multa_juros['juros_padrao'])
             }
         });
     }
-
-    $(document).ready(function() {
-        listar();
-        $('#btn-deletar').hide();
-        setTimeout(restaurarCheckboxesBaixar, 500);
-    });
 
     // ✅ Função editar
     function editar(id, descricao, fornecedor, valor, data_vencimento, data_lancamento, data_pagamento,
@@ -915,7 +913,7 @@ $juros_label = isset($config_multa_juros['juros_padrao'])
         $.ajax({
             url: 'paginas/' + pag + "/baixar.php",
             type: 'POST',
-            formData,
+            data: formData,
             success: function(mensagem) {
                 $('#mensagem-baixar').text('');
                 $('#mensagem-baixar').removeClass();
@@ -1046,7 +1044,7 @@ $juros_label = isset($config_multa_juros['juros_padrao'])
     $('[name="data_pgto"]').on('change', function() {
         var dataPgto = $(this).val();
         var dataVencimentoStr = $('#data-vencimento-baixar').val();
-        if (dataPgto && dataVencimentoStr && dataPgto > dataVencimentoStr) {
+        if (new Date(dataPgto) > new Date(dataVencimentoStr)) {
             var diasAtraso = Math.ceil((new Date(dataPgto) - new Date(dataVencimentoStr)) / (1000 * 60 * 60 * 24));
             if (!$('#valor-multa').val() || $('#valor-multa').val() === 'R$ 0,00') {
                 var valorStr = $('#valor-baixar').val();
@@ -1087,7 +1085,7 @@ $juros_label = isset($config_multa_juros['juros_padrao'])
         var id = $(this).data('id');
         var valor = parseFloat($(this).data('valor')) || 0;
         if ($(this).is(':checked')) {
-            if (!idsBaixarSelecionados.includes(id)) {
+            if (!idsBaixarSelecionados.some(item => item.id === id)) {
                 idsBaixarSelecionados.push({
                     id: id,
                     valor: valor

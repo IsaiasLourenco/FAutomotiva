@@ -320,7 +320,7 @@ $contas = [];
         <div class="header">
             <div class="header-top">
                 <div class="header-logo">
-                    <img src="C:/xampp/htdocs/OdontoClinic/img/Logo.png" alt="Logotipo">
+                    <img src="<?php echo realpath(__DIR__ . '/../../img/Logo.png'); ?>" alt="Logotipo">
                 </div>
                 <div class="header-title">
                     <h1>Relatório de Contas a Receber</h1>
@@ -354,8 +354,8 @@ $contas = [];
                     <th class="col-paciente">Paciente</th>
                     <th class="col-vencimento">Vencimento</th>
                     <th class="col-pago">Pago em</th>
-                    <th class="col-valor">Valor</th>
                     <th class="col-forma">Forma Pgto</th>
+                    <th class="col-valor">Valor</th>
                     <th class="col-subtotal">Subtotal</th>
                 </tr>
             </thead>

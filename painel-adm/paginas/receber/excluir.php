@@ -1,16 +1,34 @@
 <?php
 require_once("../../../conexao.php");
+
 $tabela = 'receber';
+$id = $_POST['id'] ?? null;
 
-$id = $_POST['id'];
+if (empty($id)) {
+    echo "ID inválido!";
+    exit;
+}
 
-$query = $pdo->query("SELECT * FROM $tabela where id = '$id'");
-$res = $query->fetchAll(PDO::FETCH_ASSOC);
-$total_reg = @count($res);
-$arquivo = $res[0]['arquivo'];
+// Busca segura
+$stmt = $pdo->prepare("SELECT arquivo FROM $tabela WHERE id = :id LIMIT 1");
+$stmt->execute([':id' => $id]);
+$res = $stmt->fetch(PDO::FETCH_ASSOC);
 
-if ($arquivo != "sem-foto.png") {
-    unlink('../../images/receber/' . $arquivo);}
+if (!$res) {
+    echo "Registro não encontrado!";
+    exit;
+}
 
-$pdo->query("DELETE FROM $tabela WHERE id = '$id'");
+$arquivo = $res['arquivo'] ?? 'sem-foto.png';
+
+$path = '../../images/receber/' . $arquivo;
+
+if ($arquivo != "sem-foto.png" && file_exists($path)) {
+    unlink($path);
+}
+
+// Delete seguro
+$stmt = $pdo->prepare("DELETE FROM $tabela WHERE id = :id");
+$stmt->execute([':id' => $id]);
+
 echo 'Excluído com Sucesso';

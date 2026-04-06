@@ -9,8 +9,7 @@ require_once __DIR__ . '/../../conexao.php';
 // ✅ 3. Buscar configurações do banco
 $config = $pdo->query("SELECT * FROM configuracoes LIMIT 1")->fetch(PDO::FETCH_ASSOC);
 $url_sistema = $config['url_sistema'] ?? 'http://localhost/OdontoClinic/';
-$marca_dagua = $config['marca_dagua'] ?? 'nao';
-$nome_sistema = $config['nome_sistema'] ?? 'Sistema';
+$nome_sistema = $config['nome_sistema'] ?? 'FG Odontologia Estética';
 $telefone_sistema = $config['telefone_sistema'] ?? '';
 $multa_atraso = $config['multa_padrao'] ?? 2.00;
 $juros_atraso = $config['juros_padrao'] ?? 0.33;
@@ -26,7 +25,6 @@ $_GET['dataInicial'] = $dataInicial;
 $_GET['dataFinal'] = $dataFinal;
 $_GET['pago'] = $pago;
 $_GET['tipo_data'] = $tipo_data;
-$_GET['marca_dagua'] = $marca_dagua;
 $_GET['url_sistema'] = $url_sistema;
 $_GET['nome_sistema'] = $nome_sistema;
 $_GET['telefone_sistema'] = $telefone_sistema;
@@ -35,7 +33,7 @@ $_GET['juros_atraso'] = $juros_atraso;
 $_GET['data_hoje'] = date('Y-m-d');
 
 // ✅ 6. Incluir relatório DIRETAMENTE
-include __DIR__ . '/rel_receber.php';
+include __DIR__ . '/rel_pagar.php';
 $html = ob_get_clean();
 
 // ✅ 7. Configurar DomPDF
@@ -43,7 +41,7 @@ use Dompdf\Dompdf;
 use Dompdf\Options;
 
 $options = new Options();
-$options->setIsRemoteEnabled(false);
+$options->setIsRemoteEnabled(true);
 $options->set('defaultFont', 'DejaVu Sans');
 $options->set('chroot', [
     realpath(__DIR__ . '/../../'),
@@ -57,9 +55,9 @@ $pdf->render();
 
 // ✅ 8. Headers corretos para PDF
 header("Content-Type: application/pdf");
-header("Content-Disposition: inline; filename=relatorio_receber_" . date('Y-m-d') . ".pdf");
+header("Content-Disposition: inline; filename=relatorio_pagar_" . date('Y-m-d') . ".pdf");
 
-$pdf->stream("relatorio_receber_" . date('Y-m-d') . ".pdf", [
+$pdf->stream("relatorio_pagar_" . date('Y-m-d') . ".pdf", [
     "Attachment" => false
 ]);
 exit;
