@@ -112,14 +112,14 @@ try {
         $q->bindValue(':st', $subtotal_f, PDO::PARAM_STR);
         foreach ($binds as $k => $v) $q->bindValue($k, $v);
     } else {
-        // INSERT - SOLUÇÃO UNIVERSAL
+        // INSERT - CONTA ORIGINAL
         $arq_final = empty($arquivo_nome) ? 'sem-foto.png' : $arquivo_nome;
         $dp_val = !empty($data_pagamento) ? $data_pagamento : null;
         $dp_type = !empty($data_pagamento) ? PDO::PARAM_STR : PDO::PARAM_NULL;
 
         $q = $pdo->prepare("INSERT INTO $tabela (descricao,paciente,valor,data_vencimento,data_lancamento,data_pagamento,forma_pagamento,frequencia,obs,
-                                                 arquivo,usuario_lanc,usuario_pgto,multa,juros,desconto,taxa,subtotal) 
-                                   VALUES (:d,:p,:v,:dv,CURDATE(),:dp,:fp,:fq,:o,:a,:ul,:up,:m,:j,:dc,:tx,:st)");
+                                                 arquivo,usuario_lanc,usuario_pgto,multa,juros,desconto,taxa,subtotal,referencia,id_referencia) 
+                                   VALUES (:d,:p,:v,:dv,CURDATE(),:dp,:fp,:fq,:o,:a,:ul,:up,:m,:j,:dc,:tx,:st,:ref,:id_ref)");
         $q->bindValue(':d', $descricao);
         $q->bindValue(':p', $paciente, PDO::PARAM_INT);
         $q->bindValue(':v', $valor_base, PDO::PARAM_STR);
@@ -136,6 +136,8 @@ try {
         $q->bindValue(':dc', $desc_f, PDO::PARAM_STR);
         $q->bindValue(':tx', $taxa_f, PDO::PARAM_STR);
         $q->bindValue(':st', $subtotal_f, PDO::PARAM_STR);
+        $q->bindValue(':ref', 'Conta');              // ← ✅ ADICIONADO
+        $q->bindValue(':id_ref', null, PDO::PARAM_NULL);  // ← ✅ ADICIONADO
     }
     $q->execute();
     echo "Salvo com Sucesso";
@@ -143,4 +145,3 @@ try {
     error_log("Erro salvar.php: " . $e->getMessage());
     echo "Erro ao salvar: " . $e->getMessage();
 }
-?>

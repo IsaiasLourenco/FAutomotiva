@@ -207,6 +207,8 @@ if ($linhas > 0) {
         $e_arquivo = js_escape($arquivo);
         $e_usuario_lanc_nome = js_escape($usuario_lanc_nome);
         $e_usuario_pgto_nome = js_escape($usuario_pgto_nome);
+        $e_referencia = js_escape($res[$i]['referencia'] ?? '');
+        $e_id_referencia = $res[$i]['id_referencia'] ?? '';
 
         echo <<<HTML
             <tr class="{$classe_status}">
@@ -279,7 +281,9 @@ HTML;
                                                  '{$e_taxaF}',
                                                  '{$e_subtotalF}',
                                                  '{$e_usuario_lanc_nome}',
-                                                 '{$e_usuario_pgto_nome}')" title="Mostrar Dados">
+                                                 '{$e_usuario_pgto_nome}',
+                                                 '{$e_referencia}',
+                                                 '{$e_id_referencia}')" title="Mostrar Dados">
                         <i class="fa fa-info-circle text-dark ico-grande"></i>
                     </a>
 HTML;
@@ -457,7 +461,7 @@ HTML;
     }
 
     function mostrar(descricao, paciente, valor, data_vencimento, data_lancamento, data_pagamento, forma_pagamento, frequencia, obs, arquivo, multa, juros,
-        desconto, taxa, subtotal, usuario_lanc, usuario_pgto) {
+        desconto, taxa, subtotal, usuario_lanc, usuario_pgto, referencia, id_referencia) {
         $('#titulo_dados').text('Detalhes: ' + descricao);
         $('#descricao_dados-cli').text(descricao);
         $('#paciente_dados-cli').text(paciente);
@@ -482,6 +486,24 @@ HTML;
         }
         $('#usuario_lanc_dados-cli').text(usuario_lanc);
         $('#usuario_pgto_dados-cli').text(usuario_pgto);
+
+        // ✅ REFERÊNCIA (lógica aprimorada)
+        if (referencia && referencia !== '' && referencia !== 'null') {
+            $('#referencia_dados-cli').text(referencia);
+
+            // Se for 'Conta', não mostra ID (é NULL mesmo)
+            // Se for 'Parcela' ou 'Resíduo', mostra o ID vinculado
+            if (referencia === 'Conta') {
+                $('#id-referencia_dados-cli').closest('small').hide(); // Esconde todo o "(ID: ...)"
+            } else {
+                $('#id-referencia_dados-cli').text(id_referencia || '-');
+                $('#id-referencia_dados-cli').closest('small').show();
+            }
+            $('#row-referencia').show();
+        } else {
+            $('#row-referencia').hide();
+        }
+
         $('#modalDados').modal('show');
     }
 

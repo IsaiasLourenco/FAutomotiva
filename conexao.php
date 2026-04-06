@@ -61,7 +61,6 @@ if (!isset($nome_sistema)) {
     $logo_rel = 'rel_padrao.jpg';
     $multa_padrao = '0,00';
     $juros_padrao = '0,00';
-    $marcadagua = 'nao';
 }
 
 // | ENDEREÇO FORMATADO

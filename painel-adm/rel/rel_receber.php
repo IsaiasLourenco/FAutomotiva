@@ -396,19 +396,23 @@ $contas = [];
                     }
 
                     $contas = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
+                    $qtd_pendentes = 0;
+                    $qtd_pagas = 0; 
                     // ✅ CALCULA TOTAIS DENTRO DO TRY
                     foreach ($contas as $c) {
                         $pago_status = (!empty($c['data_pagamento']) && $c['data_pagamento'] != '0000-00-00') ? 'pago' : 'pendente';
 
                         if ($pago_status === 'pago') {
                             $total_pago += $c['subtotal'] ?? $c['valor'] ?? 0;
+                            $qtd_pagas++;
                         } else {
                             $total_pendentes += $c['valor'] ?? 0;
+                            $qtd_pendentes++; 
                         }
                     }
 
                     $total_geral = $total_pago + $total_pendentes;
+
                 } catch (Exception $e) {
                     echo '<tr><td colspan="7" style="text-align:center;color:#e74c3c;padding:20px;">Erro: ' . htmlspecialchars($e->getMessage()) . '</td></tr>';
                     $total_geral = 0;
@@ -435,6 +439,17 @@ $contas = [];
                 <?php endforeach; ?>
             </tbody>
             <tfoot>
+                <!-- ✅ NOVA LINHA: Quantidades e Valores -->
+                <tr>
+                    <td colspan="7" style="text-align: right; font-size: 9px; padding: 4px 5px; background: #f8f9fa;">
+                        <span style="color: #e74c3c; font-weight: bold;">Pendentes: <?php echo $qtd_pendentes; ?></span> | 
+                        <span style="color: #27ae60; font-weight: bold;">Pagas: <?php echo $qtd_pagas; ?></span> | 
+                        <span style="color: #e74c3c; font-weight: bold;">Pendentes: R$ <?php echo number_format($total_pendentes, 2, ',', '.'); ?></span> | 
+                        <span style="color: #27ae60; font-weight: bold;">Pagas: R$ <?php echo number_format($total_pago, 2, ',', '.'); ?></span>
+                    </td>
+                </tr>
+    
+                <!-- ✅ LINHA EXISTENTE: Total Geral (mantida) -->
                 <tr>
                     <td colspan="5" style="text-align: right; font-weight: bold;">TOTAL GERAL:</td>
                     <td colspan="2" class="total-destaque" style="text-align: right; font-size: 12px; font-weight: bold;">

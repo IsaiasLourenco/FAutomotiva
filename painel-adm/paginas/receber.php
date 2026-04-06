@@ -360,7 +360,12 @@ $juros_label = isset($config_multa_juros['juros_padrao'])
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header bg-info text-white">
-                <h4 class="modal-title"><span id="titulo_dados"></span></h4><button id="btn-fechar-dados" type="button" class="close text-white mg-t--20" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">
+                    <span id="titulo_dados"></span>
+                </h4>
+                <button id="btn-fechar-dados" type="button" class="close text-white mg-t--20" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
             <div class="modal-body">
                 <div class="row br-btt pb-2">
@@ -368,9 +373,16 @@ $juros_label = isset($config_multa_juros['juros_padrao'])
                     <div class="col-md-6"><span><b>Paciente: </b></span><span id="paciente_dados-cli"></span></div>
                 </div>
                 <div class="row br-btt pb-2">
-                    <div class="col-md-4"><span><b>Valor: </b></span><span id="valor_dados-cli" class="text-success font-weight-bold"></span></div>
-                    <div class="col-md-4"><span><b>Vencimento: </b></span><span id="vencimento_dados-cli"></span></div>
-                    <div class="col-md-4"><span><b>Pago em: </b></span><span id="pagamento_dados-cli"></span></div>
+                    <div class="col-md-4">
+                        <span><b>Valor: </b></span>
+                        <span id="valor_dados-cli" class="text-success font-weight-bold"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <span><b>Vencimento: </b></span><span id="vencimento_dados-cli"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <span><b>Pago em: </b></span><span id="pagamento_dados-cli"></span>
+                    </div>
                 </div>
                 <div class="row br-btt pb-2">
                     <div class="col-md-6"><span><b>Forma de Pagamento: </b></span><span id="forma_pagamento_dados-cli"></span></div>
@@ -381,29 +393,64 @@ $juros_label = isset($config_multa_juros['juros_padrao'])
                     <div class="col-md-8"><span><b>Observações: </b></span><span id="obs_dados-cli"></span></div>
                 </div>
                 <div class="row br-btt pb-2">
-                    <div class="col-12"><span><b>Arquivo/Comprovante: </b></span><br><a id="link-arquivo-dados" href="#" target="_blank" class="btn btn-sm btn-outline-primary mt-1"><i class="fa fa-eye"></i> Visualizar Arquivo</a><img id="target-arquivo-dados" src="./images/receber/sem-foto.png" alt="Comprovante" class="mt-2" style="max-width: 200px; border-radius: 4px;"></div>
+                    <div class="col-12">
+                        <span><b>Arquivo/Comprovante: </b></span><br>
+                        <a id="link-arquivo-dados" href="#" target="_blank" class="btn btn-sm btn-outline-primary mt-1">
+                            <i class="fa fa-eye"></i> Visualizar Arquivo
+                        </a>
+                        <img id="target-arquivo-dados"
+                            src="./images/receber/sem-foto.png"
+                            alt="Comprovante"
+                            class="mt-2"
+                            style="max-width: 200px; border-radius: 4px;">
+                    </div>
                 </div>
                 <div class="row bg-light p-2 rounded">
                     <div class="col-md-3">
                         <small class="text-muted">Multa</small><br>
                         <span id="multa_dados-cli" class="font-weight-bold"></span>
                     </div>
-                    <div class="col-md-3"><small class="text-muted">Juros</small><br><span id="juros_dados-cli" class="font-weight-bold"></span></div>
-                    <div class="col-md-3"><small class="text-muted">Desconto</small><br><span id="desconto_dados-cli" class="font-weight-bold"></span></div>
-                    <div class="col-md-3"><small class="text-muted">Taxa</small><br><span id="taxa_dados-cli" class="font-weight-bold"></span></div>
+                    <div class="col-md-3">
+                        <small class="text-muted">Juros</small><br>
+                        <span id="juros_dados-cli" class="font-weight-bold"></span>
+                    </div>
+                    <div class="col-md-3">
+                        <small class="text-muted">Desconto</small><br>
+                        <span id="desconto_dados-cli" class="font-weight-bold"></span>
+                    </div>
+                    <div class="col-md-3">
+                        <small class="text-muted">Taxa</small><br>
+                        <span id="taxa_dados-cli" class="font-weight-bold"></span>
+                    </div>
                 </div>
                 <div class="row mt-2 bg-success text-white p-2 rounded text-center">
                     <div class="col-12"><b>Subtotal:</b> <span id="subtotal_dados-cli" class="font-weight-bold"></span></div>
                 </div>
                 <div class="row bg-light p-2 rounded mt-2">
-                    <div class="col-md-6"><small class="text-muted">Lançado por:</small><br><span id="usuario_lanc_dados-cli" class="font-weight-bold"></span></div>
-                    <div class="col-md-6"><small class="text-muted">Baixa por:</small><br><span id="usuario_pgto_dados-cli" class="font-weight-bold"></span></div>
+                    <div class="col-md-6">
+                        <small class="text-muted">Lançado por:</small><br>
+                        <span id="usuario_lanc_dados-cli" class="font-weight-bold"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <small class="text-muted">Baixa por:</small><br>
+                        <span id="usuario_pgto_dados-cli" class="font-weight-bold"></span>
+                    </div>
                 </div>
                 <div class="row mt-2" id="row-referencia" style="display:none;">
-                    <div class="col-12"><span><b>Referência: </b></span><span id="referencia_dados-cli"></span><small class="text-muted">(ID: <span id="id-referencia_dados-cli"></span>)</small></div>
+                    <div class="col-12">
+                        <span><b>Referência: </b></span>
+                        <span id="referencia_dados-cli" style="font-weight: 600; color: #2c3e50;"></span>
+                        <small class="text-muted" style="display: inline-block; margin-left: 8px;">
+                            (ID: <span id="id-referencia_dados-cli" 
+                                       style="font-weight: 700; color: #1b6e74; background: #e8f4f8; padding: 2px 6px; border-radius: 3px;">
+                                </span>)
+                        </small>
+                    </div>
                 </div>
             </div>
-            <div class="modal-footer"><button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button></div>
+            <div class="modal-footer centro">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Fechar</button>
+            </div>
         </div>
     </div>
 </div>
@@ -1055,7 +1102,8 @@ $juros_label = isset($config_multa_juros['juros_padrao'])
         limparModalParcelar();
     });
 
-    function editar(id, descricao, paciente, valor, data_vencimento, data_lancamento, data_pagamento, forma_pagamento, frequencia, obs, arquivo, multa, juros, desconto, taxa, subtotal) {
+    function editar(id, descricao, paciente, valor, data_vencimento, data_lancamento, data_pagamento, forma_pagamento, frequencia, obs, arquivo, multa,
+        juros, desconto, taxa, subtotal) {
         $('#mensagem').text('');
         $('#titulo_inserir').text('Editar Registro');
         $('#id').val(id);
@@ -1079,7 +1127,8 @@ $juros_label = isset($config_multa_juros['juros_padrao'])
         $('#modalForm').modal('show');
     }
 
-    function mostrar(descricao, paciente, valor, data_vencimento, data_lancamento, data_pagamento, forma_pagamento, frequencia, obs, arquivo, multa, juros, desconto, taxa, subtotal, usuario_lanc, usuario_pgto) {
+    function mostrar(descricao, paciente, valor, data_vencimento, data_lancamento, data_pagamento, forma_pagamento, frequencia, obs, arquivo, multa,
+        juros, desconto, taxa, subtotal, usuario_lanc, usuario_pgto, referencia, id_referencia) {
         $('#titulo_dados').text('Detalhes: ' + descricao);
         $('#descricao_dados-cli').text(descricao);
         $('#paciente_dados-cli').text(paciente);
@@ -1104,6 +1153,16 @@ $juros_label = isset($config_multa_juros['juros_padrao'])
         }
         $('#usuario_lanc_dados-cli').text(usuario_lanc);
         $('#usuario_pgto_dados-cli').text(usuario_pgto);
+
+        // ✅ Referência (mostra só se tiver valor)
+        if (referencia && referencia !== 'null' && referencia !== '') {
+            $('#referencia_dados-cli').text(referencia);
+            $('#id-referencia_dados-cli').text(id_referencia || '-'); // se tiver id_referencia também
+            $('#row-referencia').show();
+        } else {
+            $('#row-referencia').hide();
+        }
+
         $('#modalDados').modal('show');
     }
 

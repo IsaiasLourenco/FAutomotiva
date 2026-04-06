@@ -440,9 +440,16 @@ $juros_label = isset($config_multa_juros['juros_padrao'])
                         <span id="usuario_pgto_dados-cli" class="font-weight-bold"></span>
                     </div>
                 </div>
+                <div class="row mt-2" id="row-referencia">
+                    <div class="col-12">
+                        <span><b>Referência: </b></span>
+                        <span id="referencia_dados-cli"></span>
+                        <small class="text-muted">(ID: <span id="id-referencia_dados-cli"></span>)</small>
+                    </div>
+                </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+            <div class="modal-footer centro">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Fechar</button>
             </div>
         </div>
     </div>
@@ -813,7 +820,7 @@ $juros_label = isset($config_multa_juros['juros_padrao'])
     // ✅ Função mostrar
     function mostrar(descricao, fornecedor, valor, data_vencimento, data_lancamento, data_pagamento,
         forma_pagamento, frequencia, obs, arquivo, multa, juros, desconto, taxa, subtotal,
-        usuario_lanc, usuario_pgto) {
+        usuario_lanc, usuario_pgto, referencia, id_referencia) {
         $('#titulo_dados').text('Detalhes: ' + descricao);
         $('#descricao_dados-cli').text(descricao);
         $('#fornecedor_dados-cli').text(fornecedor);
@@ -839,6 +846,14 @@ $juros_label = isset($config_multa_juros['juros_padrao'])
         }
         $('#usuario_lanc_dados-cli').text(usuario_lanc);
         $('#usuario_pgto_dados-cli').text(usuario_pgto);
+        // ✅ Referência (mostra só se tiver valor)
+        if (referencia && referencia !== 'null' && referencia !== '') {
+            $('#referencia_dados-cli').text(referencia);
+            $('#id-referencia_dados-cli').text(id_referencia || '-'); // se tiver id_referencia também
+            $('#row-referencia').show();
+        } else {
+            $('#row-referencia').hide();
+        }
         $('#modalDados').modal('show');
     }
 

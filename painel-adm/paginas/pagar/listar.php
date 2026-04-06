@@ -2,7 +2,8 @@
 $tabela = 'pagar';
 require_once("../../../conexao.php");
 
-function js_escape($str) {
+function js_escape($str)
+{
     if ($str === null) return '';
     return str_replace(["'", "\\", "\n", "\r", '"'], ["\\'", "\\\\", "\\n", "\\r", '\"'], (string)$str);
 }
@@ -25,48 +26,37 @@ $mapaColunas = [
 $colunaData = $mapaColunas[$tipoData] ?? 'data_vencimento';
 $hoje = date('Y-m-d');
 
+// ✅ QUERY BASE (igual ao receber que funciona)
 $query = "SELECT * FROM $tabela WHERE 1=1";
 $params = [];
 
-// ✅ FILTRO DE PERÍODO (usa a coluna selecionada pelo tipoData)
+// ✅ FILTRO DE PERÍODO (igual ao receber)
 if (!empty($dataInicial) && !empty($dataFinal)) {
-    $query .= " AND $colunaData IS NOT NULL 
-                AND $colunaData != '0000-00-00'
-                AND $colunaData >= :data_inicial 
-                AND $colunaData <= :data_final";
+    $query .= " AND $colunaData >= :data_inicial AND $colunaData <= :data_final";
     $params[':data_inicial'] = $dataInicial;
     $params[':data_final'] = $dataFinal;
 }
 
-// ✅ FILTRO DE STATUS (sempre baseado em data_vencimento para pendente/vencido)
+// ✅ FILTRO DE STATUS (igual ao receber)
 if ($pago === 'pagas') {
-    $query .= " AND data_pagamento IS NOT NULL 
-                AND data_pagamento != '' 
-                AND data_pagamento != '0000-00-00'";
-                
+    $query .= " AND data_pagamento IS NOT NULL";
 } elseif ($pago === 'pendentes') {
-    // Pendentes: vencimento futuro (ou sem vencimento) E não pagas
-    $query .= " AND (data_vencimento IS NULL OR data_vencimento = '' OR data_vencimento = '0000-00-00' OR data_vencimento >= :hoje)
-                AND (data_pagamento IS NULL OR data_pagamento = '' OR data_pagamento = '0000-00-00')";
+    $query .= " AND data_vencimento >= :hoje AND data_pagamento IS NULL";
     $params[':hoje'] = $hoje;
-    
 } elseif ($pago === 'vencidas') {
-    // Vencidas: vencimento passado E não pagas
-    $query .= " AND data_vencimento IS NOT NULL 
-                AND data_vencimento != '' 
-                AND data_vencimento != '0000-00-00' 
-                AND data_vencimento < :hoje
-                AND (data_pagamento IS NULL OR data_pagamento = '' OR data_pagamento = '0000-00-00')";
+    $query .= " AND data_vencimento < :hoje AND data_pagamento IS NULL";
     $params[':hoje'] = $hoje;
 }
 
 $query .= " ORDER BY id DESC";
 
+// ✅ PREPARAR E EXECUTAR A QUERY (isso estava faltando!)
 $stmt = $pdo->prepare($query);
 foreach ($params as $key => $value) {
     $stmt->bindValue($key, $value);
 }
 $stmt->execute();
+
 $res = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 $linhas = @count($res);
@@ -203,6 +193,8 @@ if ($linhas > 0) {
         $e_arquivo = js_escape($foto);
         $e_usuario_lanc_nome = js_escape($usuario_lanc_nome);
         $e_usuario_pgto_nome = js_escape($usuario_pgto_nome);
+        $e_referencia = 'Conta';
+        $e_id_referencia = '';
         $valorExibir = 'R$ ' . number_format($valorBase, 2, ',', '.');
         echo <<<HTML
             <tr class="{$classe_status}">
@@ -233,7 +225,25 @@ if ($linhas > 0) {
                             </li>
                         </ul>
                     </li>
-                    <a href="#" onclick="mostrar('{$e_descricao}','{$e_fornecedor_nome}','{$e_valorF}','{$e_data_vencimentoF}','{$e_data_lancamentoF}','{$e_data_pagamentoF_js}','{$e_forma_pagamento_nome}','{$e_frequencia_nome}','{$e_obs}','{$e_arquivo}','{$e_multaF}','{$e_jurosF}','{$e_descontoF}','{$e_taxaF}','{$e_subtotalF}','{$e_usuario_lanc_nome}','{$e_usuario_pgto_nome}')" title="Mostrar Dados">
+                    <a href="#" onclick="mostrar('{$e_descricao}',
+                                                 '{$e_fornecedor_nome}',
+                                                 '{$e_valorF}',
+                                                 '{$e_data_vencimentoF}',
+                                                 '{$e_data_lancamentoF}',
+                                                 '{$e_data_pagamentoF_js}',
+                                                 '{$e_forma_pagamento_nome}',
+                                                 '{$e_frequencia_nome}',
+                                                 '{$e_obs}',
+                                                 '{$e_arquivo}',
+                                                 '{$e_multaF}',
+                                                 '{$e_jurosF}',
+                                                 '{$e_descontoF}',
+                                                 '{$e_taxaF}',
+                                                 '{$e_subtotalF}',
+                                                 '{$e_usuario_lanc_nome}',
+                                                 '{$e_usuario_pgto_nome}',
+                                                 '{$e_referencia}',
+                                                 '{$e_id_referencia}')" title="Mostrar Dados">
                         <i class="fa fa-info-circle text-dark ico-grande"></i>
                     </a>
 HTML;
@@ -335,7 +345,8 @@ HTML;
 
 <script type="text/javascript">
     // ✅ Função editar
-    function editar(id, descricao, fornecedor, valor, data_vencimento, data_lancamento, data_pagamento, forma_pagamento, frequencia, obs, arquivo, multa, juros, desconto, taxa, subtotal) {
+    function editar(id, descricao, fornecedor, valor, data_vencimento, data_lancamento, data_pagamento, forma_pagamento, frequencia, obs, arquivo, multa,
+        juros, desconto, taxa, subtotal) {
         $('#mensagem').text('');
         $('#titulo_inserir').text('Editar Registro');
         $('#id').val(id);
@@ -360,7 +371,8 @@ HTML;
     }
 
     // ✅ Função mostrar
-    function mostrar(descricao, fornecedor, valor, data_vencimento, data_lancamento, data_pagamento, forma_pagamento, frequencia, obs, arquivo, multa, juros, desconto, taxa, subtotal, usuario_lanc, usuario_pgto) {
+    function mostrar(descricao, fornecedor, valor, data_vencimento, data_lancamento, data_pagamento, forma_pagamento, frequencia, obs, arquivo, multa,
+        juros, desconto, taxa, subtotal, usuario_lanc, usuario_pgto, referencia, id_referencia) {
         $('#titulo_dados').text('Detalhes: ' + descricao);
         $('#descricao_dados-cli').text(descricao);
         $('#fornecedor_dados-cli').text(fornecedor);
@@ -385,6 +397,24 @@ HTML;
         }
         $('#usuario_lanc_dados-cli').text(usuario_lanc);
         $('#usuario_pgto_dados-cli').text(usuario_pgto);
+
+        // ✅ REFERÊNCIA (lógica aprimorada)
+        if (referencia && referencia !== '' && referencia !== 'null') {
+            $('#referencia_dados-cli').text(referencia);
+
+            // Se for 'Conta', não mostra ID (é NULL mesmo)
+            // Se for 'Parcela' ou 'Resíduo', mostra o ID vinculado
+            if (referencia === 'Conta') {
+                $('#id-referencia_dados-cli').closest('small').hide(); // Esconde todo o "(ID: ...)"
+            } else {
+                $('#id-referencia_dados-cli').text(id_referencia || '-');
+                $('#id-referencia_dados-cli').closest('small').show();
+            }
+            $('#row-referencia').show();
+        } else {
+            $('#row-referencia').hide();
+        }
+
         $('#modalDados').modal('show');
     }
 

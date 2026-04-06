@@ -21,19 +21,24 @@
     // Valores padrão: Admin vê tudo
     $home = '';
     $configuracoes = '';
+    //Pessoas
     $usuarios = '';
     $pacientes = '';
     $fornecedores = '';
+    $menu_pessoas = '';
+    //Cadastros
     $grupo_acessos = '';
     $acessos = '';
     $cargos = '';
     $forma_pagamento = '';
     $frequencias = '';
+    $menu_cadastros = '';
+    //Financeiro
     $pagar = '';
     $receber = '';
-    $menu_pessoas = '';
-    $menu_cadastros = '';
+    $relfin = '';
     $menu_financeiro = '';
+
     $pag_inicial = 'home';
 
     $id_cargo_user = $_SESSION['id_cargo_user'];
@@ -82,7 +87,7 @@
         $res_cargo = $cargo->fetchAll(PDO::FETCH_ASSOC);
         $nome_cargo_usuario = $res_cargo[0]['nome'];
     }
-    
+
     ?>
     <!DOCTYPE HTML>
     <html>
@@ -265,6 +270,13 @@
                                         <?php } ?>
                                         <?php if ($pagar != 'ocultar') { ?>
                                             <li><a href="index.php?pagina=pagar"><i class="fa fa-angle-right"></i> Pagar</a></li>
+                                        <?php } ?>
+                                        <?php if ($relfin != 'ocultar') { ?>
+                                            <li>
+                                                <a href="#" data-toggle="modal" data-target="#modalRelFin">
+                                                    <i class="fa fa-angle-right"></i> Relatório Financeiro
+                                                </a>
+                                            </li>
                                         <?php } ?>
                                     </ul>
                                 </li>
@@ -817,6 +829,74 @@
         </div>
     </div>
     <!-- Fim Modal Config -->
+
+    <!-- Modal Rel Financeiro -->
+    <div class="modal fade" id="modalRelFin" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="exampleModalLabel">Relatório Financeiro</h4>
+                    <button id="btn-fechar-rel" type="button" class="close" data-dismiss="modal" aria-label="Close" style="margin-top: -25px">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form method="POST" action="rel/financeiro_class.php" target="_blank">
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label>Data Inicial</label>
+                                <input type="date" name="dataInicial" class="form-control" value="<?php echo $data_atual ?>">
+                            </div>
+                            <div class="col-md-4">
+                                <label>Data Final</label>
+                                <input type="date" name="dataFinal" class="form-control" value="<?php echo $data_atual ?>">
+                            </div>
+                            <div class="col-md-4">
+                                <label>Filtro Data</label>
+                                <select name="filtro_data" class="form-control">
+                                    <option value="lancamento">Data de Lançamento</option>
+                                    <option value="vencimento">Data de Vencimento</option>
+                                    <option value="pagamento">Data de Pagamento</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label>Entradas / Saídas</label>
+                                <select name="filtro_tipo" class="form-control">
+                                    <option value="receber">Entradas / Ganhos</option>
+                                    <option value="pagar">Saídas / Despesas</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label>Tipo Lançamento</label>
+                                <select name="filtro_lancamento" class="form-control">
+                                    <option value="">Tudo</option>
+                                    <option value="Conta">Ganhos / Despesas</option>
+                                    <option value="Serviço">Serviços</option>
+                                    <option value="Cancelamento">Devoluções</option>
+                                    <option value="Compra">Compras</option>
+                                    <option value="Comissão">Comissões</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label>Pendentes / Pago</label>
+                                <select name="filtro_pendentes" class="form-control">
+                                    <option value="">Tudo</option>
+                                    <option value="Não">Pendentes</option>
+                                    <option value="Sim">Pago</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer centro">
+                        <button type="submit" class="btn btn-primary">Gerar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- Fim Modal Rel Financeiro -->
 
     <script type="text/javascript">
         function carregarImgPerfil() {
