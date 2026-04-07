@@ -1,13 +1,10 @@
 <?php
-if (!isset($pdo)) {
-    require_once __DIR__ . '/../../conexao.php';
-}
-// rel_fin.php - Visual do relatório financeiro (PADRONIZADO)
-// Recebe variáveis via $_GET do rel_fin_class.php
+// rel_sin.php - Visual do Relatório Sintético Detalhado
+// Recebe variáveis via $_GET do rel_sin_class.php
 
-// ✅ Formata datas para exibição (se não vierem formatadas do class)
-$dataInicialF = $_GET['dataInicialF'] ?? (!empty($_GET['dataInicial']) ? implode('/', array_reverse(explode('-', $_GET['dataInicial']))) : '');
-$dataFinalF = $_GET['dataFinalF'] ?? (!empty($_GET['dataFinal']) ? implode('/', array_reverse(explode('-', $_GET['dataFinal']))) : '');
+// ✅ Formata datas para exibição
+$dataInicialF = $_GET['dataInicialF'] ?? '';
+$dataFinalF = $_GET['dataFinalF'] ?? '';
 
 // ✅ Data por extenso (compatível com PHP 8.1+)
 if (!isset($_GET['data_extenso'])) {
@@ -34,7 +31,6 @@ if (!isset($_GET['data_extenso'])) {
         'Saturday' => 'Sábado',
         'Sunday' => 'Domingo'
     ];
-
     $data_en = date('l, j \d\e F \d\e Y', strtotime(date('Y-m-d')));
     $data_pt = strtr($data_en, $meses + $dias);
     $_GET['data_extenso'] = ucfirst($data_pt);
@@ -318,7 +314,6 @@ if (!isset($_GET['data_extenso'])) {
                     <p><?php echo $_GET['filtro_tipo']; ?></p>
                 </div>
             </div>
-            <!-- ✅ DATA POR EXTENSO (PADRÃO DOS OUTROS RELATÓRIOS) -->
             <div class="header-date">
                 <strong><?php echo $_GET['data_extenso']; ?></strong>
             </div>
@@ -333,32 +328,16 @@ if (!isset($_GET['data_extenso'])) {
                 <td class="titulo">Total Vencidas</td>
             </tr>
             <tr>
-                <td class="valor" style="color: #2c3e50;">
-                    R$ <?php echo number_format($_GET['total_geral'], 2, ',', '.'); ?>
-                </td>
-                <td class="valor" style="color: #27ae60;">
-                    R$ <?php echo number_format($_GET['total_pago'], 2, ',', '.'); ?>
-                </td>
-                <td class="valor" style="color: #e74c3c;">
-                    R$ <?php echo number_format($_GET['total_pendente'], 2, ',', '.'); ?>
-                </td>
-                <td class="valor" style="color: #8a2116;">
-                    R$ <?php echo number_format($_GET['total_vencidas'], 2, ',', '.'); ?>
-                </td>
+                <td class="valor" style="color: #2c3e50;">R$ <?php echo number_format($_GET['total_geral'], 2, ',', '.'); ?></td>
+                <td class="valor" style="color: #27ae60;">R$ <?php echo number_format($_GET['total_pago'], 2, ',', '.'); ?></td>
+                <td class="valor" style="color: #e74c3c;">R$ <?php echo number_format($_GET['total_pendente'], 2, ',', '.'); ?></td>
+                <td class="valor" style="color: #f39c12;">R$ <?php echo number_format($_GET['total_vencidas'], 2, ',', '.'); ?></td>
             </tr>
             <tr>
-                <td class="valor">
-                    <?php echo $_GET['qtd_pago'] + $_GET['qtd_pendente']; ?> registros
-                </td>
-                <td class="valor">
-                    <?php echo $_GET['qtd_pago']; ?> pagos
-                </td>
-                <td class="valor">
-                    <?php echo $_GET['qtd_pendente']; ?> pendentes
-                </td>
-                <td class="valor">
-                    <?php echo $_GET['qtd_vencidas']; ?> vencidas
-                </td>
+                <td class="valor"><?php echo $_GET['qtd_pago'] + $_GET['qtd_pendente'] + $_GET['qtd_vencidas']; ?> registros</td>
+                <td class="valor"><?php echo $_GET['qtd_pago']; ?> pagos</td>
+                <td class="valor"><?php echo $_GET['qtd_pendente']; ?> pendentes</td>
+                <td class="valor"><?php echo $_GET['qtd_vencidas']; ?> vencidas</td>
             </tr>
         </table>
 
@@ -374,8 +353,8 @@ if (!isset($_GET['data_extenso'])) {
                     <td><?php echo $_GET['filtro_data']; ?></td>
                 </tr>
                 <tr>
-                    <td><strong>Tipo Lançamento:</strong></td>
-                    <td><?php echo $_GET['filtro_lancamento']; ?></td>
+                    <td><strong>Filtro Pessoas:</strong></td>
+                    <td><?php echo $_GET['filtro_pessoas']; ?></td>
                 </tr>
                 <tr>
                     <td><strong>Status:</strong></td>
@@ -389,8 +368,8 @@ if (!isset($_GET['data_extenso'])) {
             <thead>
                 <tr>
                     <th style="width: 12%;">Data</th>
-                    <th style="width: 35%;">Descrição</th>
-                    <th style="width: 25%;"><?php echo $_GET['filtro_tipo'] === 'Saídas / Despesas' ? 'Fornecedor' : 'Paciente'; ?></th>
+                    <th style="width: 30%;">Descrição</th>
+                    <th style="width: 25%;"><?php echo htmlspecialchars($_GET['label_pessoa'] ?? 'Pessoa'); ?></th>
                     <th style="width: 13%;">Forma Pgto</th>
                     <th style="width: 10%;">Status</th>
                     <th style="width: 15%; text-align: right;">Valor</th>
@@ -435,18 +414,18 @@ if (!isset($_GET['data_extenso'])) {
             </tfoot>
         </table>
 
-        <!-- ✅ RODAPÉ PADRONIZADO (IGUAL AOS OUTROS RELATÓRIOS) -->
+        <!-- ✅ RODAPÉ PADRONIZADO -->
         <div class="footer-sistema">
-            <div class="footer-nome"><?php echo htmlspecialchars($nome_sistema); ?></div>
-            <div class="footer-endereco"><?php echo htmlspecialchars($endereco_sistema); ?></div>
+            <div class="footer-nome"><?php echo htmlspecialchars($_GET['nome_sistema'] ?? 'Sistema'); ?></div>
+            <div class="footer-endereco"><?php echo htmlspecialchars($_GET['endereco_sistema'] ?? ''); ?></div>
             <div class="footer-contato">
-                <a href="tel:<?php echo preg_replace('/[^0-9]/', '', $telefone_sistema); ?>">📱 <?php echo htmlspecialchars($telefone_sistema); ?></a>
-                <?php if (!empty($instagram_sistema)): ?>
-                    <a href="<?php echo htmlspecialchars($instagram_sistema); ?>" class="footer-instagram" target="_blank">📷 Instagram</a>
+                <a href="tel:<?php echo preg_replace('/[^0-9]/', '', $_GET['telefone_sistema'] ?? ''); ?>">📱 <?php echo htmlspecialchars($_GET['telefone_sistema'] ?? ''); ?></a>
+                <?php if (!empty($_GET['instagram_sistema'])): ?>
+                    <a href="<?php echo htmlspecialchars($_GET['instagram_sistema']); ?>" class="footer-instagram" target="_blank">📷 Instagram</a>
                 <?php endif; ?>
             </div>
             <div class="footer-dev">
-                Desenvolvido por: <a href="<?php echo htmlspecialchars($site_dev ?: '#'); ?>" target="_blank"><?php echo htmlspecialchars($desenvolvedor ?: 'Sua Empresa'); ?></a>
+                Desenvolvido por: <a href="<?php echo htmlspecialchars($_GET['site_dev'] ?: '#'); ?>" target="_blank"><?php echo htmlspecialchars($_GET['desenvolvedor'] ?: 'Sua Empresa'); ?></a>
             </div>
             <div class="footer-data">
                 Relatório gerado em <?php echo date('d/m/Y \à\s H:i:s'); ?>
@@ -457,7 +436,6 @@ if (!isset($_GET['data_extenso'])) {
     <div id="footer-paginacao">
         Página <span class="page-number"></span>
     </div>
-
 </body>
 
 </html>

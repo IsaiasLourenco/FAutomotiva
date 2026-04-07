@@ -149,42 +149,6 @@
         </style>
         <!--pie-chart --><!-- index page sales reviews visitors pie chart -->
         <script src="js/pie-chart.js" type="text/javascript"></script>
-        <script type="text/javascript">
-            $(document).ready(function() {
-                $('#demo-pie-1').pieChart({
-                    barColor: '#2dde98',
-                    trackColor: '#eee',
-                    lineCap: 'round',
-                    lineWidth: 8,
-                    onStep: function(from, to, percent) {
-                        $(this.element).find('.pie-value').text(Math.round(percent) + '%');
-                    }
-                });
-
-                $('#demo-pie-2').pieChart({
-                    barColor: '#8e43e7',
-                    trackColor: '#eee',
-                    lineCap: 'butt',
-                    lineWidth: 8,
-                    onStep: function(from, to, percent) {
-                        $(this.element).find('.pie-value').text(Math.round(percent) + '%');
-                    }
-                });
-
-                $('#demo-pie-3').pieChart({
-                    barColor: '#ffc168',
-                    trackColor: '#eee',
-                    lineCap: 'square',
-                    lineWidth: 8,
-                    onStep: function(from, to, percent) {
-                        $(this.element).find('.pie-value').text(Math.round(percent) + '%');
-                    }
-                });
-
-            });
-        </script>
-        <!-- //pie-chart --><!-- index page sales reviews visitors pie chart -->
-
     </head>
 
     <body class="cbp-spmenu-push">
@@ -890,9 +854,9 @@
                                 <label>Pendentes / Pago</label>
                                 <select name="filtro_pendente" class="form-control">
                                     <option value="">Tudo</option>
-                                    <option value="pendente">Pendentes</option> 
-                                    <option value="pago">Pago</option> 
-                                    <option value="vencidas">Vencidas</option> 
+                                    <option value="pendente">Pendentes</option>
+                                    <option value="pago">Pago</option>
+                                    <option value="vencidas">Vencidas</option>
                                 </select>
                             </div>
                         </div>
@@ -948,19 +912,18 @@
                             <div class="col-md-4">
                                 <label>Filtro Pessoas</label>
                                 <select name="filtro_pessoas" class="form-control">
-                                    <option value="clientes">Clientes</option>
-                                    <option value="fornecedores">Fornecedores</option>
-                                    <option value="funcionarios">Funcionários</option>
-                                    <option value="usuarios">Usuários</option>
+                                    <!-- As opções serão inseridas dinamicamente pelo JS acima -->
+                                    <!-- Mantém vazio ou com placeholder -->
+                                    <option value="">Selecione...</option>
                                 </select>
                             </div>
                             <div class="col-md-4">
                                 <label>Pendentes / Pago</label>
                                 <select name="filtro_pendente" class="form-control">
                                     <option value="">Tudo</option>
-                                    <option value="pendente">Pendentes</option> 
-                                    <option value="pago">Pago</option> 
-                                    <option value="vencidas">Vencidas</option> 
+                                    <option value="pendente">Pendentes</option>
+                                    <option value="pago">Pago</option>
+                                    <option value="vencidas">Vencidas</option>
                                 </select>
                             </div>
                         </div>
@@ -1222,5 +1185,66 @@
                     if (juros) juros.value = limparMoeda(juros.value);
                 });
             }
+        });
+
+        $(document).ready(function() {
+
+            // ✅ 1. Pie Charts (funcionalidade existente)
+            $('#demo-pie-1').pieChart({
+                barColor: '#2dde98',
+                trackColor: '#eee',
+                lineCap: 'round',
+                lineWidth: 8,
+                onStep: function(from, to, percent) {
+                    $(this.element).find('.pie-value').text(Math.round(percent) + '%');
+                }
+            });
+            $('#demo-pie-2').pieChart({
+                barColor: '#8e43e7',
+                trackColor: '#eee',
+                lineCap: 'butt',
+                lineWidth: 8,
+                onStep: function(from, to, percent) {
+                    $(this.element).find('.pie-value').text(Math.round(percent) + '%');
+                }
+            });
+            $('#demo-pie-3').pieChart({
+                barColor: '#ffc168',
+                trackColor: '#eee',
+                lineCap: 'square',
+                lineWidth: 8,
+                onStep: function(from, to, percent) {
+                    $(this.element).find('.pie-value').text(Math.round(percent) + '%');
+                }
+            });
+
+            // ✅ 2. Lógica dos filtros do Relatório Sintético (NOVO)
+            $('select[name="filtro_tipo"]').on('change', function() {
+                var tipo = $(this).val();
+                var selectPessoas = $('select[name="filtro_pessoas"]');
+
+                // ✅ Limpar opções dinâmicas (mantém só a primeira opção estática se houver)
+                selectPessoas.find('option').remove();
+
+                if (tipo === 'receber') {
+                    // ✅ Só pacientes para RECEBER
+                    selectPessoas.append('<option value="">Selecione...</option>');
+                    selectPessoas.append('<option value="pacientes">Pacientes</option>');
+                } else if (tipo === 'pagar') {
+                    // ✅ Fornecedores E funcionários para PAGAR (ambos são despesas)
+                    selectPessoas.append('<option value="">Selecione...</option>');
+                    selectPessoas.append('<option value="fornecedores">Fornecedores</option>');
+                    selectPessoas.append('<option value="funcionarios">Funcionários</option>');
+                } else {
+                    // ✅ "Tudo": mostra todas as opções válidas
+                    selectPessoas.append('<option value="">Selecione...</option>');
+                    selectPessoas.append('<option value="pacientes">Pacientes</option>');
+                    selectPessoas.append('<option value="fornecedores">Fornecedores</option>');
+                    selectPessoas.append('<option value="funcionarios">Funcionários</option>');
+                }
+            });
+
+            // ✅ Disparar change ao carregar (para inicializar correto)
+            $('select[name="filtro_tipo"]').trigger('change');
         });
     </script>

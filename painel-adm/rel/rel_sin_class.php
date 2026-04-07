@@ -10,9 +10,9 @@ require_once __DIR__ . '/../../conexao.php';
 $dataInicial       = $_POST['dataInicial'] ?? '';
 $dataFinal         = $_POST['dataFinal']   ?? '';
 $filtro_data       = $_POST['filtro_data'] ?? 'vencimento';
-$filtro_tipo       = $_POST['filtro_tipo'] ?? '';  // "" = tudo, "receber", "pagar"
-$filtro_lancamento = $_POST['filtro_lancamento'] ?? '';
-$filtro_pendente   = $_POST['filtro_pendente'] ?? '';  // "", "pago", "pendente", "vencidas"
+$filtro_tipo       = $_POST['filtro_tipo'] ?? '';
+$filtro_pessoas    = $_POST['filtro_pessoas'] ?? '';
+$filtro_pendente   = $_POST['filtro_pendente'] ?? '';
 
 // ✅ 4. Mapear filtro_data para coluna do banco
 $mapaColunas = [
@@ -27,10 +27,9 @@ $hoje = date('Y-m-d');
 $params = [];
 $where_comum = "";
 
-// ✅ Filtro de período (aplica em ambas as tabelas se UNION)
+// ✅ Filtro de período (SEM comparação com '0000-00-00')
 if (!empty($dataInicial) && !empty($dataFinal)) {
-    $where_comum .= " AND {$colunaData} IS NOT NULL  
-                      AND {$colunaData} != '0000-00-00'
+    $where_comum .= " AND {$colunaData} IS NOT NULL 
                       AND {$colunaData} >= :data_inicial 
                       AND {$colunaData} <= :data_final";
     $params[':data_inicial'] = $dataInicial;
@@ -46,25 +45,25 @@ if (!empty($filtro_lancamento)) {
     }
 }
 
-// ✅ Filtro por status (pago/pendente/vencidas)
+// ✅ Filtro por status (SEM comparação com '0000-00-00')
 if ($filtro_pendente === 'pago') {
-    $where_comum .= " AND r.data_pagamento IS NOT NULL 
-                      AND r.data_pagamento != '0000-00-00'";
+    $where_comum .= " AND r.data_pagamento IS NOT NULL";
 } elseif ($filtro_pendente === 'pendente') {
-    $where_comum .= " AND (r.data_pagamento IS NULL 
-                          OR r.data_pagamento = '0000-00-00')
-                      AND (r.data_vencimento IS NULL  
-                           OR r.data_vencimento = '0000-00-00' 
-                           OR r.data_vencimento >= :hoje)";
+    $where_comum .= " AND r.data_pagamento IS NULL 
+                      AND (r.data_vencimento IS NULL OR r.data_vencimento >= :hoje)";
     $params[':hoje'] = $hoje;
 } elseif ($filtro_pendente === 'vencidas') {
-    $where_comum .= " AND (r.data_pagamento IS NULL 
-                          OR r.data_pagamento = '0000-00-00')
+    $where_comum .= " AND r.data_pagamento IS NULL 
                       AND r.data_vencimento IS NOT NULL 
-                      AND r.data_vencimento != '0000-00-00'
                       AND r.data_vencimento < :hoje";
     $params[':hoje'] = $hoje;
 }
+
+// ✅ Definir variáveis de estilo ANTES de usar
+$tipo_movimento = '';
+$cor_destaque = '#2c3e50';
+$cor_fundo = '#f8f9fa';
+$label_pessoa = 'Pessoa';
 
 // ✅ 6. Montar query: UNION se "Tudo", simples se filtrado
 if (empty($filtro_tipo)) {
@@ -72,8 +71,7 @@ if (empty($filtro_tipo)) {
     $tipo_movimento = 'Entradas e Saídas';
     $cor_destaque = '#2980b9';
     $cor_fundo = '#d6eaf8';
-    
-    // Query para RECEBER
+
     $sql_receber = "SELECT r.id, r.descricao, r.valor, r.subtotal, r.data_vencimento, 
                            r.data_pagamento, r.data_lancamento, r.forma_pagamento,
                            r.referencia, r.frequencia, r.obs, r.arquivo,
@@ -85,8 +83,7 @@ if (empty($filtro_tipo)) {
                     LEFT JOIN pacientes p ON r.paciente = p.id
                     LEFT JOIN forma_pagamento fp ON r.forma_pagamento = fp.id
                     WHERE 1=1 {$where_comum}";
-    
-    // Query para PAGAR
+
     $sql_pagar = "SELECT r.id, r.descricao, r.valor, r.subtotal, r.data_vencimento, 
                          r.data_pagamento, r.data_lancamento, r.forma_pagamento,
                          r.referencia, r.frequencia, r.obs, r.arquivo,
@@ -98,10 +95,8 @@ if (empty($filtro_tipo)) {
                   LEFT JOIN fornecedores p ON r.fornecedor = p.id
                   LEFT JOIN forma_pagamento fp ON r.forma_pagamento = fp.id
                   WHERE 1=1 {$where_comum}";
-    
-    // ✅ UNION ALL (mantém ordem, mais rápido que UNION)
+
     $sql = "({$sql_receber}) UNION ALL ({$sql_pagar}) ORDER BY {$colunaData} DESC";
-    
 } else {
     // ✅ Query simples para uma tabela só
     if ($filtro_tipo === 'pagar') {
@@ -111,6 +106,7 @@ if (empty($filtro_tipo)) {
         $tipo_movimento = 'Saídas / Despesas';
         $cor_destaque = '#e74c3c';
         $cor_fundo = '#fadbd8';
+        $label_pessoa = 'Fornecedor';
     } else {
         $tabela = 'receber';
         $campo_pessoa = 'paciente';
@@ -118,11 +114,12 @@ if (empty($filtro_tipo)) {
         $tipo_movimento = 'Entradas / Ganhos';
         $cor_destaque = '#27ae60';
         $cor_fundo = '#d5f4e6';
+        $label_pessoa = 'Paciente';
     }
-    
+
     $sql = "SELECT r.*, p.nome as pessoa_nome, fp.nome as forma_nome, 
                    '{$tabela}' as tipo_tabela, 
-                   '{$campo_pessoa}' as label_pessoa
+                   '{$label_pessoa}' as label_pessoa
             FROM {$tabela} r
             LEFT JOIN {$tabela_pessoa} p ON r.{$campo_pessoa} = p.id
             LEFT JOIN forma_pagamento fp ON r.forma_pagamento = fp.id
@@ -143,7 +140,7 @@ try {
     error_log("Erro rel_sin: " . $e->getMessage());
 }
 
-// ✅ 8. Calcular totais e quantidades
+// ✅ 8. Calcular totais (validando datas no PHP)
 $total_geral = 0;
 $qtd_pago = 0;
 $qtd_pendente = 0;
@@ -156,12 +153,18 @@ foreach ($contas as $c) {
     $valorBase = (!empty($c['subtotal']) && $c['subtotal'] > 0) ? $c['subtotal'] : ($c['valor'] ?? 0);
     $data_pagamento = $c['data_pagamento'] ?? null;
     $data_vencimento = $c['data_vencimento'] ?? null;
-    
-    if (!is_null($data_pagamento) && $data_pagamento != '0000-00-00') {
+
+    $data_pagamento_valida = $data_pagamento
+        && $data_pagamento != '0000-00-00'
+        && strtotime($data_pagamento) !== false;
+    $data_vencimento_valida = $data_vencimento
+        && $data_vencimento != '0000-00-00'
+        && strtotime($data_vencimento) !== false;
+
+    if ($data_pagamento_valida) {
         $total_pago += $valorBase;
         $qtd_pago++;
-    } elseif (!empty($data_vencimento) && $data_vencimento != '0000-00-00' 
-              && strtotime($data_vencimento) !== false && $data_vencimento < $hoje) {
+    } elseif ($data_vencimento_valida && $data_vencimento < $hoje) {
         $total_vencidas += $valorBase;
         $qtd_vencidas++;
     } else {
@@ -175,17 +178,24 @@ $total_geral = $total_pago + $total_pendente + $total_vencidas;
 $dataInicialF = !empty($dataInicial) ? date('d/m/Y', strtotime($dataInicial)) : '...';
 $dataFinalF = !empty($dataFinal) ? date('d/m/Y', strtotime($dataFinal)) : '...';
 
-$texto_filtro_data = match($filtro_data) {
+$texto_filtro_data = match ($filtro_data) {
     'lancamento' => 'Data de Lançamento',
     'vencimento' => 'Data de Vencimento',
     'pagamento'  => 'Data de Pagamento',
     default => 'Data de Vencimento'
 };
 
-$texto_filtro_pendente = match($filtro_pendente) {
+$texto_filtro_pendente = match ($filtro_pendente) {
     'pago' => 'Pagos',
     'pendente' => 'Pendentes',
     'vencidas' => 'Vencidas',
+    default => 'Todos'
+};
+
+$texto_filtro_pessoas = match ($filtro_pessoas) {
+    'pacientes' => 'Pacientes',
+    'fornecedores' => 'Fornecedores',
+    'funcionarios' => 'Funcionários',
     default => 'Todos'
 };
 
@@ -194,6 +204,7 @@ $_GET['dataInicialF']       = $dataInicialF;
 $_GET['dataFinalF']         = $dataFinalF;
 $_GET['filtro_data']        = $texto_filtro_data;
 $_GET['filtro_tipo']        = $tipo_movimento;
+$_GET['filtro_pessoas']     = $texto_filtro_pessoas;
 $_GET['filtro_lancamento']  = !empty($filtro_lancamento) ? $filtro_lancamento : 'Todos';
 $_GET['filtro_pendente']    = $texto_filtro_pendente;
 $_GET['total_geral']        = $total_geral;
@@ -207,6 +218,7 @@ $_GET['contas']             = $contas;
 $_GET['tipo_movimento']     = $tipo_movimento;
 $_GET['cor_destaque']       = $cor_destaque;
 $_GET['cor_fundo']          = $cor_fundo;
+$_GET['label_pessoa']       = $label_pessoa;
 
 // Configurações do sistema + URL
 $config = $pdo->query("SELECT * FROM configuracoes LIMIT 1")->fetch(PDO::FETCH_ASSOC);
@@ -216,7 +228,7 @@ $_GET['telefone_sistema']   = $config['telefone_sistema'] ?? '';
 $_GET['instagram_sistema']  = $config['instagram_sistema'] ?? '';
 $_GET['desenvolvedor']      = $config['desenvolvedor'] ?? '';
 $_GET['site_dev']           = $config['site_dev'] ?? '';
-$_GET['url_sistema']        = $config['url_sistema'] ?? 'https://odontoclinic.vetor256.com/';
+$_GET['url_sistema']        = 'https://odontoclinic.vetor256.com';
 
 // ✅ 11. Incluir o relatório visual
 include __DIR__ . '/rel_sin.php';
@@ -231,11 +243,10 @@ $options = new Options();
 $options->setIsRemoteEnabled(true);
 $options->set('defaultFont', 'DejaVu Sans');
 $options->setIsPhpEnabled(true);
-// ✅ Permitir acesso à pasta de imagens
 $options->set('chroot', [
     realpath(__DIR__ . '/../../'),
-    'C:/xampp/htdocs/OdontoClinic',  // Ajuste para localhost
-    //'https://odontoclinic.vetor256.com'  // Ajuste para hospedagem
+    '/home1/isaia876/odontoclinic.vetor256.com',
+    '/tmp',
 ]);
 
 $pdf = new Dompdf($options);
