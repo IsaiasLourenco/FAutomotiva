@@ -45,7 +45,7 @@ if (!isset($_GET['data_extenso'])) {
 
 <head>
     <meta charset="UTF-8">
-    <title>Relatório Financeiro</title>
+    <title>Relatório Sintético</title>
     <style>
         * {
             margin: 0;
@@ -314,7 +314,7 @@ if (!isset($_GET['data_extenso'])) {
                     <img src="<?php echo $url_sistema . '/img/Logo.png'; ?>" alt="Logotipo">
                 </div>
                 <div class="header-title">
-                    <h1>Relatório Financeiro</h1>
+                    <h1>Relatório Sintético</h1>
                     <p><?php echo $_GET['filtro_tipo']; ?></p>
                 </div>
             </div>

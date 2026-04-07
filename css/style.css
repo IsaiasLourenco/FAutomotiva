@@ -199,6 +199,10 @@ body {
   color: #363636;
 }
 
+.negrito {
+  font-weight: bold;
+}
+
 /* Links de filtro - TODOS os estados sem sublinhado */
 .filtro-rapido a,
 .filtro-rapido a:visited,

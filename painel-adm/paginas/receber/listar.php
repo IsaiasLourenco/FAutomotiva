@@ -64,8 +64,12 @@ $res = $stmt->fetchAll(PDO::FETCH_ASSOC);
 $linhas = @count($res);
 
 // ✅ Inicializa totais
-$total_pendentes = 0;
-$total_pago = 0;
+$total_pendentes    = 0;
+$total_pago         = 0;
+$total_vencidas     = 0;
+$qtd_pendentes      = 0;
+$qtd_pago           = 0;
+$qtd_vencidas      = 0;
 
 echo <<<HTML
 <table class="table table-hover tabela-pequena" id="tabela">
@@ -102,11 +106,18 @@ if ($linhas > 0) {
         $taxa = $res[$i]['taxa'] ?? 0;
         $subtotal = $res[$i]['subtotal'] ?? 0;
 
-        // ✅ Acumula totais (AGORA COM VARIÁVEIS JÁ DEFINIDAS)
-        if (!is_null($data_pagamento)) {
-            $total_pago += $valor;
+        // ✅ Acumula totais corretamente usando subtotal (se existir)
+        $valorBase = ($subtotal && $subtotal > 0) ? $subtotal : $valor;
+
+        if (!is_null($data_pagamento) && $data_pagamento != '0000-00-00') {
+            $total_pago += $valorBase;
+            $qtd_pago++;
+        } elseif (!empty($data_vencimento) && $data_vencimento < $hoje) {
+            $total_vencidas += $valorBase;
+            $qtd_vencidas++;
         } else {
-            $total_pendentes += $valor;
+            $total_pendentes += $valorBase;
+            $qtd_pendentes++;
         }
 
         $valorF = 'R$ ' . number_format($valor, 2, ',', '.');
@@ -351,15 +362,27 @@ HTML;
 // ✅ Formata totais para exibição
 $total_pendentesF = number_format($total_pendentes, 2, ',', '.');
 $total_pagoF = number_format($total_pago, 2, ',', '.');
+$total_vencidasF = number_format($total_vencidas, 2, ',', '.');
+$qtd_pendentesF = str_pad($qtd_pendentes, 2, '0', STR_PAD_LEFT);
+$qtd_pagoF = str_pad($qtd_pago, 2, '0', STR_PAD_LEFT);
+$qtd_vencidasF = str_pad($qtd_vencidas, 2, '0', STR_PAD_LEFT);
 
 echo <<<HTML
         </tbody>
         <tfoot>
             <tr>
-                <td colspan="7" class="text-end font-weight-bold">
-                    <span class="text-danger">Total Pendentes: R$ {$total_pendentesF}</span> 
-                    &nbsp;&nbsp;|&nbsp;&nbsp; 
-                    <span class="text-success">Total Recebido: R$ {$total_pagoF}</span>
+                <td colspan="6" class="text-end negrito">
+                    <span class="text-warning">Qtd Vencidas: {$qtd_vencidasF}</span> 
+                        &nbsp;&nbsp;|&nbsp;&nbsp; 
+                    <span class="text-warning">$ Vencidas: R$ {$total_vencidasF}</span> 
+                        &nbsp;&nbsp;|&nbsp;&nbsp; 
+                    <span class="text-danger">Qtd Pendentes: {$qtd_pendentesF}</span>
+                        &nbsp;&nbsp;|&nbsp;&nbsp;
+                    <span class="text-danger">$ Pendentes: R$ {$total_pendentesF}</span> 
+                        &nbsp;&nbsp;|&nbsp;&nbsp; 
+                    <span class="text-success">Qtd Pagas: {$qtd_pagoF}</span>
+                        &nbsp;&nbsp;|&nbsp;&nbsp;
+                    <span class="text-success">$ Pagas: R$ {$total_pagoF}</span>
                 </td>
             </tr>
         </tfoot>
@@ -491,7 +514,6 @@ HTML;
         if (referencia && referencia !== '' && referencia !== 'null') {
             $('#referencia_dados-cli').text(referencia);
 
-            // Se for 'Conta', não mostra ID (é NULL mesmo)
             // Se for 'Parcela' ou 'Resíduo', mostra o ID vinculado
             if (referencia === 'Conta') {
                 $('#id-referencia_dados-cli').closest('small').hide(); // Esconde todo o "(ID: ...)"

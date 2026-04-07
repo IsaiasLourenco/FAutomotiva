@@ -140,7 +140,7 @@ try {
     $contas = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (Exception $e) {
     $contas = [];
-    error_log("Erro rel_fin: " . $e->getMessage());
+    error_log("Erro rel_sin: " . $e->getMessage());
 }
 
 // ✅ 8. Calcular totais e quantidades
@@ -219,7 +219,7 @@ $_GET['site_dev']           = $config['site_dev'] ?? '';
 $_GET['url_sistema']        = $config['url_sistema'] ?? 'https://odontoclinic.vetor256.com/';
 
 // ✅ 11. Incluir o relatório visual
-include __DIR__ . '/rel_fin.php';
+include __DIR__ . '/rel_sin.php';
 
 $html = ob_get_clean();
 
@@ -244,6 +244,6 @@ $pdf->loadHtml($html);
 $pdf->render();
 
 header("Content-Type: application/pdf");
-header("Content-Disposition: inline; filename=relatorio_financeiro_" . date('Y-m-d') . ".pdf");
-$pdf->stream("relatorio_financeiro_" . date('Y-m-d') . ".pdf", ["Attachment" => false]);
+header("Content-Disposition: inline; filename=relatorio_sintetico_" . date('Y-m-d') . ".pdf");
+$pdf->stream("relatorio_sintetico_" . date('Y-m-d') . ".pdf", ["Attachment" => false]);
 exit;

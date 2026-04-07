@@ -4113,6 +4113,10 @@ ul.bt-list li a {
   font-size: 10px;
 }
 
+.negrito {
+  font-weight: bold;
+}
+
 .ico-grande {
   font-size: 18px;
 }

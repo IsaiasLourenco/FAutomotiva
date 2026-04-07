@@ -3,8 +3,15 @@ if (!isset($pdo)) {
     require_once __DIR__ . '/../../conexao.php';
 }
 
-$dataInicial = !empty($_GET['dataInicial']) ? $_GET['dataInicial'] : date('Y-m-01');
-$dataFinal   = !empty($_GET['dataFinal'])   ? $_GET['dataFinal']   : date('Y-m-t');
+// ✅ DEPOIS (sem filtro automático):
+$dataInicial = $_GET['dataInicial'] ?? '';
+$dataFinal   = $_GET['dataFinal'] ?? '';
+
+// Só usa mês atual se o usuário explicitamente não enviou nada
+if (empty($dataInicial) && empty($dataFinal)) {
+    $dataInicial = '';  // ← Vazio = sem filtro de período
+    $dataFinal = '';
+}
 $pago = $_GET['pago'] ?? '';
 $tipo_data = $_GET['tipo_data'] ?? 'vencimento';
 
@@ -33,10 +40,10 @@ if ($tipo_data === 'vencimento') {
     $texto_tipo_data = 'Data de Vencimento';
 }
 
-// ✅ SE DATAS VAZIAS, USA MÊS ATUAL
+// ✅ SE DATAS VAZIAS, NÃO FILTRA POR PERÍODO (traz todos os registros)
 if (empty($dataInicial) || empty($dataFinal)) {
-    $dataInicial = date('Y-m-01');  // Primeiro dia do mês
-    $dataFinal = date('Y-m-t');     // Último dia do mês
+    $dataInicial = '';  // ← Deixa vazio para não filtrar
+    $dataFinal = '';
 }
 
 setlocale(LC_TIME, 'pt_BR', 'ptb', 'pt_BR.UTF-8');
@@ -52,9 +59,13 @@ $desenvolvedor = $config['desenvolvedor'] ?? '';
 $site_dev = $config['site_dev'] ?? '';
 
 // ✅ INICIALIZA TOTAIS ANTES (FORA DO TRY)
-$total_pendentes = 0;
-$total_pago = 0;
-$total_geral = 0;
+$total_pendentes    = 0;
+$total_pago         = 0;
+$total_vencidas     = 0;
+$qtd_pendentes      = 0;
+$qtd_pagas          = 0;
+$qtd_vencidas      = 0;
+
 $contas = [];
 ?>
 <!DOCTYPE html>
@@ -379,6 +390,7 @@ $contas = [];
             </thead>
             <tbody>
                 <?php
+
                 try {
                     $coluna = match ($tipo_data) {
                         'lancamento' => 'data_lancamento',
@@ -386,50 +398,79 @@ $contas = [];
                         default => 'data_vencimento'
                     };
 
-                    $sql = "SELECT r.*, p.nome as paciente_nome, fp.nome as forma_nome 
-                            FROM receber r
-                            LEFT JOIN pacientes p ON r.paciente = p.id
-                            LEFT JOIN forma_pagamento fp ON r.forma_pagamento = fp.id
-                            WHERE $coluna IS NOT NULL
-                            AND $coluna BETWEEN :ini AND :fim";
+                    // ✅ Query base neutra
+                    $sql = "SELECT r.*, p.nome as paciente_nome, fp.nome as forma_nome FROM receber r
+                                                                                       LEFT JOIN pacientes p ON r.paciente = p.id
+                                                                                       LEFT JOIN forma_pagamento fp ON r.forma_pagamento = fp.id
+                                                                                       WHERE 1=1";
 
-                    if ($pago === 'pagas') {
-                        $sql .= " AND r.data_pagamento IS NOT NULL";
-                    } elseif ($pago === 'pendentes') {
-                        $sql .= " AND r.data_pagamento IS NULL";
-                    } elseif ($pago === 'vencidas') {
-                        $sql .= " AND r.data_vencimento < :hoje AND r.data_pagamento IS NULL";
+                    $params = [];
+
+                    // ✅ Só adiciona filtro de período se tiver datas preenchidas
+                    if (!empty($dataInicial) && !empty($dataFinal)) {
+                        $sql .= " AND $coluna IS NOT NULL 
+                                                                               AND $coluna != '' 
+                                                                               AND $coluna != '0000-00-00'
+                                                                               AND $coluna >= :ini 
+                                                                               AND $coluna <= :fim";
+                        $params[':ini'] = $dataInicial;
+                        $params[':fim'] = $dataFinal;
                     }
 
-                    $dataInicial = !empty($dataInicial) ? $dataInicial : date('Y-m-01');
-                    $dataFinal   = !empty($dataFinal)   ? $dataFinal   : date('Y-m-t');
+                    // ✅ Filtros de status
+                    if ($pago === 'pagas') {
+                        $sql .= " AND r.data_pagamento IS NOT NULL AND r.data_pagamento != '' 
+                                                                   AND r.data_pagamento != '0000-00-00'";
+                    } elseif ($pago === 'pendentes') {
+                        $sql .= " AND (r.data_pagamento IS NULL 
+                                                                OR r.data_pagamento = '' 
+                                                                OR r.data_pagamento = '0000-00-00')";
+                    } elseif ($pago === 'vencidas') {
+                        $sql .= " AND r.data_vencimento IS NOT NULL 
+                                                               AND r.data_vencimento != '' 
+                                                               AND r.data_vencimento != '0000-00-00'
+                                                               AND r.data_vencimento < :hoje 
+                                                               AND (r.data_pagamento IS NULL 
+                                                               OR r.data_pagamento = '' 
+                                                               OR r.data_pagamento = '0000-00-00')";
+                        $params[':hoje'] = date('Y-m-d');
+                    }
 
                     $sql .= " ORDER BY r.id DESC";
-                    $stmt = $pdo->prepare($sql);
 
-                    if ($pago === 'vencidas') {
-                        $stmt->execute([':ini' => $dataInicial, ':fim' => $dataFinal, ':hoje' => date('Y-m-d')]);
-                    } else {
-                        $stmt->execute([':ini' => $dataInicial, ':fim' => $dataFinal]);
+                    // ✅ Prepara e executa SÓ com os parâmetros necessários
+                    $stmt = $pdo->prepare($sql);
+                    foreach ($params as $k => $v) {
+                        $stmt->bindValue($k, $v);
                     }
+                    $stmt->execute();
 
                     $contas = $stmt->fetchAll(PDO::FETCH_ASSOC);
-                    $qtd_pendentes = 0;
-                    $qtd_pagas = 0;
-                    // ✅ CALCULA TOTAIS DENTRO DO TRY
+                    $hoje = date('Y-m-d');
                     foreach ($contas as $c) {
-                        $pago_status = (!empty($c['data_pagamento']) && $c['data_pagamento'] != '0000-00-00') ? 'pago' : 'pendente';
+                        // ✅ Define valor base (prioriza subtotal)
+                        $valorBase = (!empty($c['subtotal']) && $c['subtotal'] > 0) ? $c['subtotal'] : ($c['valor'] ?? 0);
 
-                        if ($pago_status === 'pago') {
-                            $total_pago += $c['subtotal'] ?? $c['valor'] ?? 0;
+                        $data_pagamento = $c['data_pagamento'] ?? null;
+                        $data_vencimento = $c['data_vencimento'] ?? null;
+
+                        // ✅ Classifica igual ao listar.php
+                        if (!is_null($data_pagamento) && $data_pagamento != '' && $data_pagamento != '0000-00-00') {
+                            // → PAGA
+                            $total_pago += $valorBase;
                             $qtd_pagas++;
+                        } elseif (!empty($data_vencimento) && $data_vencimento != '0000-00-00' && $data_vencimento < $hoje) {
+                            // → VENCIDA
+                            $total_vencidas += $valorBase;
+                            $qtd_vencidas++;
                         } else {
-                            $total_pendentes += $c['valor'] ?? 0;
+                            // → PENDENTE
+                            $total_pendentes += $valorBase;
                             $qtd_pendentes++;
                         }
                     }
 
-                    $total_geral = $total_pago + $total_pendentes;
+                    $total_geral = $total_pago + $total_pendentes + $total_vencidas;
                 } catch (Exception $e) {
                     echo '<tr><td colspan="7" style="text-align:center;color:#e74c3c;padding:20px;">Erro: ' . htmlspecialchars($e->getMessage()) . '</td></tr>';
                     $total_geral = 0;
@@ -461,8 +502,10 @@ $contas = [];
                     <td colspan="7" style="text-align: right; font-size: 9px; padding: 4px 5px; background: #f8f9fa;">
                         <span style="color: #e74c3c; font-weight: bold;">Pendentes: <?php echo $qtd_pendentes; ?></span> |
                         <span style="color: #27ae60; font-weight: bold;">Pagas: <?php echo $qtd_pagas; ?></span> |
+                        <span style="color: #ac2516; font-weight: bold;">Vencidas: <?php echo $qtd_vencidas; ?></span> |
                         <span style="color: #e74c3c; font-weight: bold;">Pendentes: R$ <?php echo number_format($total_pendentes, 2, ',', '.'); ?></span> |
                         <span style="color: #27ae60; font-weight: bold;">Pagas: R$ <?php echo number_format($total_pago, 2, ',', '.'); ?></span>
+                        <span style="color: #ac2516; font-weight: bold;">Vencidas: R$ <?php echo number_format($total_vencidas, 2, ',', '.'); ?></span>
                     </td>
                 </tr>
 

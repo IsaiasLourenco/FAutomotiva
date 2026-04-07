@@ -52,9 +52,13 @@ $desenvolvedor = $config['desenvolvedor'] ?? '';
 $site_dev = $config['site_dev'] ?? '';
 
 // ✅ INICIALIZA TOTAIS ANTES (FORA DO TRY)
-$total_pendentes = 0;
-$total_pago = 0;
-$total_geral = 0;
+$total_pendentes    = 0;
+$total_pago         = 0;
+$total_vencidas     = 0;
+$qtd_pendentes      = 0;
+$qtd_pagas          = 0;
+$qtd_vencidas      = 0;
+
 $contas = [];
 ?>
 <!DOCTYPE html>
@@ -414,17 +418,27 @@ $contas = [];
                     }
 
                     $contas = $stmt->fetchAll(PDO::FETCH_ASSOC);
-                    $qtd_pendentes = 0;
-                    $qtd_pagas = 0;
+                    $hoje = date('Y-m-d');
                     // ✅ CALCULA TOTAIS DENTRO DO TRY
                     foreach ($contas as $c) {
-                        $pago_status = (!empty($c['data_pagamento']) && $c['data_pagamento'] != '0000-00-00') ? 'pago' : 'pendente';
+                        // ✅ Define valor base (prioriza subtotal)
+                        $valorBase = (!empty($c['subtotal']) && $c['subtotal'] > 0) ? $c['subtotal'] : ($c['valor'] ?? 0);
 
-                        if ($pago_status === 'pago') {
-                            $total_pago += $c['subtotal'] ?? $c['valor'] ?? 0;
+                        $data_pagamento = $c['data_pagamento'] ?? null;
+                        $data_vencimento = $c['data_vencimento'] ?? null;
+
+                        // ✅ Classifica igual ao listar.php
+                        if (!is_null($data_pagamento) && $data_pagamento != '' && $data_pagamento != '0000-00-00') {
+                            // → PAGA
+                            $total_pago += $valorBase;
                             $qtd_pagas++;
+                        } elseif (!empty($data_vencimento) && $data_vencimento != '0000-00-00' && $data_vencimento < $hoje) {
+                            // → VENCIDA
+                            $total_vencidas += $valorBase;
+                            $qtd_vencidas++;
                         } else {
-                            $total_pendentes += $c['valor'] ?? 0;
+                            // → PENDENTE
+                            $total_pendentes += $valorBase;
                             $qtd_pendentes++;
                         }
                     }
@@ -461,8 +475,10 @@ $contas = [];
                     <td colspan="7" style="text-align: right; font-size: 9px; padding: 4px 5px; background: #f8f9fa;">
                         <span style="color: #e74c3c; font-weight: bold;">Pendentes: <?php echo $qtd_pendentes; ?></span> |
                         <span style="color: #27ae60; font-weight: bold;">Pagas: <?php echo $qtd_pagas; ?></span> |
+                        <span style="color: #ac2516; font-weight: bold;">Vencidas: <?php echo $qtd_vencidas; ?></span> |
                         <span style="color: #e74c3c; font-weight: bold;">Pendentes: R$ <?php echo number_format($total_pendentes, 2, ',', '.'); ?></span> |
                         <span style="color: #27ae60; font-weight: bold;">Pagas: R$ <?php echo number_format($total_pago, 2, ',', '.'); ?></span>
+                        <span style="color: #ac2516; font-weight: bold;">Vencidas: R$ <?php echo number_format($total_vencidas, 2, ',', '.'); ?></span>
                     </td>
                 </tr>
 

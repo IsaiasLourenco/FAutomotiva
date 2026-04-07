@@ -37,6 +37,7 @@
     $pagar = '';
     $receber = '';
     $relfin = '';
+    $relsin = '';
     $menu_financeiro = '';
 
     $pag_inicial = 'home';
@@ -275,6 +276,13 @@
                                             <li>
                                                 <a href="#" data-toggle="modal" data-target="#modalRelFin">
                                                     <i class="fa fa-angle-right"></i> Relatório Financeiro
+                                                </a>
+                                            </li>
+                                        <?php } ?>
+                                        <?php if ($relsin != 'ocultar') { ?>
+                                            <li>
+                                                <a href="#" data-toggle="modal" data-target="#modalRelSin">
+                                                    <i class="fa fa-angle-right"></i> Relatório Sintético
                                                 </a>
                                             </li>
                                         <?php } ?>
@@ -864,27 +872,27 @@
                             <div class="col-md-4">
                                 <label>Entradas / Saídas</label>
                                 <select name="filtro_tipo" class="form-control">
-                                    <option value="receber">Entradas / Ganhos</option>
-                                    <option value="pagar">Saídas / Despesas</option>
+                                    <option value="">Entradas | Saídas (Tudo)</option>
+                                    <option value="receber">Entradas | Ganhos</option>
+                                    <option value="pagar">Saídas | Despesas</option>
                                 </select>
                             </div>
                             <div class="col-md-4">
                                 <label>Tipo Lançamento</label>
                                 <select name="filtro_lancamento" class="form-control">
                                     <option value="">Tudo</option>
-                                    <option value="Conta">Ganhos / Despesas</option>
-                                    <option value="Serviço">Serviços</option>
-                                    <option value="Cancelamento">Devoluções</option>
-                                    <option value="Compra">Compras</option>
-                                    <option value="Comissão">Comissões</option>
+                                    <option value="Conta">Ganhos | Despesas</option>
+                                    <option value="Resíduo">Resíduos de Pagamentos</option>
+                                    <option value="Parcela">Parcelamentos</option>
                                 </select>
                             </div>
                             <div class="col-md-4">
                                 <label>Pendentes / Pago</label>
-                                <select name="filtro_pendentes" class="form-control">
+                                <select name="filtro_pendente" class="form-control">
                                     <option value="">Tudo</option>
-                                    <option value="Não">Pendentes</option>
-                                    <option value="Sim">Pago</option>
+                                    <option value="pendente">Pendentes</option> 
+                                    <option value="pago">Pago</option> 
+                                    <option value="vencidas">Vencidas</option> 
                                 </select>
                             </div>
                         </div>
@@ -897,6 +905,74 @@
         </div>
     </div>
     <!-- Fim Modal Rel Financeiro -->
+
+    <!-- Modal Rel Sintetico -->
+    <div class="modal fade" id="modalRelSin" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="exampleModalLabel">Relatório Sintético</h4>
+                    <button id="btn-fechar-rel" type="button" class="close" data-dismiss="modal" aria-label="Close" style="margin-top: -25px">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form method="POST" action="rel/rel_sin_class.php" target="_blank">
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label>Data Inicial</label>
+                                <input type="date" name="dataInicial" class="form-control" value="<?php echo $data_atual ?>">
+                            </div>
+                            <div class="col-md-4">
+                                <label>Data Final</label>
+                                <input type="date" name="dataFinal" class="form-control" value="<?php echo $data_atual ?>">
+                            </div>
+                            <div class="col-md-4">
+                                <label>Filtro Data</label>
+                                <select name="filtro_data" class="form-control">
+                                    <option value="lancamento">Data de Lançamento</option>
+                                    <option value="vencimento">Data de Vencimento</option>
+                                    <option value="pagamento">Data de Pagamento</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label>Entradas | Saídas</label>
+                                <select name="filtro_tipo" class="form-control">
+                                    <option value="">Entradas | Saídas (Tudo)</option>
+                                    <option value="receber">Entradas | Ganhos</option>
+                                    <option value="pagar">Saídas | Despesas</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label>Filtro Pessoas</label>
+                                <select name="filtro_pessoas" class="form-control">
+                                    <option value="clientes">Clientes</option>
+                                    <option value="fornecedores">Fornecedores</option>
+                                    <option value="funcionarios">Funcionários</option>
+                                    <option value="usuarios">Usuários</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label>Pendentes / Pago</label>
+                                <select name="filtro_pendente" class="form-control">
+                                    <option value="">Tudo</option>
+                                    <option value="pendente">Pendentes</option> 
+                                    <option value="pago">Pago</option> 
+                                    <option value="vencidas">Vencidas</option> 
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer centro">
+                        <button type="submit" class="btn btn-primary">Gerar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- Fim Modal Rel Sintetico -->
 
     <script type="text/javascript">
         function carregarImgPerfil() {
