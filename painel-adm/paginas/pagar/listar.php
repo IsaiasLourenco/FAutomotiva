@@ -137,12 +137,15 @@ if ($linhas > 0) {
         if (!empty($data_pagamento) && $data_pagamento != '0000-00-00') {
             $classe_status = 'conta-paga';
             $mostrarBotaoBaixar = false;
+            $mostrarBotaoRecibo = true;
         } elseif (!empty($data_vencimento) && $data_vencimento < date('Y-m-d')) {
             $classe_status = 'conta-vencida';
             $mostrarBotaoBaixar = true;
+            $mostrarBotaoRecibo = false;
         } else {
             $classe_status = 'conta-nao-paga';
             $mostrarBotaoBaixar = true;
+            $mostrarBotaoRecibo = false;
         }
 
         // ✅ Busca fornecedor
@@ -261,10 +264,22 @@ HTML;
             </a>
 HTML;
         }
-        echo <<<HTML
+echo <<<HTML
                     <a href="#" onclick="abrirArquivos('{$id}', '{$e_descricao}')" title="Arquivos">
                         <i class="fa-solid fa-paperclip text-secondary ico-grande"></i>
                     </a>
+HTML;
+            if ($mostrarBotaoRecibo) {
+echo <<<HTML
+                <form method="POST" action="rel/rel_recibo_pagamento_class.php" target="_blank" style="display:inline-block">
+				    <input type="hidden" name="id" value="{$id}">
+					    <button title="Impressão Recibo Pagamento" class="btn-imprime">
+                            <i class="fa fa-print cinza ico-grande"></i>
+                        </button>
+			    </form>
+HTML;
+            }                    
+echo <<<HTML
                 </td>
             </tr>
 HTML;

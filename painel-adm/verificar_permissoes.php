@@ -33,6 +33,7 @@ $pagar              = 'ocultar';
 $receber            = 'ocultar';
 $relfin             = 'ocultar';
 $relsin             = 'ocultar';
+$relbal             = 'ocultar';
 
 
 // Busca permissões do usuário
@@ -80,6 +81,8 @@ if ($total_permissoes > 0) {
                 $relfin = '';  // ← Controla página Relatório Financeiro
             } else if ($chave_acesso == 'relsin') {
                 $relsin = '';  // ← Controla página Relatório Sintético
+            } else if ($chave_acesso == 'relbal') {
+                $relbal = '';  // ← Controla página Relatório Balanço Anual
             }
         }
     }
@@ -112,6 +115,8 @@ if ($home != 'ocultar') {
     $pag_inicial = 'relfin';
 } else if ($relsin != 'ocultar') {
     $pag_inicial = 'relsin';
+} else if ($relbal != 'ocultar') {
+    $pag_inicial = 'relbal';
 } else if ($acessos != 'ocultar') {
     $pag_inicial = 'acessos';
 } else if ($configuracoes != 'ocultar') {

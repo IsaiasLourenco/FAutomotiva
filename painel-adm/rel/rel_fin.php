@@ -440,16 +440,23 @@ if (!isset($_GET['data_extenso'])) {
             <div class="footer-nome"><?php echo htmlspecialchars($nome_sistema); ?></div>
             <div class="footer-endereco"><?php echo htmlspecialchars($endereco_sistema); ?></div>
             <div class="footer-contato">
-                <a href="tel:<?php echo preg_replace('/[^0-9]/', '', $telefone_sistema); ?>">📱 <?php echo htmlspecialchars($telefone_sistema); ?></a>
+                <!-- ✅ Telefone com ícone de telefone (caractere Unicode simples) -->
+                <a href="tel:<?php echo preg_replace('/[^0-9]/', '', $telefone_sistema); ?>">
+                    ☎ <?php echo htmlspecialchars($telefone_sistema); ?>
+                </a>
+
+                <!-- ✅ Instagram só aparece se tiver valor -->
                 <?php if (!empty($instagram_sistema)): ?>
-                    <a href="<?php echo htmlspecialchars($instagram_sistema); ?>" class="footer-instagram" target="_blank">📷 Instagram</a>
+                    <a href="<?php echo htmlspecialchars($instagram_sistema); ?>" class="footer-instagram" target="_blank">▣ Instagram</a>
                 <?php endif; ?>
             </div>
             <div class="footer-dev">
-                Desenvolvido por: <a href="<?php echo htmlspecialchars($site_dev ?: '#'); ?>" target="_blank"><?php echo htmlspecialchars($desenvolvedor ?: 'Sua Empresa'); ?></a>
+                Desenvolvido por: <a href="<?php echo htmlspecialchars($site_dev ?: '#'); ?>" target="_blank">
+                    <?php echo htmlspecialchars($desenvolvedor ?: 'Sua Empresa'); ?>
+                </a>
             </div>
             <div class="footer-data">
-                Relatório gerado em <?php echo date('d/m/Y \à\s H:i:s'); ?>
+                Relatório gerado em <?php echo date('d/m/Y \à\s H:i'); ?>
             </div>
         </div>
     </div>

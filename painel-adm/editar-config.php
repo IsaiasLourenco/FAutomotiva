@@ -58,12 +58,13 @@ $pasta_img = realpath(__DIR__ . '/../../img/');
 $logotipo_nome = $pasta_img ? processarUpload('logotipo', $pasta_img, 'logo') : '';
 $icone_nome = $pasta_img ? processarUpload('icone', $pasta_img, 'ico') : '';
 $logo_rel_nome = $pasta_img ? processarUpload('logo_rel', $pasta_img, 'rel') : '';
+$assinatura_nome = $pasta_img ? processarUpload('assinatura', $pasta_img, 'assinatura') : '';  // ✅ NOVO
 
 try {
     $check = $pdo->query("SELECT id FROM configuracoes LIMIT 1")->fetch();
 
     if ($check) {
-        // ✅ UPDATE - USANDO NOME CORRETO DA COLUNA
+        // ✅ UPDATE
         $sql = "UPDATE configuracoes SET 
             nome_sistema=:nome_sistema, email_sistema=:email_sistema,
             telefone_sistema=:telefone_sistema, cnpj_sistema=:cnpj_sistema,
@@ -80,6 +81,7 @@ try {
         if ($logotipo_nome) { $sql .= ", logotipo=:logotipo"; $campos_img[':logotipo'] = $logotipo_nome; }
         if ($icone_nome) { $sql .= ", icone=:icone"; $campos_img[':icone'] = $icone_nome; }
         if ($logo_rel_nome) { $sql .= ", logo_rel=:logo_rel"; $campos_img[':logo_rel'] = $logo_rel_nome; }
+        if ($assinatura_nome) { $sql .= ", assinatura=:assinatura"; $campos_img[':assinatura'] = $assinatura_nome; }  // ✅ NOVO
 
         $sql .= " WHERE id=:id";
         $query = $pdo->prepare($sql);
@@ -113,21 +115,21 @@ try {
         foreach ($campos_img as $k => $v) $query->bindValue($k, $v);
 
     } else {
-        // ✅ INSERT - USANDO NOME CORRETO DA COLUNA
+        // ✅ INSERT
         $query = $pdo->prepare("INSERT INTO configuracoes (
             nome_sistema, email_sistema, telefone_sistema, cnpj_sistema,
             telefone_fixo, cep_sistema, rua_sistema, numero_sistema,
             bairro_sistema, cidade_sistema, estado_sistema, instagram_sistema,
             tipo_relatorio, contatoZap, desenvolvedor, site_dev,
             url_sistema, chave_pix, tipo_chave, multa_padrao, juros_padrao,
-            logotipo, icone, logo_rel
+            logotipo, icone, logo_rel, assinatura
         ) VALUES (
             :nome_sistema, :email_sistema, :telefone_sistema, :cnpj_sistema,
             :telefone_fixo, :cep_sistema, :rua_sistema, :numero_sistema,
             :bairro_sistema, :cidade_sistema, :estado_sistema, :instagram,
             :tipoRel, :contatoZap, :dev, :site,
             :url_sistema, :chave_pix, :tipo_chave, :multa_padrao, :juros_padrao,
-            :logotipo, :icone, :logo_rel
+            :logotipo, :icone, :logo_rel, :assinatura
         )");
 
         $query->bindValue(':nome_sistema', $nome_sistema);
@@ -154,6 +156,7 @@ try {
         $query->bindValue(':logotipo', $logotipo_nome ?: 'logo_padrao.png');
         $query->bindValue(':icone', $icone_nome ?: 'ico_padrao.png');
         $query->bindValue(':logo_rel', $logo_rel_nome ?: 'rel_padrao.jpg');
+        $query->bindValue(':assinatura', $assinatura_nome ?: 'assinatura_padrao.jpg');  // ✅ NOVO
     }
 
     $query->execute();

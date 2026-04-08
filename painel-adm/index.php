@@ -38,6 +38,7 @@
     $receber = '';
     $relfin = '';
     $relsin = '';
+    $relbal = '';
     $menu_financeiro = '';
 
     $pag_inicial = 'home';
@@ -248,6 +249,38 @@
                                                 <a href="#" data-toggle="modal" data-target="#modalRelSin">
                                                     <i class="fa fa-angle-right"></i> Relatório Sintético
                                                 </a>
+                                            </li>
+                                        <?php } ?>
+                                        <?php if ($relbal != 'ocultar') { ?>
+                                            <li class="dropdown head-dpdn2">
+                                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                                    <i class="fa fa-angle-right"></i> Relatório Balanço Anual
+                                                </a>
+                                                <ul class="dropdown-menu" style="min-width: 180px; padding: 10px;">
+                                                    <li style="padding: 0 10px 10px 10px; border-bottom: 1px solid #eee; margin-bottom: 8px;">
+                                                        <small class="text-muted">Selecione o ano:</small>
+                                                    </li>
+                                                    <li>
+                                                        <form action="rel/rel_bal_anual_class.php" method="GET" target="_blank">
+                                                            <select name="ano" class="form-control input-sm" style="margin-bottom: 8px;" onchange="this.form.submit()">
+                                                                <?php
+                                                                $ano_atual = date('Y');
+                                                                // Mostra 3 anos: anterior, atual e próximo
+                                                                for ($a = $ano_atual - 5; $a <= $ano_atual + 5; $a++) {
+                                                                    $selected = ($a == $ano_atual) ? 'selected' : '';
+                                                                    echo "<option value='{$a}' {$selected}>{$a}</option>";
+                                                                }
+                                                                ?>
+                                                            </select>
+                                                        </form>
+                                                    </li>
+                                                    <li class="divider" style="margin: 5px 0;"></li>
+                                                    <li>
+                                                        <a href="rel/rel_bal_anual_class.php" target="_blank" style="font-size: 11px; color: #2c3e50;">
+                                                            <i class="fa fa-refresh"></i> Ano Atual (<?php echo $ano_atual; ?>)
+                                                        </a>
+                                                    </li>
+                                                </ul>
                                             </li>
                                         <?php } ?>
                                     </ul>
@@ -705,19 +738,26 @@
 
                         <!-- ✅ NOVOS CAMPOS: Multa e Juros Padrão -->
                         <div class="row border-top pt-3 mt-3">
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <label for="multa_padrao">Multa Padrão (%)</label>
                                 <input type="text" class="form-control moeda" id="multa_padrao" name="multa_padrao"
                                     value="<?php echo isset($multa_padrao) ? number_format($multa_padrao, 2, ',', '.') : '0,00'; ?>"
                                     placeholder="0,00" maxlength="5">
                                 <small class="text-muted">Ex: 2,00 para 2%</small>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <label for="juros_padrao">Juros Padrão (% ao mês)</label>
                                 <input type="text" class="form-control moeda" id="juros_padrao" name="juros_padrao"
                                     value="<?php echo isset($juros_padrao) ? number_format($juros_padrao, 2, ',', '.') : '0,00'; ?>"
                                     placeholder="0,00" maxlength="5">
                                 <small class="text-muted">Ex: 0,33 para 0,33% a.m.</small>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="marcadagua">Marca d'Água(Rel)</label>
+                                <select name="marcadagua" id="marcadagua" class="form-control">
+                                    <option value="sim">Sim</option>
+                                    <option value="nao">Não</option>
+                                </select>
                             </div>
                         </div>
 
@@ -792,6 +832,14 @@
                             <div class="col-md-2">
                                 <img src="../../img/<?php echo $logo_rel; ?>" alt="Logotipo do Relatório" style="width: 80px;"
                                     id="target-logo-rel">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="assinatura">Assinatura(*.jpg)</label>
+                                <input type="file" class="form-control" id="assinatura" name="assinatura" onchange="carregarImgAssinatura()">
+                            </div>
+                            <div class="col-md-2">
+                                <img src="../../img/<?php echo $assinatura; ?>" alt="Assinatura" style="width: 80px;"
+                                    id="target-assinatura">
                             </div>
                         </div>
                         <div id="msg-config" class="centro"></div>
@@ -1088,6 +1136,22 @@
         }
     </script>
 
+    <script type="text/javascript">
+        function carregarImgAssinatura() {
+            var target = document.getElementById('target-assinatura');
+            var file = document.querySelector("#assinatura").files[0];
+            var reader = new FileReader();
+            reader.onloadend = function() {
+                target.src = reader.result;
+            };
+            if (file) {
+                reader.readAsDataURL(file);
+            } else {
+                target.src = "";
+            }
+        }
+    </script>
+
     <script>
         document.addEventListener("DOMContentLoaded", function() {
 
@@ -1250,4 +1314,12 @@
             // ✅ Disparar change ao carregar (para inicializar correto)
             $('select[name="filtro_tipo"]').trigger('change');
         });
+    </script>
+
+    <script>
+        function gerarBalanco() {
+            var ano = document.getElementById('select-ano-balanco').value;
+            var url = 'rel/rel_bal_anual_class.php?ano=' + ano;
+            window.open(url, '_blank');
+        }
     </script>
