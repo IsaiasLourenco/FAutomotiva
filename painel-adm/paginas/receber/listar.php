@@ -70,7 +70,6 @@ $total_vencidas     = 0;
 $qtd_pendentes      = 0;
 $qtd_pago           = 0;
 $qtd_vencidas      = 0;
-
 echo <<<HTML
 <table class="table table-hover tabela-pequena" id="tabela">
     <thead> 
@@ -139,18 +138,22 @@ if ($linhas > 0) {
             $classe_status = 'conta-paga';
             $mostrarBotaoParcelar = false;
             $mostrarBotaoBaixar = false;
+            $mostrarBotaoRecibo = true;
         } elseif (strpos($descricao, '(Parcelada)') !== false) {
             $classe_status = 'conta-parcelada';
             $mostrarBotaoParcelar = false;
             $mostrarBotaoBaixar = true;
+            $mostrarBotaoRecibo = false;
         } elseif (!empty($data_vencimento) && $data_vencimento < date('Y-m-d')) {
             $classe_status = 'conta-vencida';
             $mostrarBotaoParcelar = true;
             $mostrarBotaoBaixar = true;
+            $mostrarBotaoRecibo = false;
         } else {
             $classe_status = 'conta-nao-paga';
             $mostrarBotaoParcelar = true;
             $mostrarBotaoBaixar = true;
+            $mostrarBotaoRecibo = false;
         }
 
         $qp = $pdo->prepare("SELECT nome FROM pacientes WHERE id = :id LIMIT 1");
@@ -221,10 +224,21 @@ if ($linhas > 0) {
         $e_referencia = js_escape($res[$i]['referencia'] ?? '');
         $e_id_referencia = $res[$i]['id_referencia'] ?? '';
 
-        echo <<<HTML
+        // ✅ Lógica do link "Voltar" para pacientes (CALCULAR ANTES DO HEREDOC)
+        $celula_paciente = $paciente_nome; // Padrão: só o nome
+
+        if (@$_GET['voltar'] === 'pacientes') {
+            // Se veio de pacientes, torna o nome clicável
+echo <<<HTML
+            $celula_paciente = "<a href='index.php?pagina=pacientes' class='text-primary font-weight-bold' title='Voltar para lista de pacientes'>
+                                    {$paciente_nome} <i class='fa fa-external-link-alt' style='font-size:10px'></i>
+                                </a>";
+HTML;
+        }
+echo <<<HTML
             <tr class="{$classe_status}">
                 <td><input type="checkbox" id="seletor-{$id}" class="form-check-input" onchange="selecionar('{$id}')"> {$descricao}</td>
-                <td>{$paciente_nome}</td>
+                <td>{$celula_paciente}</td>
                 <td>{$data_lancamentoF}</td>
                 <td>{$data_vencimentoF}</td>
                 <td class="esc">{$data_pagamentoF_tabela}</td>
@@ -234,7 +248,7 @@ HTML;
 
         // ✅ Exibe "Recebido" APENAS se a conta estiver efetivamente paga
         if (!empty($data_pagamento) && $data_pagamento != '0000-00-00' && $subtotal > 0 && $subtotal != $valor) {
-            echo <<<HTML
+echo <<<HTML
                     <br>
                     <small class="text-success font-weight-bold">
                     Recebido: {$subtotalF}
@@ -244,7 +258,7 @@ HTML;
 
         // ✅ Exibe "Pago/Saldo" apenas se houver resíduos
         if ($total_residuos > 0) {
-            echo <<<HTML
+echo <<<HTML
         <br>
         <small class="text-muted">
             Pago: R$ {$total_residuosF} | 
@@ -252,8 +266,7 @@ HTML;
         </small>
 HTML;
         }
-
-        echo <<<HTML
+echo <<<HTML
                 </td>
                 
                 <td>
@@ -304,7 +317,7 @@ HTML;
         $tem_relacionados = $stmt_relacionados->fetchColumn() > 0;
 
         if ($tem_relacionados) {
-            echo <<<HTML
+echo <<<HTML
                     <a href="#" onclick="mostrarRelacionados('{$id}', 
                                                              '{$e_descricao}')" title="Ver Parcelas e Resíduos">
                         <i class="fa-solid fa-diagram-project text-dark ico-grande"></i>
@@ -312,7 +325,7 @@ HTML;
 HTML;
         }
         if ($mostrarBotaoParcelar) {
-            echo <<<HTML
+echo <<<HTML
             <a href="#" onclick="parcelar('{$id}', 
                                           '{$e_valorF}', 
                                           '{$e_descricao}', 
@@ -326,8 +339,7 @@ HTML;
 
         if ($mostrarBotaoBaixar) {
             $valor_restante = $valor - $total_residuos;
-
-            echo <<<HTML
+echo <<<HTML
 
             <input type="checkbox" class="check-baixar maozinha" data-id="{$id}" data-valor="{$valor_restante}" title="Selecionar para baixa">
 
@@ -335,7 +347,7 @@ HTML;
             $valor_restante = $valor - $total_residuos;
             $valor_restanteF = 'R$ ' . number_format($valor_restante, 2, ',', '.');
             $e_valor_restanteF = js_escape($valor_restanteF);
-            echo <<<HTML
+echo <<<HTML
 
             <a href="#" onclick="baixar('{$id}', 
                                         '{$e_valor_restanteF}', 
@@ -347,12 +359,23 @@ HTML;
     
 HTML;
         }
-
-        echo <<<HTML
+echo <<<HTML
             <!-- ✅ Botão para abrir modal de arquivos -->
             <a href="#" onclick="abrirArquivos('{$id}', '{$e_descricao}')" title="Arquivos">
                 <i class="fa-solid fa-paperclip text-secondary ico-grande"></i>
             </a>
+HTML;            
+            if ($mostrarBotaoRecibo) {
+echo <<<HTML
+                <form method="POST" action="rel/rel_recibo_class.php" target="_blank" style="display:inline-block">
+				    <input type="hidden" name="id" value="{$id}">
+					    <button title="Impressão Recibo Pagamento" class="btn-imprime">
+                            <i class="fa fa-print cinza ico-grande"></i>
+                        </button>
+			    </form>
+HTML;
+            }
+echo <<<HTML
         </td>
     </tr>
 HTML;
@@ -366,7 +389,6 @@ $total_vencidasF = number_format($total_vencidas, 2, ',', '.');
 $qtd_pendentesF = str_pad($qtd_pendentes, 2, '0', STR_PAD_LEFT);
 $qtd_pagoF = str_pad($qtd_pago, 2, '0', STR_PAD_LEFT);
 $qtd_vencidasF = str_pad($qtd_vencidas, 2, '0', STR_PAD_LEFT);
-
 echo <<<HTML
         </tbody>
         <tfoot>

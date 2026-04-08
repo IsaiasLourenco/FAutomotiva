@@ -146,9 +146,9 @@ $pag = 'usuarios';
 
 <!-- Modal Inserir-->
 <div class="modal fade" id="modalForm" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog" role="document">
+    <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
-            <div class="modal-header">
+            <div class="modal-header bg-success text-white">
                 <h4 class="modal-title"><span id="titulo_inserir"></span></h4>
                 <button id="btn-fechar" type="button" class="close mg-t--20" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
@@ -292,9 +292,9 @@ $pag = 'usuarios';
 
 <!-- Modal Dados-->
 <div class="modal fade" id="modalDados" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content modal-lg">
-            <div class="modal-header">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
                 <h4 class="modal-title"><span id="nome_dados-cli"></span></h4>
                 <button id="btn-fechar-dados-cli" type="button" class="close mg-t--20" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
@@ -397,9 +397,9 @@ $pag = 'usuarios';
 <!-- Modal Permissões -->
 <div class="modal fade" id="modalPermissoes" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog" role="document">
+        <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title">
+            <div class="modal-header bg-success text-white">
                     Usuário: <span id="nome_permissoes"></span>
                     <span class="absolute-right">
                         <input class="form-check-input" type="checkbox" id="input_todos" onchange="marcarTodos()">

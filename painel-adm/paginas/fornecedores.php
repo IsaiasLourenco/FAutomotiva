@@ -133,9 +133,9 @@ $pag = 'fornecedores';
 
 <!-- Modal Inserir-->
 <div class="modal fade" id="modalForm" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog" role="document">
+    <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
-            <div class="modal-header">
+            <div class="modal-header bg-success text-white">
                 <h4 class="modal-title"><span id="titulo_inserir"></span></h4>
                 <button id="btn-fechar" type="button" class="close mg-t--20" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
@@ -220,9 +220,9 @@ $pag = 'fornecedores';
 
 <!-- Modal Dados-->
 <div class="modal fade" id="modalDados" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content modal-lg">
-            <div class="modal-header">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
                 <h4 class="modal-title"><span id="nome_dados-for"></span></h4>
                 <button id="btn-fechar-dados-for" type="button" class="close mg-t--20" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
@@ -234,10 +234,6 @@ $pag = 'fornecedores';
                         <span><b>Email: </b></span>
                         <span id="email_dados-for"></span>
                     </div>
-                    <!-- <div class="col-md-6">
-                        <span><b>Nível: </b></span>
-                        <span id="cargo_dados-for"></span>
-                    </div> -->
                 </div>
                 <div class="row br-btt">
                     <div class="col-md-6">

@@ -268,105 +268,108 @@
                         <i class="fa fa-bars"></i>
                     </button>
                     <!--toggle button end-->
-                    <?php
-                    $query = $pdo->query("SELECT * FROM receber WHERE data_pagamento IS NULL ORDER BY data_vencimento");
-                    $res = $query->fetchAll(PDO::FETCH_ASSOC);
-                    $linhas = count($res);
-                    $linhasF = str_pad($linhas, 2, '0', STR_PAD_LEFT);
-                    ?>
-                    <div class="profile_details_left"><!--notifications of menu start -->
-                        <ul class="nofitications-dropdown">
-                            <li class="dropdown head-dpdn">
-                                <a href="#" title="Contas à receber" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                                    <i class="fa-solid fa-money-bills btn-receber"></i>
-                                    <span class="badge"><?php echo $linhas; ?></span>
-                                </a>
-                                <ul class="dropdown-menu" style="background: beige;">
-                                    <li>
-                                        <div class="notification_header">
-                                            <h3>Você possui <strong><?php echo $linhasF; ?></strong> conta(s) à receber</h3>
-                                        </div>
-                                    </li>
-                                    <?php
-                                    $query = $pdo->query("SELECT * FROM receber WHERE data_pagamento IS NULL ORDER BY data_vencimento ASC LIMIT 5");
-                                    $res = $query->fetchAll(PDO::FETCH_ASSOC);
-                                    for ($i = 0; $i < count($res); $i++) {
-                                    ?>
-                                        <li>
-                                            <a href="#">
-                                                <div class="notification_desc">
-                                                    <p>
-                                                        <span class="text-danger" style="color: red !important; font-weight: bold;">
-                                                            <?php echo 'R$ ' . number_format($res[$i]['valor'], 2, ',', '.'); ?>
-                                                        </span> |
-                                                        <?php echo $res[$i]['descricao']; ?>
-                                                        <!-- <?php echo date('d/m/Y', strtotime($res[$i]['data_vencimento'])); ?> -->
-                                                    </p>
-                                                </div>
-                                                <div class="clearfix"></div>
-                                            </a>
-                                        </li>
-                                    <?php } ?>
-                                    <li>
-                                        <div class="notification_bottom">
-                                            <a href="index.php?pagina=receber">Ver todas as contas</a>
-                                        </div>
-                                    </li>
-                                </ul>
-                            </li>
-                        </ul>
-                        <div class="clearfix"> </div>
-                    </div>
-
-                    <div class="profile_details_left"><!--notifications of menu start -->
+                    <?php if ($receber != 'ocultar'): ?>
                         <?php
-                        $query = $pdo->query("SELECT * FROM pagar WHERE data_pagamento IS NULL ORDER BY data_vencimento ASC");
-                        $resP = $query->fetchAll(PDO::FETCH_ASSOC);
-                        $linhasP = count($resP);
-                        $linhasPF = str_pad($linhasP, 2, '0', STR_PAD_LEFT);
+                        $query = $pdo->query("SELECT * FROM receber WHERE data_pagamento IS NULL ORDER BY data_vencimento");
+                        $res = $query->fetchAll(PDO::FETCH_ASSOC);
+                        $linhas = count($res);
+                        $linhasF = str_pad($linhas, 2, '0', STR_PAD_LEFT);
                         ?>
-                        <ul class="nofitications-dropdown">
-                            <li class="dropdown head-dpdn">
-                                <a href="#" title="Contas à pagar" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                                    <i class="fa-solid fa-money-bills btn-pagar"></i>
-                                    <span class="badge" style="background:red"><?php echo $linhasP; ?></span>
-                                </a>
-                                <ul class="dropdown-menu" style="background: beige;">
-                                    <li>
-                                        <div class="notification_header">
-                                            <h3>Você possui <strong><?php echo $linhasPF; ?></strong> conta(s) à pagar</h3>
-                                        </div>
-                                    </li>
-                                    <?php
-                                    $query = $pdo->query("SELECT * FROM pagar WHERE data_pagamento IS NULL ORDER BY data_vencimento ASC LIMIT 5");
-                                    $resP = $query->fetchAll(PDO::FETCH_ASSOC);
-                                    for ($i = 0; $i < count($resP); $i++) {
-                                    ?>
+                        <div class="profile_details_left"><!--notifications of menu start -->
+                            <ul class="nofitications-dropdown">
+                                <li class="dropdown head-dpdn">
+                                    <a href="#" title="Contas à receber" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                        <i class="fa-solid fa-money-bills btn-receber"></i>
+                                        <span class="badge"><?php echo $linhas; ?></span>
+                                    </a>
+                                    <ul class="dropdown-menu" style="background: beige;">
                                         <li>
-                                            <a href="#">
-                                                <div class="notification_desc">
-                                                    <p>
-                                                        <span class="text-danger" style="color: red !important; font-weight: bold;">
-                                                            <?php echo 'R$ ' . number_format($resP[$i]['valor'], 2, ',', '.'); ?>
-                                                        </span> |
-                                                        <?php echo $resP[$i]['descricao']; ?>
-                                                    </p>
-                                                </div>
-                                                <div class="clearfix"></div>
-                                            </a>
+                                            <div class="notification_header">
+                                                <h3>Você possui <strong><?php echo $linhasF; ?></strong> conta(s) à receber</h3>
+                                            </div>
                                         </li>
-                                    <?php } ?>
-                                    <li>
-                                        <div class="notification_bottom">
-                                            <a href="index.php?pagina=pagar">Ver todas as contas</a>
-                                        </div>
-                                    </li>
-                                </ul>
-                            </li>
-                        </ul>
-                        <div class="clearfix"> </div>
-                    </div>
+                                        <?php
+                                        $query = $pdo->query("SELECT * FROM receber WHERE data_pagamento IS NULL ORDER BY data_vencimento ASC LIMIT 5");
+                                        $res = $query->fetchAll(PDO::FETCH_ASSOC);
+                                        for ($i = 0; $i < count($res); $i++) {
+                                        ?>
+                                            <li>
+                                                <a href="#">
+                                                    <div class="notification_desc">
+                                                        <p>
+                                                            <span class="text-danger" style="color: red !important; font-weight: bold;">
+                                                                <?php echo 'R$ ' . number_format($res[$i]['valor'], 2, ',', '.'); ?>
+                                                            </span> |
+                                                            <?php echo $res[$i]['descricao']; ?>
+                                                            <!-- <?php echo date('d/m/Y', strtotime($res[$i]['data_vencimento'])); ?> -->
+                                                        </p>
+                                                    </div>
+                                                    <div class="clearfix"></div>
+                                                </a>
+                                            </li>
+                                        <?php } ?>
+                                        <li>
+                                            <div class="notification_bottom">
+                                                <a href="index.php?pagina=receber">Ver todas as contas</a>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </li>
+                            </ul>
+                            <div class="clearfix"> </div>
+                        </div>
+                    <?php endif; ?>
 
+                    <?php if ($pagar != 'ocultar'): ?>
+                        <div class="profile_details_left"><!--notifications of menu start -->
+                            <?php
+                            $query = $pdo->query("SELECT * FROM pagar WHERE data_pagamento IS NULL ORDER BY data_vencimento ASC");
+                            $resP = $query->fetchAll(PDO::FETCH_ASSOC);
+                            $linhasP = count($resP);
+                            $linhasPF = str_pad($linhasP, 2, '0', STR_PAD_LEFT);
+                            ?>
+                            <ul class="nofitications-dropdown">
+                                <li class="dropdown head-dpdn">
+                                    <a href="#" title="Contas à pagar" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                        <i class="fa-solid fa-money-bills btn-pagar"></i>
+                                        <span class="badge" style="background:red"><?php echo $linhasP; ?></span>
+                                    </a>
+                                    <ul class="dropdown-menu" style="background: beige;">
+                                        <li>
+                                            <div class="notification_header">
+                                                <h3>Você possui <strong><?php echo $linhasPF; ?></strong> conta(s) à pagar</h3>
+                                            </div>
+                                        </li>
+                                        <?php
+                                        $query = $pdo->query("SELECT * FROM pagar WHERE data_pagamento IS NULL ORDER BY data_vencimento ASC LIMIT 5");
+                                        $resP = $query->fetchAll(PDO::FETCH_ASSOC);
+                                        for ($i = 0; $i < count($resP); $i++) {
+                                        ?>
+                                            <li>
+                                                <a href="#">
+                                                    <div class="notification_desc">
+                                                        <p>
+                                                            <span class="text-danger" style="color: red !important; font-weight: bold;">
+                                                                <?php echo 'R$ ' . number_format($resP[$i]['valor'], 2, ',', '.'); ?>
+                                                            </span> |
+                                                            <?php echo $resP[$i]['descricao']; ?>
+                                                        </p>
+                                                    </div>
+                                                    <div class="clearfix"></div>
+                                                </a>
+                                            </li>
+                                        <?php } ?>
+                                        <li>
+                                            <div class="notification_bottom">
+                                                <a href="index.php?pagina=pagar">Ver todas as contas</a>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </li>
+                            </ul>
+                            <div class="clearfix"> </div>
+                        </div>
+                    <?php endif; ?>
                 </div>
 
 

@@ -21,15 +21,18 @@ $pag = 'pacientes';
         #tabela.tabela-pequena td {
             font-size: 10px !important;
         }
+
         #tabela_wrapper {
             font-size: 10px !important;
             line-height: 1.4 !important;
         }
+
         #tabela_wrapper .dataTables_length,
         #tabela_wrapper .dataTables_filter {
             font-size: 10px !important;
             margin-bottom: 5px !important;
         }
+
         #tabela_wrapper .dataTables_length select,
         #tabela_wrapper .dataTables_filter input {
             font-size: 10px !important;
@@ -40,6 +43,7 @@ $pag = 'pacientes';
             width: auto !important;
             max-width: 80px !important;
         }
+
         #tabela_wrapper .dataTables_length label,
         #tabela_wrapper .dataTables_filter label {
             font-size: 10px !important;
@@ -49,15 +53,18 @@ $pag = 'pacientes';
             align-items: center !important;
             gap: 5px !important;
         }
+
         #tabela_wrapper .dataTables_info {
             font-size: 10px !important;
             padding-top: 5px !important;
             line-height: 1.4 !important;
         }
+
         #tabela_wrapper .dataTables_paginate {
             font-size: 10px !important;
             padding-top: 5px !important;
         }
+
         #tabela_wrapper .dataTables_paginate .paginate_button {
             font-size: 10px !important;
             padding: 3px 8px !important;
@@ -67,13 +74,16 @@ $pag = 'pacientes';
             line-height: 1.2 !important;
             border-radius: 2px !important;
         }
+
         #tabela_wrapper .dataTables_paginate .paginate_button.current,
         #tabela_wrapper .dataTables_paginate .paginate_button:hover {
             font-size: 10px !important;
         }
+
         #tabela_wrapper .row {
             margin: 0 !important;
         }
+
         #tabela_wrapper .col-sm-6,
         #tabela_wrapper .col-sm-12 {
             padding: 0 !important;
@@ -81,7 +91,9 @@ $pag = 'pacientes';
             float: none !important;
             text-align: center !important;
         }
+
         @media (max-width: 768px) {
+
             #tabela_wrapper .dataTables_length,
             #tabela_wrapper .dataTables_filter,
             #tabela_wrapper .dataTables_info,
@@ -129,13 +141,14 @@ $pag = 'pacientes';
     <input type="hidden" id="ids">
 
 </body>
+
 </html>
 
 <!-- Modal Inserir-->
 <div class="modal fade" id="modalForm" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog" role="document">
+    <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
-            <div class="modal-header">
+            <div class="modal-header bg-success text-white">
                 <h4 class="modal-title"><span id="titulo_inserir"></span></h4>
                 <button id="btn-fechar" type="button" class="close mg-t--20" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
@@ -216,10 +229,12 @@ $pag = 'pacientes';
 
 <!-- Modal Dados-->
 <div class="modal fade" id="modalDados" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content modal-lg">
-            <div class="modal-header">
-                <h4 class="modal-title"><span id="nome_dados-paciente"></span></h4>
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h4 class="modal-title">
+                    <span id="nome_dados-paciente"></span>
+                </h4>
                 <button id="btn-fechar-dados-paciente" type="button" class="close mg-t--20" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -279,5 +294,32 @@ $pag = 'pacientes';
     </div>
 </div>
 <!-- Fim Modal Dados-->
+
+<!-- Modal Contas -->
+<div class="modal fade" id="modalContas" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h4 class="modal-title">
+                    Contas de: <span id="titulo_contas"></span>
+                </h4>
+                <select id="filtro_status_contas" class="form-control form-control-sm" style="width: auto; margin-left: 50px;">
+                    <option value="todas">Todas</option>
+                    <option value="pendentes">Pendentes</option>
+                    <option value="vencidas">Vencidas</option>
+                    <option value="pagas">Pagas</option>
+                </select>
+                <button id="btn-fechar-contas" type="button" class="close" data-dismiss="modal" aria-label="Close" style="margin-top: -25px">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="listar_debitos" class="mt-3"></div>
+                <input type="hidden" id="id_contas">
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Fim Modal Contas -->
 
 <script src="../js/ajax.js"></script>

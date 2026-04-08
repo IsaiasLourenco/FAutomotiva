@@ -116,6 +116,24 @@ $juros_label = isset($config_multa_juros['juros_padrao'])
 
     <div class="row mb-3 align-items-center d-flex flex-wrap">
 
+        <?php
+        // ✅ Verifica se veio da página de pacientes para mostrar link de voltar
+        $voltar_para = @$_GET['voltar'] ?? '';
+        $mostrar_voltar = ($voltar_para === 'pacientes');
+        ?>
+
+        <?php if ($mostrar_voltar): ?>
+            <div class="alert alert-info py-2 mb-3 d-flex align-items-center justify-content-between">
+                <div>
+                    <i class="fa fa-info-circle mr-2"></i>
+                    <strong>Vindo de:</strong> Pacientes → Baixa de Conta
+                </div>
+                <a href="index.php?pagina=pacientes" class="btn btn-sm btn-outline-primary">
+                    <i class="fa fa-arrow-left mr-1"></i> Voltar para Pacientes
+                </a>
+            </div>
+        <?php endif; ?>
+
         <!-- BOTÕES DA ESQUERDA -->
         <div class="col-md-4 col-sm-12 d-flex align-items-center flex-wrap gap-2 mb-2">
 
@@ -201,8 +219,8 @@ $juros_label = isset($config_multa_juros['juros_padrao'])
             <input type="hidden" name="tipo_data" id="tipo_data_rel" value="vencimento">
             <!-- BOTÃO PDF SEMPRE NO CANTO DIREITO -->
             <div class="ms-auto mb-2">
-                <button type="submit" class="btn btn-danger btn-sm" title="Relatório PDF">
-                    <i class="fa-solid fa-file-pdf"></i>
+                <button type="submit" class="btn-light" title="Relatório PDF">
+                    <i class="fa-solid fa-file-pdf text-danger ico-grande"></i>
                 </button>
             </div>
 
@@ -354,6 +372,7 @@ $juros_label = isset($config_multa_juros['juros_padrao'])
         </div>
     </div>
 </div>
+<!-- Fim Modal Inserir/Editar -->
 
 <!-- Modal Dados -->
 <div class="modal fade" id="modalDados" tabindex="-1" role="dialog" aria-hidden="true">
@@ -441,9 +460,9 @@ $juros_label = isset($config_multa_juros['juros_padrao'])
                         <span><b>Referência: </b></span>
                         <span id="referencia_dados-cli" style="font-weight: 600; color: #2c3e50;"></span>
                         <small class="text-muted" style="display: inline-block; margin-left: 8px;">
-                            (ID: <span id="id-referencia_dados-cli" 
-                                       style="font-weight: 700; color: #1b6e74; background: #e8f4f8; padding: 2px 6px; border-radius: 3px;">
-                                </span>)
+                            (ID: <span id="id-referencia_dados-cli"
+                                style="font-weight: 700; color: #1b6e74; background: #e8f4f8; padding: 2px 6px; border-radius: 3px;">
+                            </span>)
                         </small>
                     </div>
                 </div>
@@ -454,6 +473,7 @@ $juros_label = isset($config_multa_juros['juros_padrao'])
         </div>
     </div>
 </div>
+<!-- Fim Modal Dados -->
 
 <!-- ✅ Modal Parcelar -->
 <div class="modal fade" id="modalParcelar" tabindex="-1" role="dialog" aria-hidden="true">
@@ -539,6 +559,7 @@ $juros_label = isset($config_multa_juros['juros_padrao'])
         </div>
     </div>
 </div>
+<!-- ✅ Fim Modal Parcelar -->
 
 <!-- ✅ Modal Baixar -->
 <div class="modal fade" id="modalBaixar" tabindex="-1" role="dialog">
@@ -616,6 +637,7 @@ $juros_label = isset($config_multa_juros['juros_padrao'])
         </div>
     </div>
 </div>
+<!-- ✅ Fim Modal Baixar -->
 
 <!-- ✅ Modal de Relacionados (Parcelas/Resíduos) -->
 <div class="modal fade" id="modalRelacionados" tabindex="-1" role="dialog" aria-hidden="true">
@@ -672,6 +694,7 @@ $juros_label = isset($config_multa_juros['juros_padrao'])
         </div>
     </div>
 </div>
+<!-- ✅ Modal de Relacionados (Parcelas/Resíduos) -->
 
 <!-- ✅ Modal de Baixa Múltipla -->
 <div class="modal fade" id="modalBaixarMultiplo" tabindex="-1" role="dialog" aria-hidden="true">
@@ -724,6 +747,7 @@ $juros_label = isset($config_multa_juros['juros_padrao'])
         </div>
     </div>
 </div>
+<!-- ✅ Fim Modal de Baixa Múltipla -->
 
 <!-- ✅ Modal de Arquivos Adicionais -->
 <div class="modal fade" id="modalArquivos" tabindex="-1" aria-hidden="true">
@@ -804,6 +828,7 @@ $juros_label = isset($config_multa_juros['juros_padrao'])
         </div>
     </div>
 </div>
+<!-- ✅ Fim Modal de Arquivos Adicionais -->
 
 <script src="../js/ajax.js"></script>
 <script>
@@ -902,9 +927,33 @@ $juros_label = isset($config_multa_juros['juros_padrao'])
     });
 
     $(document).ready(function() {
+
+        // ✅ 1. Carrega a tabela inicial
         listar();
+
+        // ✅ 2. Esconde botões de ação em lote
         $('#btn-deletar').hide();
         $('#btn-baixar').hide();
+
+        // ✅ 3. Restaura checkboxes de baixa após tabela carregar
+        setTimeout(restaurarCheckboxesBaixar, 500);
+
+        // ✅ 4. NOVO: Verifica se veio parâmetro de baixa da página de pacientes
+        var urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('baixar_id')) {
+            var id = urlParams.get('baixar_id');
+            var valor = urlParams.get('baixar_valor');
+            var descricao = urlParams.get('baixar_desc');
+
+            // ✅ Aguarda a tabela carregar e chama a função global baixar()
+            setTimeout(function() {
+                if (typeof baixar === 'function') {
+                    // Chama com 5 parâmetros (os dois últimos vazios, pois não temos aqui)
+                    baixar(id, valor, descricao, '', '');
+                }
+            }, 800); // Um pouco mais de tempo para garantir que o modal está no DOM
+        }
+
     });
 
     // ✅ Restaurar estado dos checkboxes após listar
@@ -916,15 +965,6 @@ $juros_label = isset($config_multa_juros['juros_padrao'])
             }
         });
     }
-
-    // ✅ Chamar após listar() no document.ready
-    $(document).ready(function() {
-        listar();
-        $('#btn-deletar').hide();
-
-        // ✅ Restaurar checkboxes após tabela carregar
-        setTimeout(restaurarCheckboxesBaixar, 500);
-    });
 
     function parcelar(id, valor, descricao, multa, juros, desconto) {
         limparModalParcelar();

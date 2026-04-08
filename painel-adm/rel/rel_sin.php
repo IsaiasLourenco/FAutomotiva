@@ -307,7 +307,7 @@ if (!isset($_GET['data_extenso'])) {
         <div class="header">
             <div class="header-top">
                 <div class="header-logo">
-                    <img src="<?php echo $url_sistema . '/img/Logo.png'; ?>" alt="Logotipo">
+                    <img src="https://odontoclinic.vetor256.com/img/Logo.png" alt="Logotipo">
                 </div>
                 <div class="header-title">
                     <h1>Relatório Sintético</h1>

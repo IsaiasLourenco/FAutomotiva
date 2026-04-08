@@ -65,9 +65,27 @@ $cor_destaque = '#2c3e50';
 $cor_fundo = '#f8f9fa';
 $label_pessoa = 'Pessoa';
 
-// ✅ 6. Montar query: UNION se "Tudo", simples se filtrado
-if (empty($filtro_tipo)) {
-    // ✅ UNION: juntar receber e pagar
+// ✅ DEPOIS: filtro_pessoas também decide a tabela
+if ($filtro_pessoas === 'pacientes') {
+    // ✅ Só pacientes → tabela receber
+    $tabela = 'receber';
+    $campo_pessoa = 'paciente';
+    $tabela_pessoa = 'pacientes';
+    $tipo_movimento = 'Entradas / Ganhos';
+    $cor_destaque = '#27ae60';
+    $cor_fundo = '#d5f4e6';
+    $label_pessoa = 'Paciente';
+} elseif ($filtro_pessoas === 'fornecedores' || $filtro_pessoas === 'funcionarios') {
+    // ✅ Fornecedores/Funcionários → tabela pagar
+    $tabela = 'pagar';
+    $campo_pessoa = 'fornecedor';
+    $tabela_pessoa = 'fornecedores';
+    $tipo_movimento = 'Saídas / Despesas';
+    $cor_destaque = '#e74c3c';
+    $cor_fundo = '#fadbd8';
+    $label_pessoa = 'Fornecedor';
+} elseif (empty($filtro_tipo)) {
+    // ✅ "Tudo" sem filtro de pessoas → UNION das duas
     $tipo_movimento = 'Entradas e Saídas';
     $cor_destaque = '#2980b9';
     $cor_fundo = '#d6eaf8';
@@ -98,7 +116,7 @@ if (empty($filtro_tipo)) {
 
     $sql = "({$sql_receber}) UNION ALL ({$sql_pagar}) ORDER BY {$colunaData} DESC";
 } else {
-    // ✅ Query simples para uma tabela só
+    // ✅ filtro_tipo define (receber ou pagar)
     if ($filtro_tipo === 'pagar') {
         $tabela = 'pagar';
         $campo_pessoa = 'fornecedor';
@@ -116,7 +134,10 @@ if (empty($filtro_tipo)) {
         $cor_fundo = '#d5f4e6';
         $label_pessoa = 'Paciente';
     }
+}
 
+// ✅ Montar query simples se tiver tabela definida (não UNION)
+if (isset($tabela)) {
     $sql = "SELECT r.*, p.nome as pessoa_nome, fp.nome as forma_nome, 
                    '{$tabela}' as tipo_tabela, 
                    '{$label_pessoa}' as label_pessoa

@@ -409,7 +409,6 @@ $contas = [];
                     // ✅ Só adiciona filtro de período se tiver datas preenchidas
                     if (!empty($dataInicial) && !empty($dataFinal)) {
                         $sql .= " AND $coluna IS NOT NULL 
-                                                                               AND $coluna != '' 
                                                                                AND $coluna != '0000-00-00'
                                                                                AND $coluna >= :ini 
                                                                                AND $coluna <= :fim";
@@ -419,20 +418,13 @@ $contas = [];
 
                     // ✅ Filtros de status
                     if ($pago === 'pagas') {
-                        $sql .= " AND r.data_pagamento IS NOT NULL AND r.data_pagamento != '' 
-                                                                   AND r.data_pagamento != '0000-00-00'";
+                        $sql .= " AND r.data_pagamento IS NOT NULL";
                     } elseif ($pago === 'pendentes') {
-                        $sql .= " AND (r.data_pagamento IS NULL 
-                                                                OR r.data_pagamento = '' 
-                                                                OR r.data_pagamento = '0000-00-00')";
+                        $sql .= " AND r.data_pagamento IS NULL";
                     } elseif ($pago === 'vencidas') {
                         $sql .= " AND r.data_vencimento IS NOT NULL 
-                                                               AND r.data_vencimento != '' 
-                                                               AND r.data_vencimento != '0000-00-00'
-                                                               AND r.data_vencimento < :hoje 
-                                                               AND (r.data_pagamento IS NULL 
-                                                               OR r.data_pagamento = '' 
-                                                               OR r.data_pagamento = '0000-00-00')";
+                                AND r.data_vencimento < :hoje 
+                                AND r.data_pagamento IS NULL";
                         $params[':hoje'] = date('Y-m-d');
                     }
 

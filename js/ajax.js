@@ -94,10 +94,6 @@ function ativar(id, acao) {
     });
 }
 
-
-
-
-
 function baixar(id, pg, id_listar) {
     var id_user = localStorage.id_usu;
     var id_empresa = localStorage.id_empresa;

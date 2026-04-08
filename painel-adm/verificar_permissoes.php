@@ -9,28 +9,30 @@ $id_user = $_SESSION['id_user'];
 
 // Inicializa todas como 'ocultar' (padrão: sem acesso)
 // menu superior
-$home = 'ocultar';
-$configuracoes = 'ocultar';
-$perfil_modal = 'ocultar';
+$home               = 'ocultar';
+$configuracoes      = 'ocultar';
+$perfil_modal       = 'ocultar';
 
 // grupo pessoas
-$menu_pessoas = 'ocultar';
-$usuarios = 'ocultar';
-$pacientes = 'ocultar';
-$fornecedores = 'ocultar';
+$menu_pessoas       = 'ocultar';
+$usuarios           = 'ocultar';
+$pacientes          = 'ocultar';
+$fornecedores       = 'ocultar';
 
 //grupo cadastros
-$menu_cadastros = 'ocultar';
-$formas_pagamento = 'ocultar';
-$frequencias = 'ocultar';
-$cargos = 'ocultar';
-$grupo_acessos = 'ocultar';
-$acessos = 'ocultar';
+$menu_cadastros     = 'ocultar';
+$formas_pagamento   = 'ocultar';
+$frequencias        = 'ocultar';
+$cargos             = 'ocultar';
+$grupo_acessos      = 'ocultar';
+$acessos            = 'ocultar';
 
 //grupo financeiro
-$menu_financeiro = 'ocultar';
-$pagar = 'ocultar';
-$receber = 'ocultar';
+$menu_financeiro    = 'ocultar';
+$pagar              = 'ocultar';
+$receber            = 'ocultar';
+$relfin             = 'ocultar';
+$relsin             = 'ocultar';
 
 
 // Busca permissões do usuário
@@ -74,6 +76,10 @@ if ($total_permissoes > 0) {
                 $pagar = '';  // ← Controla página Pagar
             } else if ($chave_acesso == 'receber') {
                 $receber = '';  // ← Controla página Receber
+            } else if ($chave_acesso == 'relfin') {
+                $relfin = '';  // ← Controla página Relatório Financeiro
+            } else if ($chave_acesso == 'relsin') {
+                $relsin = '';  // ← Controla página Relatório Sintético
             }
         }
     }
@@ -102,6 +108,10 @@ if ($home != 'ocultar') {
     $pag_inicial = 'pagar';
 } else if ($receber != 'ocultar') {
     $pag_inicial = 'receber';
+} else if ($relfin != 'ocultar') {
+    $pag_inicial = 'relfin';
+} else if ($relsin != 'ocultar') {
+    $pag_inicial = 'relsin';
 } else if ($acessos != 'ocultar') {
     $pag_inicial = 'acessos';
 } else if ($configuracoes != 'ocultar') {

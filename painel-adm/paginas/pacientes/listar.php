@@ -43,6 +43,8 @@ HTML;
         $estado = $res[$i]['estado'];
         $foto = $res[$i]['foto'];
 
+        $tel_pessoaF = '55' . preg_replace('/\D/', '', $telefone) . '';
+
         echo <<<HTML
             <tr>
                 <td>
@@ -98,8 +100,19 @@ HTML;
                                                 '{$cidade}',
                                                 '{$estado}',
                                                 '{$foto}')" title="Mostrar Dados">
-                                                    <i class="fa fa-info-circle text-dark ico-grande"></i>
+                            <i class="fa fa-info-circle text-dark ico-grande"></i>
                     </a>
+
+                    <a href="#" onclick="mostrarContas('{$nome}',
+                                                        '{$id}')" title="Mostrar Contas">
+                            <i class="fa-solid fa-wallet text-success ico-grande"></i>
+                    </a>
+
+                    <a href="https://api.whatsapp.com/send?phone=<?php echo $tel_pessoaF ?>; ?>&text=Ol%C3%A1!%20Temos%20mudanças%20no%20seu%20arranjo%20conosco." 
+                       title="Enviar WhatsApp" target="_blank">
+                        <i class="fa-brands fa-whatsapp text-success ico-grande"></i>
+                    </a>
+
                 </td>
             </tr>
 HTML;
@@ -277,6 +290,27 @@ HTML;
                     $('#mensagem-excluir').addClass('text-danger')
                     $('#mensagem-excluir').text(mensagem)
                 }
+            }
+        });
+    }
+
+    function mostrarContas(nome, id) {
+        $('#titulo_contas').text(nome);
+        $('#id_contas').val(id);
+        $('#modalContas').modal('show');
+        listarDebitos(id);
+    }
+
+    function listarDebitos(id) {
+        $.ajax({
+            url: 'paginas/' + pag + "/listar_debitos.php",
+            method: 'POST',
+            data: {
+                id
+            },
+            dataType: "html",
+            success: function(result) {
+                $("#listar_debitos").html(result);
             }
         });
     }

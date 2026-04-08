@@ -9,6 +9,26 @@ body {
   padding: 8% 0 0;
 }
 
+/* ✅ Botão de voltar suave */
+.btn-voltar-pacientes {
+    transition: all 0.2s ease;
+}
+.btn-voltar-pacientes:hover {
+    transform: translateX(-3px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.cinza {
+  color: #545352;
+}
+
+.btn-imprime {
+   background:transparent; 
+   border:none; 
+   margin:0; 
+   padding:0;
+}
+
 .form {
   position: relative;
   z-index: 1;
@@ -22,6 +42,16 @@ body {
 
 .alinhaDireita {
   text-align: right;
+}
+
+/* ✅ Adicione no seu CSS geral ou no <style> do index.php */
+.modal-header .form-control-sm {
+    margin-left: 15px;
+    margin-right: 10px;
+    border: none;
+    background: rgba(255,255,255,0.9);
+    color: #2c3e50;
+    font-weight: 600;
 }
 
 .btn-receber {
