@@ -117,13 +117,13 @@ $pag = 'forma_pagamento';
 
 <body>
 
-    <a onclick="inserir()" href="#" type="button" class="btn btn-primary">
+    <a onclick="inserir()" href="#" type="button" class="btn btn-primary btn-sm">
         <span class="fa fa-plus"></span>
         Forma Pagto
     </a>
 
     <li class="dropdown head-dpdn2" style="display: inline-block;" id="btn-deletar">
-        <a href="#" class="btn btn-danger dropdown-toggle" data-toggle="dropdown">
+        <a href="#" class="btn btn-danger btn-sm dropdown-toggle" data-toggle="dropdown">
             <span class="fa-solid fa-trash-can text-whiter"></span>
             Excluir Forma Pagto
         </a>
