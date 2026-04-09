@@ -122,19 +122,19 @@ $pag = 'acessos';
         Acesso
     </a>
 
-    <li class="dropdown head-dpdn2" style="display: inline-block;"  id="btn-deletar">
+    <li class="dropdown head-dpdn2" style="display: inline-block;" id="btn-deletar">
         <a href="#" class="btn btn-danger dropdown-toggle" data-toggle="dropdown">
             <span class="fa-solid fa-trash-can text-whiter"></span>
-                Excluir Acesso
+            Excluir Acesso
         </a>
 
         <ul class="dropdown-menu">
 
             <li>
-                <div class="notification_desc2">
-                    <p>Confirmar Exclusão?
-                        <a href="#" onclick="deletarSel()">
-                            <span class="text-danger">Sim</span>
+                <div class="notification_desc2 centro">
+                    <p class="mb-1">Confirmar Exclusão?
+                        <a href="#" onclick="deletarSel()" class="btn btn-danger btn-xs">
+                            <span class="fa fa-check"> Sim, Excluir</span>
                         </a>
                     </p>
                 </div>
@@ -208,4 +208,4 @@ $pag = 'acessos';
 </div>
 <!-- Fim Modal Inserir-->
 
-    <script src="../js/ajax.js"></script>
+<script src="../js/ajax.js"></script>

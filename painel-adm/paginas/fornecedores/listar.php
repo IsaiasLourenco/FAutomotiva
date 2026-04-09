@@ -94,13 +94,13 @@ echo <<<HTML
 		                <ul class="dropdown-menu" style="margin-left:-230px;">
 
 		                    <li>
-		                        <div class="notification_desc2">
-		                            <p>Confirmar Exclusão? 
-                                        <a href="#" onclick="excluir('{$id}')" class="btn btn-danger btn-sm">
-                                            <span>Sim</span>
-                                        </a>
-                                    </p>
-		                        </div>
+		                        <div class="notification_desc2 centro">
+	                                <p>Confirmar Exclusão? <br>
+		                                <a href="#" onclick="excluir('{$id}')" class="btn btn-danger btn-xs">
+			                                <span>Sim</span>
+		                                </a>
+	                                </p>
+                                </div>
 		                    </li>										
 		                </ul>
                     </li>

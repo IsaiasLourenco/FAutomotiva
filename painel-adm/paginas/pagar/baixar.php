@@ -22,6 +22,10 @@ $juros_informado = @$_POST['juros'];
 $desconto_informado = @$_POST['desconto'];
 $taxa_informada = @$_POST['taxa'];
 
+// ✅ NOVO: Pagamento parcial (resíduo) - IGUAL AO RECEBER
+$pagamento_parcial = isset($_POST['pagamento_parcial']) && $_POST['pagamento_parcial'] === 'on';
+$valor_parcial = $pagamento_parcial ? (@$_POST['valor_parcial'] ?? '') : null;
+
 // ✅ Validações básicas COM MENSAGEM ESPECÍFICA
 if (empty($id)) {
     error_log("Erro: ID não recebido");
@@ -35,18 +39,28 @@ if (empty($valor)) {
 }
 if (empty($forma_pagamento)) {
     error_log("Erro: Forma de pagamento não recebida");
-    echo "Erro: Selecione uma forma de pagamento!";  // ✅ Mensagem clara para o usuário
+    echo "Erro: Selecione uma forma de pagamento!";
     exit;
 }
 
+// ✅ Se for pagamento parcial, valida o valor parcial
+if ($pagamento_parcial && empty($valor_parcial)) {
+    error_log("Erro: Pagamento parcial marcado mas valor_parcial vazio");
+    echo "Erro: Informe o valor recebido para pagamento parcial!";
+    exit;
+}
+
+// ✅ Determina qual valor usar para cálculos
+$valor_usado = $pagamento_parcial && !empty($valor_parcial) ? $valor_parcial : $valor;
+
 // ✅ Converte valores para decimal
-$valor_num = floatval(str_replace(['R$', '.', ','], ['', '', '.'], $valor));
+$valor_num = floatval(str_replace(['R$', '.', ','], ['', '', '.'], $valor_usado));
 $multa_num = !empty($multa_informada) ? floatval(str_replace(['R$', '.', ','], ['', '', '.'], $multa_informada)) : 0;
 $juros_num = !empty($juros_informado) ? floatval(str_replace(['R$', '.', ','], ['', '', '.'], $juros_informado)) : 0;
 $desconto_num = !empty($desconto_informado) ? floatval(str_replace(['R$', '.', ','], ['', '', '.'], $desconto_informado)) : 0;
 $taxa_num = !empty($taxa_informada) ? floatval($taxa_informada) : 0;
 
-error_log("Valores convertidos: valor_num={$valor_num}, multa={$multa_num}, juros={$juros_num}, taxa={$taxa_num}");
+error_log("Valores: valor_original={$valor}, valor_usado={$valor_usado}, multa={$multa_num}, juros={$juros_num}, taxa={$taxa_num}");
 
 try {
     // ✅ Busca dados da conta original
@@ -61,9 +75,10 @@ try {
     }
 
     $data_vencimento = $conta['data_vencimento'];
-    error_log("Conta encontrada: vencimento={$data_vencimento}, data_pgto={$data_pgto}");
+    $valor_original_num = floatval($conta['valor'] ?? 0);
+    error_log("Conta encontrada: vencimento={$data_vencimento}, valor_original={$valor_original_num}, data_pgto={$data_pgto}");
 
-    // ✅ Calcula multa e juros automáticos SE estiver atrasado
+    // ✅ Calcula multa e juros automáticos SE estiver atrasado (baseado no valor usado)
     if ($data_pgto > $data_vencimento) {
         if (empty($multa_informada)) {
             $multa_num = $valor_num * ($multa_pct / 100);
@@ -89,11 +104,11 @@ try {
         error_log("Taxa aplicada: {$taxa_num}% (forma: {$fp_nome})");
     }
 
-    // ✅ Calcula subtotal
+    // ✅ Calcula subtotal (valor recebido + ajustes)
     $subtotal = $valor_num + $multa_num + $juros_num + ($valor_num * $taxa_num / 100) - $desconto_num;
     error_log("Subtotal calculado: {$subtotal}");
 
-    // ✅ BAIXA NORMAL: atualiza conta como paga
+    // ✅ BAIXA: atualiza conta como paga
     $stmt_update = $pdo->prepare("UPDATE pagar SET 
         data_pagamento = :data_pgto,
         usuario_pgto = :usuario,
@@ -115,10 +130,46 @@ try {
         ':id' => $id
     ]);
 
+    // ✅ VERIFICA SE HÁ RESÍDUO (pagamento parcial)
+    if ($pagamento_parcial && !empty($valor_parcial)) {
+        // ✅ Calcula resíduo baseado no VALOR ORIGINAL da conta
+        $valor_parcial_num = floatval(str_replace(['R$', '.', ','], ['', '', '.'], $valor_parcial));
+        $resto = $valor_original_num - $valor_parcial_num;
+        
+        error_log("Pagamento parcial: valor_original={$valor_original_num}, valor_parcial={$valor_parcial_num}, resto={$resto}");
+        
+        if ($resto > 0.01) { // ✅ Se sobrou mais de 1 centavo, cria resíduo
+            $stmt_residuo = $pdo->prepare("INSERT INTO pagar (
+                descricao, fornecedor, valor, subtotal, data_vencimento, 
+                data_lancamento, forma_pagamento, frequencia, obs, usuario_lanc,
+                arquivo, referencia, id_referencia
+            ) VALUES (
+                :descricao, :fornecedor, :valor, :subtotal, :data_venc,
+                NOW(), NULL, NULL, :obs, :usuario_lanc,
+                :arquivo, 'Resíduo', :id_orig
+            )");
+
+            $stmt_residuo->execute([
+                ':descricao' => $conta['descricao'] . ' (Resíduo)',
+                ':fornecedor' => $conta['fornecedor'],
+                ':valor' => round($resto, 2),
+                ':subtotal' => round($resto, 2),
+                ':data_venc' => date('Y-m-d', strtotime('+30 days')),
+                ':obs' => 'Resíduo da conta #' . $id,
+                ':usuario_lanc' => $_SESSION['id_user'] ?? 1,
+                ':arquivo' => $conta['arquivo'] ?? 'aPagar.png',
+                ':id_orig' => $id
+            ]);
+            
+            error_log("Resíduo criado: R$ " . round($resto, 2));
+        }
+    }
+
     error_log("Baixa realizada com sucesso para conta {$id}");
     echo "Baixado com Sucesso";
     
 } catch (Exception $e) {
+    if ($pdo->inTransaction()) { $pdo->rollBack(); }
     error_log("ERRO EXCEPTION: " . $e->getMessage());
     echo "Erro: " . $e->getMessage();
 }

@@ -7,7 +7,7 @@ $res = $query->fetchAll(PDO::FETCH_ASSOC);
 $linhas = @count($res);
 if ($linhas > 0) {
 
-    echo <<<HTML
+echo <<<HTML
 
 	<table class="table table-hover tabela-pequena" id="tabela">
 
@@ -31,7 +31,7 @@ HTML;
         $nome = $res[$i]['nome'];
 
 
-        echo <<<HTML
+echo <<<HTML
             <tr>
                 <td>
                     <input type="checkbox" id="seletor-{$id}" class="form-check-input" onchange="selecionar('{$id}')">
@@ -51,13 +51,13 @@ HTML;
 		                <ul class="dropdown-menu" style="margin-left:-230px;">
 
 		                    <li>
-		                        <div class="notification_desc2">
-		                            <p>Confirmar Exclusão? 
-                                        <a href="#" onclick="excluir('{$id}')">
-                                            <span class="text-danger">Sim</span>
-                                        </a>
-                                    </p>
-		                        </div>
+		                        <div class="notification_desc2 centro">
+	                                <p>Confirmar Exclusão? <br>
+		                                <a href="#" onclick="excluir('{$id}')" class="btn btn-danger btn-xs">
+			                                <span>Sim</span>
+		                                </a>
+	                                </p>
+                                </div>
 		                    </li>										
 		                </ul>
                     </li>
@@ -66,7 +66,7 @@ HTML;
             </tr>
 HTML;
     }
-    echo <<<HTML
+echo <<<HTML
         </tbody>
         <div class="centro-pequeno" id="mensagem-excluir"></div>
     </table>

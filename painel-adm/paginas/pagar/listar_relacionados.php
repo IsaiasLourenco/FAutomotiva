@@ -5,18 +5,12 @@ $id_original = $_POST['id'] ?? 0;
 $resumo = $_POST['resumo'] ?? 'nao';
 
 // ✅ 1. Identificar a conta principal
-// Se a conta tem id_referencia, ela é parcela/resíduo → buscar a principal
-// Se não tem, ela É a principal
-$stmt_principal = $pdo->prepare("
-    SELECT id, descricao, valor, subtotal, paciente, referencia, id_referencia 
-    FROM receber 
-    WHERE id = :id LIMIT 1
-");
+$stmt_principal = $pdo->prepare("SELECT id, descricao, valor, subtotal, fornecedor, referencia, id_referencia FROM pagar WHERE id = :id LIMIT 1");
 $stmt_principal->execute([':id' => $id_original]);
 $conta_original = $stmt_principal->fetch(PDO::FETCH_ASSOC);
 
 if (!$conta_original) {
-    echo '<tr><td colspan="5" class="text-center text-danger">Conta não encontrada.</td></tr>';
+    echo '<tr><td colspan="6" class="text-center text-danger">Conta não encontrada.</td></tr>';
     exit;
 }
 
@@ -25,25 +19,18 @@ $id_principal = !empty($conta_original['id_referencia']) && $conta_original['id_
     ? $conta_original['id_referencia']
     : $id_original;
 
-// ✅ 2. Buscar dados da conta principal (para exibir no topo)
-$stmt_info = $pdo->prepare("
-    SELECT r.*, p.nome as paciente_nome 
-    FROM receber r 
-    LEFT JOIN pacientes p ON r.paciente = p.id 
-    WHERE r.id = :id LIMIT 1
-");
+// ✅ 2. Buscar dados da conta principal
+$stmt_info = $pdo->prepare("SELECT p.*, f.nome as fornecedor_nome FROM pagar p LEFT JOIN fornecedores f ON p.fornecedor = f.id WHERE p.id = :id LIMIT 1");
 $stmt_info->execute([':id' => $id_principal]);
 $info_principal = $stmt_info->fetch(PDO::FETCH_ASSOC);
 
 // ✅ 3. Buscar TODAS as contas relacionadas (parcelas + resíduos)
-$stmt_rel = $pdo->prepare("
-    SELECT r.*, p.nome as paciente_nome, fp.nome as forma_nome 
-    FROM receber r 
-    LEFT JOIN pacientes p ON r.paciente = p.id 
-    LEFT JOIN forma_pagamento fp ON r.forma_pagamento = fp.id 
-    WHERE r.id_referencia = :id_principal OR r.id = :id_principal
-    ORDER BY r.data_vencimento ASC, r.id ASC
-");
+$stmt_rel = $pdo->prepare("SELECT p.*, f.nome as fornecedor_nome, fp.nome as forma_nome 
+    FROM pagar p 
+    LEFT JOIN fornecedores f ON p.fornecedor = f.id 
+    LEFT JOIN forma_pagamento fp ON p.forma_pagamento = fp.id 
+    WHERE p.id_referencia = :id_principal OR p.id = :id_principal
+    ORDER BY p.data_vencimento ASC, p.id ASC");
 $stmt_rel->execute([':id_principal' => $id_principal]);
 $relacionados = $stmt_rel->fetchAll(PDO::FETCH_ASSOC);
 
@@ -72,8 +59,6 @@ if ($resumo === 'sim') {
     ]);
     exit;
 }
-
-// ✅ 6. Gerar HTML da tabela
 ?>
 
 <!-- ✅ Cabeçalho: Conta Principal -->
@@ -84,11 +69,9 @@ if ($resumo === 'sim') {
     <div class="card-body py-2">
         <div class="row small">
             <div class="col-md-4"><strong>Descrição:</strong> <?php echo htmlspecialchars($info_principal['descricao']); ?></div>
-            <div class="col-md-3"><strong>Paciente:</strong> <?php echo htmlspecialchars($info_principal['paciente_nome']); ?></div>
+            <div class="col-md-3"><strong>Fornecedor:</strong> <?php echo htmlspecialchars($info_principal['fornecedor_nome']); ?></div>
             <div class="col-md-2"><strong>Valor Original:</strong> R$ <?php echo number_format($valor_original, 2, ',', '.'); ?></div>
-            <div class="col-md-3">
-                <strong>Vencimento:</strong> 
-                    <?php echo !empty($info_principal['data_vencimento']) && $info_principal['data_vencimento'] != '0000-00-00' ? date('d/m/Y', strtotime($info_principal['data_vencimento'])) : '-'; ?></div>
+            <div class="col-md-3"><strong>Vencimento:</strong> <?php echo !empty($info_principal['data_vencimento']) && $info_principal['data_vencimento'] != '0000-00-00' ? date('d/m/Y', strtotime($info_principal['data_vencimento'])) : '-'; ?></div>
         </div>
     </div>
 </div>
@@ -124,8 +107,7 @@ if ($resumo === 'sim') {
                         </span>
                     </td>
                     <td class="small"><?php echo htmlspecialchars($r['descricao']); ?></td>
-                    <td class="text-center small">
-                        <?php echo !empty($r['data_vencimento']) && $r['data_vencimento'] != '0000-00-00' ? date('d/m/Y', strtotime($r['data_vencimento'])) : '-'; ?></td>
+                    <td class="text-center small"><?php echo !empty($r['data_vencimento']) && $r['data_vencimento'] != '0000-00-00' ? date('d/m/Y', strtotime($r['data_vencimento'])) : '-'; ?></td>
                     <td class="text-center small <?php echo $classe_status; ?>"><?php echo $texto_pago; ?></td>
                     <td class="text-center small"><?php echo htmlspecialchars($r['forma_nome'] ?? '-'); ?></td>
                     <td class="text-end small font-weight-bold">R$ <?php echo number_format($valor_exibir, 2, ',', '.'); ?></td>
@@ -135,7 +117,7 @@ if ($resumo === 'sim') {
     </tbody>
 </table>
 
-<!-- ✅ Rodapé com Resumo (sempre visível agora) -->
+<!-- ✅ Rodapé com Resumo -->
 <div class="row mt-3 pt-3 border-top bg-light rounded p-2">
     <div class="col-md-4 text-center">
         <small class="text-muted d-block">Total Pago</small>

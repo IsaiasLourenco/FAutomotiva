@@ -279,12 +279,12 @@ echo <<<HTML
                         </a>
                         <ul class="dropdown-menu" style="margin-left:-230px;">
                             <li>
-                                <div class="notification_desc2">
-                                    <p>Confirmar Exclusão? <br>
-                                        <a href="#" onclick="excluir('{$id}')" class="btn btn-danger btn-xs">
-                                            <span class="alinhaDireita">Sim</span>
-                                        </a>
-                                    </p>
+                                <div class="notification_desc2 centro">
+	                                <p>Confirmar Exclusão? <br>
+		                                <a href="#" onclick="excluir('{$id}')" class="btn btn-danger btn-xs">
+			                                <span>Sim</span>
+		                                </a>
+	                                </p>
                                 </div>
                             </li>
                         </ul>

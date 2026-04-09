@@ -147,10 +147,10 @@ $juros_label = isset($config_multa_juros['juros_padrao'])
                 </a>
                 <ul class="dropdown-menu">
                     <li>
-                        <div class="notification_desc2">
+                        <div class="notification_desc2 centro">
                             <p class="mb-1">Confirmar Exclusão?
                                 <a href="#" onclick="deletarSel()" class="btn btn-danger btn-xs">
-                                    <span class="fa fa-check"></span> Sim, Excluir
+                                    <span class="fa fa-check"> Sim, Excluir</span>
                                 </a>
                             </p>
                         </div>
@@ -158,16 +158,16 @@ $juros_label = isset($config_multa_juros['juros_padrao'])
                 </ul>
             </li>
 
-            <li class="dropdown head-dpdn2" id="btn-baixar" style="display:inline-block;">
+            <li class="dropdown head-dpdn2 centro" id="btn-baixar" style="display:inline-block;">
                 <a href="#" class="btn btn-success dropdown-toggle btn-sm" data-toggle="dropdown">
-                    <span class="fa-solid fa-check-square"></span> Baixar Conta
+                    <span class="fa-solid fa-check-square"></span> Baixar Conta<br>
                 </a>
                 <ul class="dropdown-menu">
                     <li>
-                        <div class="notification_desc2">
-                            <p class="mb-1">Confirmar Baixa?
+                        <div class="notification_desc2 centro">
+                            <p class="mb-1">Confirmar Baixa? <br>
                                 <a href="#" onclick="baixarSel()" class="btn btn-success btn-xs">
-                                    <span class="fa fa-check"></span> Sim, Baixar
+                                    <span class="fa fa-check"> Sim, Baixar</span>
                                 </a>
                             </p>
                             <p><strong>Total:</strong> <span id="totalContas"></span></p>
@@ -242,7 +242,7 @@ $juros_label = isset($config_multa_juros['juros_padrao'])
 <div class="modal fade" id="modalForm" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
-            <div class="modal-header">
+            <div class="modal-header bg-info text-white">
                 <h4 class="modal-title">
                     <span id="titulo_inserir"></span>
                 </h4>
@@ -291,7 +291,7 @@ $juros_label = isset($config_multa_juros['juros_padrao'])
                             <label for="pago">Pago em</label>
                             <input type="date" class="form-control" id="pagamento-conta" name="pagamento">
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-6">
                             <label for="forma_pagamento">Forma de Pagamento</label>
                             <select class="form-control" name="forma_pagamento" id="forma_pagamento" required>
                                 <option value="" selected disabled>Escolha uma forma de pagamento...</option>
@@ -307,8 +307,9 @@ $juros_label = isset($config_multa_juros['juros_padrao'])
                                 } ?>
                             </select>
                         </div>
-
-                        <div class="col-md-3">
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
                             <label for="frequencia">Frequência</label>
                             <select name="frequencia" id="frequencia" class="form-control" required>
                                 <option value="" selected disabled>Escolha uma frequência...</option>
@@ -324,19 +325,9 @@ $juros_label = isset($config_multa_juros['juros_padrao'])
                                 } ?>
                             </select>
                         </div>
-
-                    </div>
-                    <div class="row">
-                        <div class="col-md-5">
+                        <div class="col-md-6">
                             <label for="obs">Observações</label>
                             <input type="text" class="form-control" id="obs-perfil" name="obs" required>
-                        </div>
-                        <div class="col-md-5">
-                            <label for="arquivo">Arquivo</label>
-                            <input type="file" class="form-control" id="arquivo-conta" name="arquivo" onchange="carregarImgReceber()">
-                        </div>
-                        <div class="col-md-2">
-                            <img src="./images/receber/sem-foto.png" alt="Foto do arquivo" style="width: 80px;" id="target-arquivo">
                         </div>
                         <input type="hidden" name="id" id="id">
                     </div>
@@ -364,7 +355,7 @@ $juros_label = isset($config_multa_juros['juros_padrao'])
                     <div id="mensagem" class="centro-pequeno"></div>
                 </div>
                 <div class="modal-footer centro">
-                    <button type="submit" class="btn btn-primary" id="btn_salvar">
+                    <button type="submit" class="btn btn-primary btn-sm" id="btn_salvar">
                         Salvar
                     </button>
                 </div>
@@ -468,7 +459,7 @@ $juros_label = isset($config_multa_juros['juros_padrao'])
                 </div>
             </div>
             <div class="modal-footer centro">
-                <button type="button" class="btn btn-primary" data-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-primary btn-sm" data-dismiss="modal">Fechar</button>
             </div>
         </div>
     </div>
@@ -551,8 +542,8 @@ $juros_label = isset($config_multa_juros['juros_padrao'])
                     <input type="hidden" name="freq_id" id="freq-id-hidden">
                     <div id="mensagem-parcelar" class="mt-2"></div>
                 </div>
-                <div class="modal-footer justify-content-between">
-                    <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal" id="btn-cancelar-parcelar"><i class="fa fa-times"></i> Cancelar</button>
+                <div class="modal-footer centro">
+                    <button type="button" class="btn btn-warning btn-sm" data-dismiss="modal" id="btn-cancelar-parcelar"><i class="fa fa-times"></i> Cancelar</button>
                     <button type="submit" class="btn btn-primary btn-sm" id="btn-confirmar-parcelar"><i class="fa fa-check"></i> Confirmar Parcelamento</button>
                 </div>
             </form>
@@ -561,7 +552,7 @@ $juros_label = isset($config_multa_juros['juros_padrao'])
 </div>
 <!-- ✅ Fim Modal Parcelar -->
 
-<!-- ✅ Modal Baixar -->
+<!-- ✅ Modal Baixar (IDÊNTICA AO RECEBER) -->
 <div class="modal fade" id="modalBaixar" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-md" role="document">
         <div class="modal-content">
@@ -596,7 +587,7 @@ $juros_label = isset($config_multa_juros['juros_padrao'])
                         </div>
                     </div>
 
-                    <!-- ✅ ADICIONE após o campo "Valor" -->
+                    <!-- ✅ CHECKBOX PAGAMENTO PARCIAL (RESÍDUO) -->
                     <div class="row mt-2">
                         <div class="col-12">
                             <div class="form-check">
@@ -629,9 +620,9 @@ $juros_label = isset($config_multa_juros['juros_padrao'])
                     <input type="hidden" id="data-vencimento-baixar">
                     <div id="mensagem-baixar" class="mt-2"></div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" id="btn-fechar-baixar" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-success" id="btn-confirmar-baixar">Confirmar Baixa</button>
+                <div class="modal-footer centro">
+                    <button type="button" id="btn-fechar-baixar" class="btn btn-primary btn-sm" data-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-success btn-sm" id="btn-confirmar-baixar">Confirmar Baixa</button>
                 </div>
             </form>
         </div>
@@ -639,7 +630,7 @@ $juros_label = isset($config_multa_juros['juros_padrao'])
 </div>
 <!-- ✅ Fim Modal Baixar -->
 
-<!-- ✅ Modal de Relacionados (Parcelas/Resíduos) -->
+<!-- ✅ Modal de Relacionados (Parcelas/Resíduos) - ATUALIZADA -->
 <div class="modal fade" id="modalRelacionados" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
@@ -653,48 +644,22 @@ $juros_label = isset($config_multa_juros['juros_padrao'])
                 </button>
             </div>
             <div class="modal-body">
-                <div class="table-responsive">
-                    <table class="table table-sm table-hover">
-                        <thead class="bg-light">
-                            <tr>
-                                <th width="5%" class="text-center">Tipo</th>
-                                <th width="35%">Descrição</th>
-                                <th width="15%" class="text-center">Pago em</th>
-                                <th width="15%" class="text-center">Forma Pgto</th>
-                                <th width="30%" class="text-end">Valores</th>
-                            </tr>
-                        </thead>
-                        <tbody id="lista-relacionados">
-                            <tr>
-                                <td colspan="5" class="text-center text-muted">Carregando...</td>
-                            </tr>
-                        </tbody>
-                    </table>
+
+                <!-- ✅ CONTAINER PRINCIPAL (onde o PHP vai injetar o conteúdo) -->
+                <div id="lista-relacionados-container">
+                    <div class="text-center text-muted py-4">
+                        <i class="fa fa-spinner fa-spin"></i> Carregando...
+                    </div>
                 </div>
 
-                <!-- ✅ Resumo no rodapé da modal -->
-                <div class="row mt-3 pt-3 border-top" id="resumo-relacionados" style="display:none;">
-                    <div class="col-md-4">
-                        <small class="text-muted">Total Pago:</small>
-                        <h5 class="text-success font-weight-bold" id="total-pago">R$ 0,00</h5>
-                    </div>
-                    <div class="col-md-4">
-                        <small class="text-muted">Saldo Restante:</small>
-                        <h5 class="text-danger font-weight-bold" id="saldo-restante">R$ 0,00</h5>
-                    </div>
-                    <div class="col-md-4">
-                        <small class="text-muted">Valor Original:</small>
-                        <h5 class="text-dark font-weight-bold" id="valor-original">R$ 0,00</h5>
-                    </div>
-                </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+            <div class="modal-footer centro">
+                <button type="button" class="btn btn-danger btn-sm" data-dismiss="modal">Fechar</button>
             </div>
         </div>
     </div>
 </div>
-<!-- ✅ Modal de Relacionados (Parcelas/Resíduos) -->
+<!-- ✅ Fim Modal de Relacionados -->
 
 <!-- ✅ Modal de Baixa Múltipla -->
 <div class="modal fade" id="modalBaixarMultiplo" tabindex="-1" role="dialog" aria-hidden="true">
@@ -740,9 +705,9 @@ $juros_label = isset($config_multa_juros['juros_padrao'])
 
                 <div id="mensagem-baixar-multiplo" class="mt-2"></div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-success" id="btn-confirmar-baixar-multiplo">Confirmar Baixa</button>
+            <div class="modal-footer centro">
+                <button type="button" class="btn btn-primary btn-sm" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-success btn-sm" id="btn-confirmar-baixar-multiplo">Confirmar Baixa</button>
             </div>
         </div>
     </div>
@@ -822,8 +787,8 @@ $juros_label = isset($config_multa_juros['juros_padrao'])
                 </div>
 
             </div>
-            <div class="modal-footer bg-light">
-                <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"><i class="fa fa-times"></i> Fechar</button>
+            <div class="modal-footer bg-light centro">
+                <button type="button" class="btn btn-primary btn-sm" data-dismiss="modal"><i class="fa fa-times"></i> Fechar</button>
             </div>
         </div>
     </div>
@@ -1595,11 +1560,10 @@ $juros_label = isset($config_multa_juros['juros_padrao'])
         }
     });
 
-    // ✅ Função para abrir modal de relacionados
+    // ✅ Função para abrir modal de relacionados (ATUALIZADA)
     function mostrarRelacionados(id, descricao) {
         $('#titulo-relacionados').text(descricao);
-        $('#lista-relacionados').html('<tr><td colspan="5" class="text-center text-muted"><i class="fa fa-spinner fa-spin"></i> Carregando...</td></tr>');
-        $('#resumo-relacionados').hide();
+        $('#lista-relacionados-container').html('<div class="text-center text-muted py-4"><i class="fa fa-spinner fa-spin"></i> Carregando...</div>');
         $('#modalRelacionados').modal('show');
 
         $.ajax({
@@ -1610,15 +1574,31 @@ $juros_label = isset($config_multa_juros['juros_padrao'])
             },
             dataType: 'html',
             success: function(resposta) {
-                $('#lista-relacionados').html(resposta);
-
-                // ✅ Calcula resumo se houver dados
-                if ($(resposta).find('tr').length > 1) {
-                    calcularResumoRelacionados(id);
-                }
+                $('#lista-relacionados-container').html(resposta);
             },
             error: function() {
-                $('#lista-relacionados').html('<tr><td colspan="5" class="text-center text-danger">Erro ao carregar dados</td></tr>');
+                $('#lista-relacionados-container').html('<div class="text-center text-danger py-4">Erro ao carregar dados</div>');
+            }
+        });
+    }
+
+    // ✅ Função para recalcular resumo via AJAX (opcional, se quiser atualizar sem recarregar)
+    function atualizarResumoRelacionados(id_original) {
+        $.ajax({
+            url: 'paginas/receber/listar_relacionados.php',
+            method: 'POST',
+            data: {
+                id: id_original,
+                resumo: 'sim'
+            },
+            dataType: 'json',
+            success: function(resposta) {
+                if (resposta.sucesso) {
+                    $('#total-pago').text(resposta.total_pago);
+                    $('#saldo-restante').text(resposta.saldo_restante);
+                    $('#valor-original').text(resposta.valor_original);
+                    $('#resumo-relacionados').show();
+                }
             }
         });
     }

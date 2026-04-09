@@ -1,27 +1,27 @@
 <?php
 require_once("../../../conexao.php");
 require_once("../../verificar.php");
-require_once("../../funcoes.php"); // ✅ Importa a função calcularDiasAtraso()
+require_once("../../funcoes.php");
 
 // ✅ Busca configurações de multa/juros padrão do sistema
 $config = $pdo->query("SELECT multa_padrao, juros_padrao FROM configuracoes LIMIT 1")->fetch(PDO::FETCH_ASSOC);
 $multa_pct = $config['multa_padrao'] ?? 2.00;
 $juros_pct = $config['juros_padrao'] ?? 0.33;
 
-// ✅ Recebe dados do formulário (NOMES IGUAIS AO RECEBER)
-$id_original = @$_POST['id-parcelar'];
-$valor_total = @$_POST['valor-parcelar'];
-$qtd_parcelas = @$_POST['qtd-parcelar'];
-$data_primeira = @$_POST['data-primeira'];
-$forma_pagamento = @$_POST['forma_pagamento'];
-$frequencia_id = @$_POST['frequencia'];
-$descricao_original = @$_POST['descricao-original'];
+// ✅ Recebe dados do formulário (NOMES IGUAIS AO HTML DA MODAL)
+$id_original = isset($_POST['id-parcelar']) ? trim($_POST['id-parcelar']) : '';
+$valor_total = isset($_POST['valor-parcelar']) ? $_POST['valor-parcelar'] : '';
+$qtd_parcelas = isset($_POST['qtd-parcelar']) ? intval($_POST['qtd-parcelar']) : 0;
+$data_primeira = isset($_POST['data-primeira']) ? $_POST['data-primeira'] : '';
+$forma_pagamento = isset($_POST['forma_pagamento']) ? $_POST['forma_pagamento'] : '';
+$frequencia_id = isset($_POST['frequencia']) ? $_POST['frequencia'] : '';
+$descricao_original = isset($_POST['descricao-original']) ? $_POST['descricao-original'] : '';
 
 // ✅ Novos campos de ajustes financeiros
-$multa = @$_POST['multa'];
-$juros = @$_POST['juros'];
-$desconto = @$_POST['desconto'];
-$taxa = @$_POST['taxa'];
+$multa = isset($_POST['multa']) ? $_POST['multa'] : '';
+$juros = isset($_POST['juros']) ? $_POST['juros'] : '';
+$desconto = isset($_POST['desconto']) ? $_POST['desconto'] : '';
+$taxa = isset($_POST['taxa']) ? $_POST['taxa'] : '';
 
 // ✅ Validações
 if (!$id_original) {
@@ -50,7 +50,7 @@ $valor_total_num = floatval(str_replace(['R$', '.', ','], ['', '', '.'], $valor_
 
 // ✅ Se multa/juros estiverem vazios ("Auto"), calcula automaticamente se a conta original estiver vencida
 $hoje = date('Y-m-d');
-$stmt_orig_check = $pdo->prepare("SELECT data_vencimento FROM receber WHERE id = :id LIMIT 1");
+$stmt_orig_check = $pdo->prepare("SELECT data_vencimento FROM pagar WHERE id = :id LIMIT 1");
 $stmt_orig_check->execute([':id' => $id_original]);
 $conta_check = $stmt_orig_check->fetch(PDO::FETCH_ASSOC);
 $data_vencimento_original = $conta_check['data_vencimento'] ?? null;
@@ -64,7 +64,6 @@ if (empty($multa) && $data_vencimento_original && $data_vencimento_original < $h
 
 // Juros automáticos (se vazios e conta vencida) - USANDO FUNÇÃO REUTILIZÁVEL
 if (empty($juros) && $data_vencimento_original && $data_vencimento_original < $hoje) {
-    // ✅ Usa função centralizada (limita a 30 dias)
     $dias_calculo = calcularDiasAtraso($data_vencimento_original, $hoje, 30);
     $juros_num = $valor_total_num * ($juros_pct / 100) * ($dias_calculo / 30);
 } else {
@@ -77,13 +76,13 @@ $taxa_num = !empty($taxa) ? floatval($taxa) : 0;
 try {
     $pdo->beginTransaction();
 
-    // ✅ 1. Busca o paciente e arquivo da conta original
-    $stmt_orig = $pdo->prepare("SELECT paciente, arquivo FROM receber WHERE id = :id LIMIT 1");
+    // ✅ 1. Busca o fornecedor e arquivo da conta original
+    $stmt_orig = $pdo->prepare("SELECT fornecedor, arquivo FROM pagar WHERE id = :id LIMIT 1");
     $stmt_orig->execute([':id' => $id_original]);
     $conta_orig = $stmt_orig->fetch(PDO::FETCH_ASSOC);
-    $paciente_id = $conta_orig['paciente'];
+    $fornecedor_id = $conta_orig['fornecedor'];
 
-    if (!$paciente_id) {
+    if (!$fornecedor_id) {
         throw new Exception("Conta original não encontrada!");
     }
 
@@ -91,7 +90,7 @@ try {
         ? $conta_orig['arquivo'] : 'aPagar.png';
 
     // ✅ 2. Marca conta original como "Parcelada"
-    $stmt = $pdo->prepare("UPDATE receber SET descricao = CONCAT(descricao, ' (Parcelada)') WHERE id = :id");
+    $stmt = $pdo->prepare("UPDATE pagar SET descricao = CONCAT(descricao, ' (Parcelada)') WHERE id = :id");
     $stmt->execute([':id' => $id_original]);
 
     // ✅ 3. Calcula valor total ajustado
@@ -131,10 +130,10 @@ try {
 
         // ✅ 7. INSERT da parcela
         $stmt = $pdo->prepare("INSERT INTO pagar (descricao, fornecedor, valor, data_vencimento, data_lancamento, 
-                                            forma_pagamento, frequencia, obs, usuario_lanc, usuario_pgto,
-                                            arquivo, referencia, id_referencia, multa, juros, desconto, taxa, subtotal) 
-                              VALUES (:descricao, :fornecedor, :valor, :data_venc, :data_lanc, :forma_pgto, :freq_id, :obs, :usuario_lanc, NULL,
-                                      :arquivo, 'Parcela', :id_orig, :multa, :juros, :desconto, :taxa, :subtotal)");
+                                                    forma_pagamento, frequencia, obs, usuario_lanc, usuario_pgto,
+                                                    arquivo, referencia, id_referencia, multa, juros, desconto, taxa, subtotal) 
+                                      VALUES (:descricao, :fornecedor, :valor, :data_venc, :data_lanc, :forma_pgto, :freq_id, :obs, :usuario_lanc, NULL,
+                                              :arquivo, 'Parcela', :id_orig, :multa, :juros, :desconto, :taxa, :subtotal)");
 
         $stmt->execute([
             ':descricao' => $descricao_parcela,

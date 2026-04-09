@@ -131,10 +131,10 @@ $pag = 'cargos';
         <ul class="dropdown-menu">
 
             <li>
-                <div class="notification_desc2">
-                    <p>Confirmar Exclusão?
-                        <a href="#" onclick="deletarSel()">
-                            <span class="text-danger">Sim</span>
+                <div class="notification_desc2 centro">
+                    <p class="mb-1">Confirmar Exclusão?
+                        <a href="#" onclick="deletarSel()" class="btn btn-danger btn-xs">
+                            <span class="fa fa-check"> Sim, Excluir</span>
                         </a>
                     </p>
                 </div>
