@@ -1,4 +1,4 @@
-# 🦷 FAutomotiva - Sistema de Check In e Orçamento para Oficinas automotivas
+# 🚗 FAutomotiva - Sistema de Check In e Orçamento para Oficinas automotivas
 
 > Sistema desenvolvido para gestão de oficinas mecânicas, desde a entrada do carro na oficina, até o orçamento e envio do mesmom para o cliente.
 
