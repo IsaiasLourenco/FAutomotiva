@@ -1,0 +1,54 @@
+body {
+  font-family: 'Montserrat', sans-serif;
+  background: linear-gradient(135deg, #6b6b6b, #2f2f2f);
+  position: relative;
+  height: 100vh;
+}
+
+body::before {
+  content: "";
+  position: absolute;
+  width: 400px;
+  height: 400px;
+  background: rgba(255, 255, 255, 0.05);
+  top: -100px;
+  right: -100px;
+  border-radius: 50%;
+}
+
+.login-container {
+  height: 100vh;
+}
+
+.card-login {
+  border: none;
+  border-radius: 12px;
+  padding: 30px;
+}
+
+.logo-img {
+  width: 120px;
+  margin-bottom: 20px;
+}
+
+.input-group-text {
+  background: #f1f1f1;
+}
+
+.btn-login {
+  background: #4CAF50;
+  border: none;
+}
+
+.btn-login:hover {
+  background: #43a047;
+}
+
+.btn-recuperar {
+  background: #2196F3;
+  border: none;
+}
+
+.btn-recuperar:hover {
+  background: #1976d2;
+}

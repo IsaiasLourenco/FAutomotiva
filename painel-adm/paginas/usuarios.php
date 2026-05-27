@@ -107,30 +107,30 @@ $pag = 'usuarios';
 </head>
 
 <body>
-
-    <a onclick="inserir()" href="#" type="button" class="btn btn-primary btn-sm">
-        <span class="fa fa-plus"></span>
-        Usuário
-    </a>
-
-    <li class="dropdown head-dpdn2" style="display: inline-block;" id="btn-deletar">
-        <a href="#" class="btn btn-danger btn-sm dropdown-toggle" data-toggle="dropdown">
-            <span class="fa-solid fa-trash-can text-whiter"></span>
-            Excluir User
+    <div class="main-page margin-mobile">
+        <a onclick="inserir()" href="#" type="button" class="btn btn-primary btn-sm">
+            <span class="fa fa-plus"></span>
+            Usuário
         </a>
-        <ul class="dropdown-menu">
-            <li>
-                <div class="notification_desc2 centro">
-                    <p class="mb-1">Confirmar Exclusão?
-                        <a href="#" onclick="deletarSel()" class="btn btn-danger btn-xs">
-                            <span class="fa fa-check"> Sim, Excluir</span>
-                        </a>
-                    </p>
-                </div>
-            </li>
-        </ul>
-    </li>
 
+        <li class="dropdown head-dpdn2" style="display: inline-block;" id="btn-deletar">
+            <a href="#" class="btn btn-danger btn-sm dropdown-toggle" data-toggle="dropdown">
+                <span class="fa-solid fa-trash-can text-whiter"></span>
+                Excluir User
+            </a>
+            <ul class="dropdown-menu">
+                <li>
+                    <div class="notification_desc2 centro">
+                        <p class="mb-1">Confirmar Exclusão?
+                            <a href="#" onclick="deletarSel()" class="btn btn-danger btn-xs">
+                                <span class="fa fa-check"> Sim, Excluir</span>
+                            </a>
+                        </p>
+                    </div>
+                </li>
+            </ul>
+        </li>
+    </div>
     <div class="bs-example widget-shadow table-primary" id="listar"></div>
 
     <!-- DataTables JS -->
@@ -398,30 +398,30 @@ $pag = 'usuarios';
 <div class="modal fade" id="modalPermissoes" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-header bg-success text-white">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
                     Usuário: <span id="nome_permissoes"></span>
                     <span class="absolute-right">
                         <input class="form-check-input" type="checkbox" id="input_todos" onchange="marcarTodos()">
                         <label for="input_todos">Marcar Todos</label>
                     </span>
-                </h4>
-                <button type="button" class="close mg-t--20" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="row" id="listar_permissoes">
-
+                    </h4>
+                    <button type="button" class="close mg-t--20" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
                 </div>
-                <br>
-                <input type="hidden" name="id" id="id_permissoes">
-                <div id="mensagem_permissao" class="mt-3 centro-pequeno"></div>
-            </div>
+                <div class="modal-body">
+                    <div class="row" id="listar_permissoes">
 
+                    </div>
+                    <br>
+                    <input type="hidden" name="id" id="id_permissoes">
+                    <div id="mensagem_permissao" class="mt-3 centro-pequeno"></div>
+                </div>
+
+            </div>
         </div>
     </div>
-</div>
-<!-- Fim Modal Permissões -->
+    <!-- Fim Modal Permissões -->
 
-<script src="../js/ajax.js"></script>
+    <script src="../js/ajax.js"></script>

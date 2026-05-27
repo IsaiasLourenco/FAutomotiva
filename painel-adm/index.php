@@ -182,6 +182,18 @@
                                         <i class="fa fa-home"></i> <span>Home</span>
                                     </a>
                                 </li>
+                                <li class="treeview <?php echo $menu_orcamentos ?>">
+                                    <a href="#">
+                                        <i class="far fa-file-alt"></i>
+                                        <span>Orçamentos</span>
+                                        <i class="fa fa-angle-left pull-right"></i>
+                                    </a>
+                                    <ul class="treeview-menu">
+                                        <?php if ($usuarios != 'ocultar') { ?>
+                                            <li><a href="index.php?pagina=orcamentos"><i class="fa fa-angle-right"></i> Orçamentos</a></li>
+                                        <?php } ?>
+                                    </ul>
+                                </li>
                                 <li class="treeview <?php echo $menu_pessoas ?>">
                                     <a href="#">
                                         <i class="fa fa-users"></i>
@@ -548,8 +560,10 @@
     <div class="modal fade" id="modalPerfil" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title" id="exampleModalLabel">Alterar Dados</h4>
+                <div class="modal-header bg-success" style="color: black;">
+                    <h4 class="modal-title" id="exampleModalLabel">
+                        <i class="fas fa-user-edit"></i> Alterar Dados
+                    </h4>
                     <button id="btn-fechar-perfil" type="button" class="close mg-t--20" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -671,8 +685,11 @@
     <div class="modal fade" id="modalConfig" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title" id="exampleModalLabel">Editar Configurações</h4>
+                <div class="modal-header bg-success" style="color: black;">
+                    <h4 class="modal-title" id="exampleModalLabel">
+                        <i class="fas fa-cog"></i>
+                        Editar Configurações
+                    </h4>
                     <button id="btn-fechar-config" type="button" class="close mg-t--20" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -735,32 +752,6 @@
                                 <input type="text" class="form-control" id="instagram" name="instagram" value="<?php echo $instagram_sistema ?>">
                             </div>
                         </div>
-
-                        <!-- ✅ NOVOS CAMPOS: Multa e Juros Padrão -->
-                        <div class="row border-top pt-3 mt-3">
-                            <div class="col-md-4">
-                                <label for="multa_padrao">Multa Padrão (%)</label>
-                                <input type="text" class="form-control moeda" id="multa_padrao" name="multa_padrao"
-                                    value="<?php echo isset($multa_padrao) ? number_format($multa_padrao, 2, ',', '.') : '0,00'; ?>"
-                                    placeholder="0,00" maxlength="5">
-                                <small class="text-muted">Ex: 2,00 para 2%</small>
-                            </div>
-                            <div class="col-md-4">
-                                <label for="juros_padrao">Juros Padrão (% ao mês)</label>
-                                <input type="text" class="form-control moeda" id="juros_padrao" name="juros_padrao"
-                                    value="<?php echo isset($juros_padrao) ? number_format($juros_padrao, 2, ',', '.') : '0,00'; ?>"
-                                    placeholder="0,00" maxlength="5">
-                                <small class="text-muted">Ex: 0,33 para 0,33% a.m.</small>
-                            </div>
-                            <div class="col-md-4">
-                                <label for="marcadagua">Marca d'Água(Rel)</label>
-                                <select name="marcadagua" id="marcadagua" class="form-control">
-                                    <option value="sim">Sim</option>
-                                    <option value="nao">Não</option>
-                                </select>
-                            </div>
-                        </div>
-
                         <div class="row">
                             <div class="col-md-3">
                                 <label for="tipoRel">Tipo Relatório</label>
@@ -857,8 +848,11 @@
     <div class="modal fade" id="modalRelFin" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title" id="exampleModalLabel">Relatório Financeiro</h4>
+                <div class="modal-header bg-success" style="color: black;">
+                    <h4 class="modal-title" id="exampleModalLabel">
+                        <i class="fas fa-file-pdf"></i>
+                        Relatório Financeiro
+                    </h4>
                     <button id="btn-fechar-rel" type="button" class="close" data-dismiss="modal" aria-label="Close" style="margin-top: -25px">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -925,8 +919,10 @@
     <div class="modal fade" id="modalRelSin" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title" id="exampleModalLabel">Relatório Sintético</h4>
+                <div class="modal-header bg-success" style="color: black;">
+                    <h4 class="modal-title" id="exampleModalLabel">
+                        <i class="fas fa-file-alt"></i> Relatório Sintético
+                    </h4>
                     <button id="btn-fechar-rel" type="button" class="close" data-dismiss="modal" aria-label="Close" style="margin-top: -25px">
                         <span aria-hidden="true">&times;</span>
                     </button>

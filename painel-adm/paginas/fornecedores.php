@@ -21,15 +21,18 @@ $pag = 'fornecedores';
         #tabela.tabela-pequena td {
             font-size: 10px !important;
         }
+
         #tabela_wrapper {
             font-size: 10px !important;
             line-height: 1.4 !important;
         }
+
         #tabela_wrapper .dataTables_length,
         #tabela_wrapper .dataTables_filter {
             font-size: 10px !important;
             margin-bottom: 5px !important;
         }
+
         #tabela_wrapper .dataTables_length select,
         #tabela_wrapper .dataTables_filter input {
             font-size: 10px !important;
@@ -40,6 +43,7 @@ $pag = 'fornecedores';
             width: auto !important;
             max-width: 80px !important;
         }
+
         #tabela_wrapper .dataTables_length label,
         #tabela_wrapper .dataTables_filter label {
             font-size: 10px !important;
@@ -49,15 +53,18 @@ $pag = 'fornecedores';
             align-items: center !important;
             gap: 5px !important;
         }
+
         #tabela_wrapper .dataTables_info {
             font-size: 10px !important;
             padding-top: 5px !important;
             line-height: 1.4 !important;
         }
+
         #tabela_wrapper .dataTables_paginate {
             font-size: 10px !important;
             padding-top: 5px !important;
         }
+
         #tabela_wrapper .dataTables_paginate .paginate_button {
             font-size: 10px !important;
             padding: 3px 8px !important;
@@ -67,13 +74,16 @@ $pag = 'fornecedores';
             line-height: 1.2 !important;
             border-radius: 2px !important;
         }
+
         #tabela_wrapper .dataTables_paginate .paginate_button.current,
         #tabela_wrapper .dataTables_paginate .paginate_button:hover {
             font-size: 10px !important;
         }
+
         #tabela_wrapper .row {
             margin: 0 !important;
         }
+
         #tabela_wrapper .col-sm-6,
         #tabela_wrapper .col-sm-12 {
             padding: 0 !important;
@@ -81,7 +91,9 @@ $pag = 'fornecedores';
             float: none !important;
             text-align: center !important;
         }
+
         @media (max-width: 768px) {
+
             #tabela_wrapper .dataTables_length,
             #tabela_wrapper .dataTables_filter,
             #tabela_wrapper .dataTables_info,
@@ -95,30 +107,30 @@ $pag = 'fornecedores';
 </head>
 
 <body>
-
-    <a onclick="inserir()" href="#" type="button" class="btn btn-primary btn-sm">
-        <span class="fa fa-plus"></span>
-        Fornecedor
-    </a>
-
-    <li class="dropdown head-dpdn2" style="display: inline-block;" id="btn-deletar">
-        <a href="#" class="btn btn-danger btn-sm dropdown-toggle" data-toggle="dropdown">
-            <span class="fa-solid fa-trash-can text-whiter"></span>
-            Excluir Fornecedor
+    <div class="main-page margin-mobile">
+        <a onclick="inserir()" href="#" type="button" class="btn btn-primary btn-sm">
+            <span class="fa fa-plus"></span>
+            Fornecedor
         </a>
-        <ul class="dropdown-menu">
-            <li>
-                <div class="notification_desc2 centro">
-	                <p class="mb-1">Confirmar Exclusão?
-		                <a href="#" onclick="deletarSel()" class="btn btn-danger btn-xs">
-			                <span class="fa fa-check"> Sim, Excluir</span>
-		                </a>
-	                </p>
-                </div>
-            </li>
-        </ul>
-    </li>
 
+        <li class="dropdown head-dpdn2" style="display: inline-block;" id="btn-deletar">
+            <a href="#" class="btn btn-danger btn-sm dropdown-toggle" data-toggle="dropdown">
+                <span class="fa-solid fa-trash-can text-whiter"></span>
+                Excluir Fornecedor
+            </a>
+            <ul class="dropdown-menu">
+                <li>
+                    <div class="notification_desc2 centro">
+                        <p class="mb-1">Confirmar Exclusão?
+                            <a href="#" onclick="deletarSel()" class="btn btn-danger btn-xs">
+                                <span class="fa fa-check"> Sim, Excluir</span>
+                            </a>
+                        </p>
+                    </div>
+                </li>
+            </ul>
+        </li>
+    </div>
     <div class="bs-example widget-shadow table-primary" id="listar"></div>
 
     <!-- DataTables JS -->
@@ -129,6 +141,7 @@ $pag = 'fornecedores';
     <input type="hidden" id="ids">
 
 </body>
+
 </html>
 
 <!-- Modal Inserir-->

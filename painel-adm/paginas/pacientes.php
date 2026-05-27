@@ -107,30 +107,33 @@ $pag = 'pacientes';
 </head>
 
 <body>
-
-    <a onclick="inserir()" href="#" type="button" class="btn btn-primary btn-sm">
-        <span class="fa fa-plus"></span>
-        Paciente
-    </a>
-
-    <li class="dropdown head-dpdn2" style="display: inline-block;" id="btn-deletar">
-        <a href="#" class="btn btn-danger btn-sm dropdown-toggle" data-toggle="dropdown">
-            <span class="fa-solid fa-trash-can text-whiter"></span>
-            Excluir Paciente
+    <div class="main-page margin-mobile">
+        <a onclick="inserir()" href="#" type="button" class="btn btn-primary btn-sm">
+            <span class="fa fa-plus"></span>
+            Paciente
         </a>
-        <ul class="dropdown-menu">
-            <li>
-                <div class="notification_desc2 centro">
-                    <p class="mb-1">Confirmar Exclusão?
-                        <a href="#" onclick="deletarSel()" class="btn btn-danger btn-xs">
-                            <span class="fa fa-check"> Sim, Excluir</span>
-                        </a>
-                    </p>
-                </div>
-            </li>
-        </ul>
-    </li>
 
+        <li class="dropdown head-dpdn2" style="display: inline-block;" id="btn-deletar">
+            <a href="#" class="btn btn-danger btn-sm dropdown-toggle" data-toggle="dropdown">
+                <span class="fa-solid fa-trash-can text-whiter"></span>
+                Excluir Paciente
+            </a>
+            <ul class="dropdown-menu">
+                <li>
+                    <div class="notification_desc2 centro">
+                        <p class="mb-1">Confirmar Exclusão?
+                            <a href="#" onclick="deletarSel()" class="btn btn-danger btn-xs">
+                                <span class="fa fa-check"> Sim, Excluir</span>
+                            </a>
+                        </p>
+                    </div>
+                </li>
+            </ul>
+        </li>
+        <a href="rel/excel_pacientes.php" type="button" class="btn btn-success btn-sm botao-excel" target="_blank">
+            <span class="fa-solid fa-file-excel"></span> Exportar
+        </a>
+    </div>
     <div class="bs-example widget-shadow table-primary" id="listar"></div>
 
     <!-- DataTables JS -->

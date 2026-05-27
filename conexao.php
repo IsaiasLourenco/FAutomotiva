@@ -2,7 +2,7 @@
 date_default_timezone_set('America/Sao_Paulo');
 
 $servidor = 'localhost';
-$banco = 'odontoclinic';
+$banco = 'oficina_db';
 $usuario = 'root';
 $senha_banco = ''; // Renomeado para evitar conflito com $senha de formulários
 
@@ -37,8 +37,8 @@ try {
 // VALORES PADRÃO (fallback se não houver configurações no banco)
 // ============================================================================
 if (!isset($nome_sistema)) {
-    $nome_sistema = 'FG Odontologia e Estética';
-    $email_sistema = 'o.implantare@gmail.com';
+    $nome_sistema = 'FAutomotiva';
+    $email_sistema = 'fautomotiva@gmail.com';
     $cnpj_sistema = '45.057.703/0001-94';
     $telefone_sistema = '(19) 99574-5466';
     $telefone_fixo = '(19) 97111-0538';
@@ -48,12 +48,12 @@ if (!isset($nome_sistema)) {
     $bairro_sistema = 'Loteamento Parque Itacolomy';
     $cidade_sistema = 'Mogi Guaçu';
     $estado_sistema = 'SP';
-    $instagram_sistema = 'https://www.instagram.com/fgodontologiaestetica/';
+    $instagram_sistema = 'https://www.instagram.com/fautomotiva5/';
     $tipo_relatorio = 'PDF';
     $contatoZap = 'Sim';
     $desenvolvedor = 'Vetor256.';
     $site_dev = 'https://vetor256.com/';
-    $url_sistema = 'http://localhost/odontoclinic/';
+    $url_sistema = 'http://localhost/FAutomotiva/';
     $chave_pix = '45057703000194';
     $tipo_chave = 'CNPJ';
     $logotipo = 'logo_padrao.png';

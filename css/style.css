@@ -185,6 +185,12 @@ body {
   text-align: center;
 }
 
+.botao-excel {
+  position: absolute;
+  right: 40px;
+  font-size: 12px;
+}
+
 .centro-pequeno {
   text-align: center;
   font-size: 10px;
