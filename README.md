@@ -1,6 +1,6 @@
-# 🦷 OdontoClinic - Sistema de Gerenciamento para Clínica Odontológica
+# 🦷 FAutomotiva - Sistema de Check In e Orçamento para Oficinas automotivas
 
-> Sistema desenvolvido para gestão completa de clínicas odontológicas, focado em agilidade, segurança e experiência do usuário.
+> Sistema desenvolvido para gestão de oficinas mecânicas, desde a entrada do carro na oficina, até o orçamento e envio do mesmom para o cliente.
 
 <div align="center">
 
@@ -15,11 +15,11 @@
 
 ## 📋 Sobre o Projeto
 
-O **OdontoClinic** é um sistema web desenvolvido em PHP puro com MySQL para automatizar e organizar a rotina de clínicas odontológicas.
+O **AutoCheck** é um sistema web desenvolvido em PHP puro com MySQL para automatizar e organizar a rotina da entrada dos carros em oficinas.
 
-**Objetivo:** Facilitar o controle de pacientes, agendamentos, orçamentos e equipe, proporcionando uma interface intuitiva para recepcionistas e dentistas.
+**Objetivo:** Facilitar o orçamento para oficinas que trabalham com estoque zero, gerando a ordem de compra para cada orçamento e finalizando a compra paa início da manutenção.
 
-**Status do Desenvolvimento:** 🚧 Em construção (Previsão de MVP: Abril/2024)
+**Status do Desenvolvimento:** 🚧 Em construção (Previsão de MVP: Agosto/2026)
 
 ---
 
@@ -35,8 +35,8 @@ O **OdontoClinic** é um sistema web desenvolvido em PHP puro com MySQL para aut
 ### 🔄 Em Desenvolvimento (Roadmap)
 - [ ] Dashboard administrativo com métricas e resumos.
 - [ ] CRUD completo de usuários e cargos.
-- [ ] Cadastro e gestão de pacientes (prontuário eletrônico).
-- [ ] Agenda de consultas com calendário visual.
+- [ ] Cadastro e gestão de clientes (orçamento eletrônico).
+- [ ] Orçamento e compra de peças com escolhas inteligentes.
 - [ ] Orçamentos e controle financeiro básico.
 - [ ] Criptografia de senhas com `password_hash()` em produção.
 
@@ -70,7 +70,7 @@ O **OdontoClinic** é um sistema web desenvolvido em PHP puro com MySQL para aut
 
 1. **Clone o repositório**
    ```bash
-   git clone https://github.com/IsaiasLourenco/OdontoClinic.git
+   git clone https://github.com/IsaiasLourenco/FAutomotiva.git
    cd odonto-clinic
 
 2. **Configure o ambiente**
@@ -88,7 +88,7 @@ O **OdontoClinic** é um sistema web desenvolvido em PHP puro com MySQL para aut
     -- ou via scripts de migração futuros.
 
 4. **Acesse o sistema**
-    - Navegue até http://localhost/OdontoClinic/
+    - Navegue até http://localhost/FAutomotiva/
     - Se o banco estiver vazio, o sistema criará automaticamente:
         - Cargo: Administrador
         - Usuário: usuario@email.com | Senha: 123
