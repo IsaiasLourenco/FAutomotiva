@@ -30,7 +30,7 @@ ADD
 SET
     NULL ON UPDATE CASCADE;
 
-    ALTER TABLE usuarios 
+    ALTER TABLE usuarios
 ADD COLUMN data_admissao DATE DEFAULT NULL COMMENT 'Data de admissão',
 ADD COLUMN cargo_funcional VARCHAR(50) DEFAULT NULL COMMENT 'Cargo na clínica',
 ADD COLUMN tipo_contrato ENUM('CLT','PJ','Estagiário','Autônomo') DEFAULT 'CLT',
@@ -80,7 +80,7 @@ CREATE TABLE permissoes (
     permissao INT NOT NULL
 );
 
-CREATE TABLE pacientes (
+CREATE TABLE clientes (
     id INT PRIMARY KEY AUTO_INCREMENT,
     nome VARCHAR(50) NOT NULL,
     cpf VARCHAR(14) NOT NULL UNIQUE,

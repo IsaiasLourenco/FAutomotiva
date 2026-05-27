@@ -72,8 +72,8 @@ $qtd_pago           = 0;
 $qtd_vencidas      = 0;
 echo <<<HTML
 <table class="table table-hover tabela-pequena" id="tabela">
-    <thead> 
-        <tr> 
+    <thead>
+        <tr>
             <th>Descrição</th>
             <th>Paciente</th>
             <th>Lançamento</th>
@@ -81,8 +81,8 @@ echo <<<HTML
             <th class="esc">Pagamento</th>
             <th>Valor</th>
             <th>Ações</th>
-        </tr> 
-    </thead> 
+        </tr>
+    </thead>
     <tbody>
 HTML;
 
@@ -156,7 +156,7 @@ if ($linhas > 0) {
             $mostrarBotaoRecibo = false;
         }
 
-        $qp = $pdo->prepare("SELECT nome FROM pacientes WHERE id = :id LIMIT 1");
+        $qp = $pdo->prepare("SELECT nome FROM clientes WHERE id = :id LIMIT 1");
         $qp->bindValue(":id", $paciente_id, PDO::PARAM_INT);
         $qp->execute();
         $paciente_nome = ($rp = $qp->fetch(PDO::FETCH_ASSOC)) ? $rp['nome'] : 'Paciente Desconhecido';
@@ -224,13 +224,13 @@ if ($linhas > 0) {
         $e_referencia = js_escape($res[$i]['referencia'] ?? '');
         $e_id_referencia = $res[$i]['id_referencia'] ?? '';
 
-        // ✅ Lógica do link "Voltar" para pacientes (CALCULAR ANTES DO HEREDOC)
+        // ✅ Lógica do link "Voltar" para clientes (CALCULAR ANTES DO HEREDOC)
         $celula_paciente = $paciente_nome; // Padrão: só o nome
 
-        if (@$_GET['voltar'] === 'pacientes') {
-            // Se veio de pacientes, torna o nome clicável
+        if (@$_GET['voltar'] === 'clientes') {
+            // Se veio de clientes, torna o nome clicável
 echo <<<HTML
-            $celula_paciente = "<a href='index.php?pagina=pacientes' class='text-primary font-weight-bold' title='Voltar para lista de pacientes'>
+            $celula_paciente = "<a href='index.php?pagina=clientes' class='text-primary font-weight-bold' title='Voltar para lista de clientes'>
                                     {$paciente_nome} <i class='fa fa-external-link-alt' style='font-size:10px'></i>
                                 </a>";
 HTML;
@@ -261,14 +261,14 @@ HTML;
 echo <<<HTML
         <br>
         <small class="text-muted">
-            Pago: R$ {$total_residuosF} | 
+            Pago: R$ {$total_residuosF} |
             Saldo: R$ {$saldo_restanteF}
         </small>
 HTML;
         }
 echo <<<HTML
                 </td>
-                
+
                 <td>
                     <a href="#" onclick="editar('{$id}','{$e_descricao}','{$paciente_id}','{$e_valorF}','{$e_data_vencimento_iso}','{$e_data_lancamentoF}','{$e_data_pagamento_iso}','{$forma_pagamento_id}','{$frequencia_id}','{$e_obs}','{$e_arquivo}','{$e_multaF}','{$e_jurosF}','{$e_descontoF}','{$e_taxaF}','{$e_subtotalF}')" title="Editar Dados">
                         <i class="fa fa-edit text-primary ico-grande"></i>
@@ -318,7 +318,7 @@ HTML;
 
         if ($tem_relacionados) {
 echo <<<HTML
-                    <a href="#" onclick="mostrarRelacionados('{$id}', 
+                    <a href="#" onclick="mostrarRelacionados('{$id}',
                                                              '{$e_descricao}')" title="Ver Parcelas e Resíduos">
                         <i class="fa-solid fa-diagram-project text-dark ico-grande"></i>
                     </a>
@@ -326,11 +326,11 @@ HTML;
         }
         if ($mostrarBotaoParcelar) {
 echo <<<HTML
-            <a href="#" onclick="parcelar('{$id}', 
-                                          '{$e_valorF}', 
-                                          '{$e_descricao}', 
-                                          '{$e_multaF}', 
-                                          '{$e_jurosF}', 
+            <a href="#" onclick="parcelar('{$id}',
+                                          '{$e_valorF}',
+                                          '{$e_descricao}',
+                                          '{$e_multaF}',
+                                          '{$e_jurosF}',
                                           '{$e_descontoF}')" title="Parcelar valor">
                 <i class="fa-solid fa-calendar-days text-success ico-grande"></i>
             </a>
@@ -349,14 +349,14 @@ HTML;
             $e_valor_restanteF = js_escape($valor_restanteF);
 echo <<<HTML
 
-            <a href="#" onclick="baixar('{$id}', 
-                                        '{$e_valor_restanteF}', 
-                                        '{$e_descricao}', 
-                                        '{$e_forma_pagamento_nome}', 
+            <a href="#" onclick="baixar('{$id}',
+                                        '{$e_valor_restanteF}',
+                                        '{$e_descricao}',
+                                        '{$e_forma_pagamento_nome}',
                                         '{$data_vencimento_iso}')" title="Baixar valor">
                 <i class="fa-solid fa-square-check text-danger ico-grande"></i>
             </a>
-    
+
 HTML;
         }
 echo <<<HTML
@@ -364,7 +364,7 @@ echo <<<HTML
             <a href="#" onclick="abrirArquivos('{$id}', '{$e_descricao}')" title="Arquivos">
                 <i class="fa-solid fa-paperclip text-secondary ico-grande"></i>
             </a>
-HTML;            
+HTML;
             if ($mostrarBotaoRecibo) {
 echo <<<HTML
                 <form method="POST" action="rel/rel_recibo_class.php" target="_blank" style="display:inline-block">
@@ -394,14 +394,14 @@ echo <<<HTML
         <tfoot>
             <tr>
                 <td colspan="6" class="text-end negrito">
-                    <span class="text-warning">Qtd Vencidas: {$qtd_vencidasF}</span> 
-                        &nbsp;&nbsp;|&nbsp;&nbsp; 
-                    <span class="text-warning">$ Vencidas: R$ {$total_vencidasF}</span> 
-                        &nbsp;&nbsp;|&nbsp;&nbsp; 
+                    <span class="text-warning">Qtd Vencidas: {$qtd_vencidasF}</span>
+                        &nbsp;&nbsp;|&nbsp;&nbsp;
+                    <span class="text-warning">$ Vencidas: R$ {$total_vencidasF}</span>
+                        &nbsp;&nbsp;|&nbsp;&nbsp;
                     <span class="text-danger">Qtd Pendentes: {$qtd_pendentesF}</span>
                         &nbsp;&nbsp;|&nbsp;&nbsp;
-                    <span class="text-danger">$ Pendentes: R$ {$total_pendentesF}</span> 
-                        &nbsp;&nbsp;|&nbsp;&nbsp; 
+                    <span class="text-danger">$ Pendentes: R$ {$total_pendentesF}</span>
+                        &nbsp;&nbsp;|&nbsp;&nbsp;
                     <span class="text-success">Qtd Pagas: {$qtd_pagoF}</span>
                         &nbsp;&nbsp;|&nbsp;&nbsp;
                     <span class="text-success">$ Pagas: R$ {$total_pagoF}</span>

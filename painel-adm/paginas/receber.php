@@ -117,19 +117,19 @@ $juros_label = isset($config_multa_juros['juros_padrao'])
     <div class="row mb-3 align-items-center d-flex flex-wrap">
 
         <?php
-        // ✅ Verifica se veio da página de pacientes para mostrar link de voltar
+        // ✅ Verifica se veio da página de clientes para mostrar link de voltar
         $voltar_para = @$_GET['voltar'] ?? '';
-        $mostrar_voltar = ($voltar_para === 'pacientes');
+        $mostrar_voltar = ($voltar_para === 'clientes');
         ?>
 
         <?php if ($mostrar_voltar): ?>
             <div class="alert alert-info py-2 mb-3 d-flex align-items-center justify-content-between">
                 <div>
                     <i class="fa fa-info-circle mr-2"></i>
-                    <strong>Vindo de:</strong> Pacientes → Baixa de Conta
+                    <strong>Vindo de:</strong> clientes → Baixa de Conta
                 </div>
-                <a href="index.php?pagina=pacientes" class="btn btn-sm btn-outline-primary">
-                    <i class="fa fa-arrow-left mr-1"></i> Voltar para Pacientes
+                <a href="index.php?pagina=clientes" class="btn btn-sm btn-outline-primary">
+                    <i class="fa fa-arrow-left mr-1"></i> Voltar para clientes
                 </a>
             </div>
         <?php endif; ?>
@@ -263,7 +263,7 @@ $juros_label = isset($config_multa_juros['juros_padrao'])
                             <label for="paciente">Paciente</label>
                             <select name="paciente" id="paciente-perfil" class="form-control">
                                 <option value="" selected disabled>Escolha um paciente...</option>
-                                <?php $query = $pdo->query("SELECT * FROM pacientes ORDER BY nome asc");
+                                <?php $query = $pdo->query("SELECT * FROM clientes ORDER BY nome asc");
                                 $res = $query->fetchAll(PDO::FETCH_ASSOC);
                                 $total_reg = @count($res);
                                 if ($total_reg > 0) {
@@ -903,7 +903,7 @@ $juros_label = isset($config_multa_juros['juros_padrao'])
         // ✅ 3. Restaura checkboxes de baixa após tabela carregar
         setTimeout(restaurarCheckboxesBaixar, 500);
 
-        // ✅ 4. NOVO: Verifica se veio parâmetro de baixa da página de pacientes
+        // ✅ 4. NOVO: Verifica se veio parâmetro de baixa da página de clientes
         var urlParams = new URLSearchParams(window.location.search);
         if (urlParams.has('baixar_id')) {
             var id = urlParams.get('baixar_id');

@@ -75,7 +75,7 @@ if ($linhas > 0) {
         if ($mostrar_botao) {
             // ✅ Nome único para evitar conflito com ajax.js
             $botao_html = '<a href="#" onclick="abrirModalBaixaPaciente(\'' . $id_conta . '\', \'' . $valor_js . '\', \'' . $descricao_js . '\', \'' . $forma_pgto_js . '\', \'' .
-                $data_vencimento_iso . '\'); return false;" 
+                $data_vencimento_iso . '\'); return false;"
                                 title="Baixar Conta">
                                 <i class="fa fa-check-square text-success" style="font-size:16px"></i>
                             </a>';
@@ -128,7 +128,7 @@ if ($linhas > 0) {
         var url = 'index.php?pagina=receber&baixar_id=' + id +
             '&baixar_valor=' + encodeURIComponent(valor) +
             '&baixar_desc=' + encodeURIComponent(descricao) +
-            '&voltar=pacientes'; // ← NOVO: indica a origem
+            '&voltar=clientes'; // ← NOVO: indica a origem
         window.location.href = url;
     }
 

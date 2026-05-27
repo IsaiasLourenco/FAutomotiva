@@ -12,104 +12,13 @@ $pag = 'fornecedores';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $nome_sistema ?></title>
     <link rel="stylesheet" href="../css/style.css">
-    <!-- DataTables CSS -->
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
-    <style>
-        /* === Apenas a tabela #tabela e seus controles DataTables === */
-        #tabela.tabela-pequena,
-        #tabela.tabela-pequena th,
-        #tabela.tabela-pequena td {
-            font-size: 10px !important;
-        }
-
-        #tabela_wrapper {
-            font-size: 10px !important;
-            line-height: 1.4 !important;
-        }
-
-        #tabela_wrapper .dataTables_length,
-        #tabela_wrapper .dataTables_filter {
-            font-size: 10px !important;
-            margin-bottom: 5px !important;
-        }
-
-        #tabela_wrapper .dataTables_length select,
-        #tabela_wrapper .dataTables_filter input {
-            font-size: 10px !important;
-            padding: 2px 5px !important;
-            height: 25px !important;
-            margin: 0 5px !important;
-            display: inline-block !important;
-            width: auto !important;
-            max-width: 80px !important;
-        }
-
-        #tabela_wrapper .dataTables_length label,
-        #tabela_wrapper .dataTables_filter label {
-            font-size: 10px !important;
-            margin: 0 !important;
-            font-weight: normal !important;
-            display: inline-flex !important;
-            align-items: center !important;
-            gap: 5px !important;
-        }
-
-        #tabela_wrapper .dataTables_info {
-            font-size: 10px !important;
-            padding-top: 5px !important;
-            line-height: 1.4 !important;
-        }
-
-        #tabela_wrapper .dataTables_paginate {
-            font-size: 10px !important;
-            padding-top: 5px !important;
-        }
-
-        #tabela_wrapper .dataTables_paginate .paginate_button {
-            font-size: 10px !important;
-            padding: 3px 8px !important;
-            margin: 0 2px !important;
-            min-width: 25px !important;
-            height: 25px !important;
-            line-height: 1.2 !important;
-            border-radius: 2px !important;
-        }
-
-        #tabela_wrapper .dataTables_paginate .paginate_button.current,
-        #tabela_wrapper .dataTables_paginate .paginate_button:hover {
-            font-size: 10px !important;
-        }
-
-        #tabela_wrapper .row {
-            margin: 0 !important;
-        }
-
-        #tabela_wrapper .col-sm-6,
-        #tabela_wrapper .col-sm-12 {
-            padding: 0 !important;
-            width: 100% !important;
-            float: none !important;
-            text-align: center !important;
-        }
-
-        @media (max-width: 768px) {
-
-            #tabela_wrapper .dataTables_length,
-            #tabela_wrapper .dataTables_filter,
-            #tabela_wrapper .dataTables_info,
-            #tabela_wrapper .dataTables_paginate {
-                float: none !important;
-                text-align: center !important;
-                margin: 5px 0 !important;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="../css/tabela-pequena.css">
 </head>
 
 <body>
     <div class="main-page margin-mobile">
         <a onclick="inserir()" href="#" type="button" class="btn btn-primary btn-sm">
-            <span class="fa fa-plus"></span>
+            <span class="fas fa-truck"></span>
             Fornecedor
         </a>
 
@@ -148,9 +57,11 @@ $pag = 'fornecedores';
 <div class="modal fade" id="modalForm" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
-            <div class="modal-header bg-success text-white">
-                <h4 class="modal-title"><span id="titulo_inserir"></span></h4>
-                <button id="btn-fechar" type="button" class="close mg-t--20" data-dismiss="modal" aria-label="Close">
+            <div class="modal-header bg-success texto-preto">
+                <h4 class="modal-title">
+                    <i class="fas fa-truck"></i>&nbsp;<span id="titulo_inserir"></span>
+                </h4>
+                <button id="btn-fechar" type="button" class="close texto-preto" style="margin-top: -40px !important;" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -221,7 +132,7 @@ $pag = 'fornecedores';
                     <div id="mensagem" class="centro-pequeno"></div>
                 </div>
                 <div class="modal-footer centro">
-                    <button type="submit" class="btn btn-primary" id="btn_salvar">
+                    <button type="submit" class="btn btn-primary btn-sm" id="btn_salvar">
                         Salvar
                     </button>
                 </div>
@@ -235,9 +146,16 @@ $pag = 'fornecedores';
 <div class="modal fade" id="modalDados" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
-            <div class="modal-header bg-success text-white">
-                <h4 class="modal-title"><span id="nome_dados-for"></span></h4>
-                <button id="btn-fechar-dados-for" type="button" class="close mg-t--20" data-dismiss="modal" aria-label="Close">
+            <div class="modal-header bg-success texto-preto">
+                <h4 class="modal-title">
+                    <i class="fas fa-truck"></i>&nbsp;<span id="nome_dados-for"></span>
+                </h4>
+                <button id="btn-fechar"
+                        type="button"
+                        class="close texto-preto"
+                        style="margin-top: -40px !important;"
+                        data-dismiss="modal"
+                        aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>

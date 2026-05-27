@@ -1,5 +1,6 @@
+
 <?php
-$tabela = 'pacientes';
+$tabela = 'clientes';
 require_once("../../../conexao.php");
 
 $query = $pdo->query("SELECT * FROM $tabela ORDER BY id DESC");
@@ -11,21 +12,21 @@ echo <<<HTML
 
 	<table class="table table-hover tabela-pequena" id="tabela">
 
-	    <thead> 
+	    <thead>
 
-	        <tr> 
+	        <tr>
 
-	            <th>Nome</th>	
-	            <th class="esc">Telefone</th>	    
-	            <th class="esc">Email</th>	
-	            <th class="esc">Foto</th>	
+	            <th>Nome</th>
+	            <th class="esc">Telefone</th>
+	            <th class="esc">Email</th>
+	            <th class="esc">Foto</th>
 	            <th>Ações</th>
 
-	        </tr> 
+	        </tr>
 
-	    </thead> 
+	    </thead>
 
-	    <tbody>	
+	    <tbody>
 
 HTML;
 
@@ -53,7 +54,7 @@ echo <<<HTML
                 </td>
                 <td class="esc">{$telefone}</td>
                 <td class="esc">{$email}</td>
-                <td class="esc"><img src="images/pacientes/{$foto}" width="25px"></td>
+                <td class="esc"><img src="images/clientes/{$foto}" width="25px"></td>
                 <td>
 	                <a href="#" onclick="editar('{$id}',
                                                 '{$nome}',
@@ -85,7 +86,7 @@ echo <<<HTML
 		                                </a>
 	                                </p>
                                 </div>
-		                    </li>										
+		                    </li>
 		                </ul>
                     </li>
 
@@ -108,7 +109,7 @@ echo <<<HTML
                             <i class="fa-solid fa-wallet text-success ico-grande"></i>
                     </a>
 
-                    <a href="https://api.whatsapp.com/send?phone=<?php echo $tel_pessoaF ?>; ?>&text=Ol%C3%A1!%20Temos%20mudanças%20no%20seu%20arranjo%20conosco." 
+                    <a href="https://api.whatsapp.com/send?phone=<?php echo $tel_pessoaF ?>; ?>&text=Ol%C3%A1!%20Temos%20mudanças%20no%20seu%20arranjo%20conosco."
                        title="Enviar WhatsApp" target="_blank">
                         <i class="fa-brands fa-whatsapp text-success ico-grande"></i>
                     </a>
@@ -123,7 +124,7 @@ echo <<<HTML
     </table>
 HTML;
 } else {
-    echo 'Nenhum Registro Encontrado!';
+    echo '<div class="centro-pequeno">Nenhum Registro Encontrado!</div>';
 }
 ?>
 
@@ -166,7 +167,7 @@ HTML;
         $('#cidade-paciente').val(cidade);
         $('#estado-paciente').val(estado);
 
-        $('#target-paciente').attr("src", "images/pacientes/" + foto);
+        $('#target-paciente').attr("src", "images/clientes/" + foto);
 
         // Abre o modal
         $('#modalForm').modal('show'); // Ou $('#modalPerfil').modal('show') se for o mesmo modal
@@ -192,9 +193,9 @@ HTML;
         // Foto (opcional, se quiser exibir)
         // ✅ Atualiza a foto
         if (foto && foto !== 'sem-foto.jpg') {
-            $('#foto_dados-paciente').attr('src', 'images/pacientes/' + foto);
+            $('#foto_dados-paciente').attr('src', 'images/clientes/' + foto);
         } else {
-            $('#foto_dados-paciente').attr('src', 'images/pacientes/sem-foto.jpg');
+            $('#foto_dados-paciente').attr('src', 'images/clientes/sem-foto.jpg');
         }
 
         // Abre o modal CORRETO
@@ -219,7 +220,7 @@ HTML;
 
         // Foto (reseta input file e preview)
         $('#foto-paciente').val('');
-        $('#target-paciente').attr('src', 'images/pacientes/sem-foto.jpg');
+        $('#target-paciente').attr('src', 'images/clientes/sem-foto.jpg');
 
         // Mensagem de erro/sucesso
         $('#mensagem').text('').removeClass('text-danger');

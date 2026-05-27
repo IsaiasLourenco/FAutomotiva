@@ -29,8 +29,8 @@ $where_comum = "";
 
 // ✅ Filtro de período (SEM comparação com '0000-00-00')
 if (!empty($dataInicial) && !empty($dataFinal)) {
-    $where_comum .= " AND {$colunaData} IS NOT NULL 
-                      AND {$colunaData} >= :data_inicial 
+    $where_comum .= " AND {$colunaData} IS NOT NULL
+                      AND {$colunaData} >= :data_inicial
                       AND {$colunaData} <= :data_final";
     $params[':data_inicial'] = $dataInicial;
     $params[':data_final'] = $dataFinal;
@@ -49,12 +49,12 @@ if (!empty($filtro_lancamento)) {
 if ($filtro_pendente === 'pago') {
     $where_comum .= " AND r.data_pagamento IS NOT NULL";
 } elseif ($filtro_pendente === 'pendente') {
-    $where_comum .= " AND r.data_pagamento IS NULL 
+    $where_comum .= " AND r.data_pagamento IS NULL
                       AND (r.data_vencimento IS NULL OR r.data_vencimento >= :hoje)";
     $params[':hoje'] = $hoje;
 } elseif ($filtro_pendente === 'vencidas') {
-    $where_comum .= " AND r.data_pagamento IS NULL 
-                      AND r.data_vencimento IS NOT NULL 
+    $where_comum .= " AND r.data_pagamento IS NULL
+                      AND r.data_vencimento IS NOT NULL
                       AND r.data_vencimento < :hoje";
     $params[':hoje'] = $hoje;
 }
@@ -66,11 +66,11 @@ $cor_fundo = '#f8f9fa';
 $label_pessoa = 'Pessoa';
 
 // ✅ DEPOIS: filtro_pessoas também decide a tabela
-if ($filtro_pessoas === 'pacientes') {
-    // ✅ Só pacientes → tabela receber
+if ($filtro_pessoas === 'clientes') {
+    // ✅ Só clientes → tabela receber
     $tabela = 'receber';
     $campo_pessoa = 'paciente';
-    $tabela_pessoa = 'pacientes';
+    $tabela_pessoa = 'clientes';
     $tipo_movimento = 'Entradas / Ganhos';
     $cor_destaque = '#27ae60';
     $cor_fundo = '#d5f4e6';
@@ -90,22 +90,22 @@ if ($filtro_pessoas === 'pacientes') {
     $cor_destaque = '#2980b9';
     $cor_fundo = '#d6eaf8';
 
-    $sql_receber = "SELECT r.id, r.descricao, r.valor, r.subtotal, r.data_vencimento, 
+    $sql_receber = "SELECT r.id, r.descricao, r.valor, r.subtotal, r.data_vencimento,
                            r.data_pagamento, r.data_lancamento, r.forma_pagamento,
                            r.referencia, r.frequencia, r.obs, r.arquivo,
-                           r.usuario_lanc, r.usuario_pgto, r.multa, r.juros, 
+                           r.usuario_lanc, r.usuario_pgto, r.multa, r.juros,
                            r.desconto, r.taxa,
                            p.nome as pessoa_nome, fp.nome as forma_nome,
                            'receber' as tipo_tabela, 'Paciente' as label_pessoa
                     FROM receber r
-                    LEFT JOIN pacientes p ON r.paciente = p.id
+                    LEFT JOIN clientes p ON r.paciente = p.id
                     LEFT JOIN forma_pagamento fp ON r.forma_pagamento = fp.id
                     WHERE 1=1 {$where_comum}";
 
-    $sql_pagar = "SELECT r.id, r.descricao, r.valor, r.subtotal, r.data_vencimento, 
+    $sql_pagar = "SELECT r.id, r.descricao, r.valor, r.subtotal, r.data_vencimento,
                          r.data_pagamento, r.data_lancamento, r.forma_pagamento,
                          r.referencia, r.frequencia, r.obs, r.arquivo,
-                         r.usuario_lanc, r.usuario_pgto, r.multa, r.juros, 
+                         r.usuario_lanc, r.usuario_pgto, r.multa, r.juros,
                          r.desconto, r.taxa,
                          p.nome as pessoa_nome, fp.nome as forma_nome,
                          'pagar' as tipo_tabela, 'Fornecedor' as label_pessoa
@@ -128,7 +128,7 @@ if ($filtro_pessoas === 'pacientes') {
     } else {
         $tabela = 'receber';
         $campo_pessoa = 'paciente';
-        $tabela_pessoa = 'pacientes';
+        $tabela_pessoa = 'clientes';
         $tipo_movimento = 'Entradas / Ganhos';
         $cor_destaque = '#27ae60';
         $cor_fundo = '#d5f4e6';
@@ -138,8 +138,8 @@ if ($filtro_pessoas === 'pacientes') {
 
 // ✅ Montar query simples se tiver tabela definida (não UNION)
 if (isset($tabela)) {
-    $sql = "SELECT r.*, p.nome as pessoa_nome, fp.nome as forma_nome, 
-                   '{$tabela}' as tipo_tabela, 
+    $sql = "SELECT r.*, p.nome as pessoa_nome, fp.nome as forma_nome,
+                   '{$tabela}' as tipo_tabela,
                    '{$label_pessoa}' as label_pessoa
             FROM {$tabela} r
             LEFT JOIN {$tabela_pessoa} p ON r.{$campo_pessoa} = p.id
@@ -214,7 +214,7 @@ $texto_filtro_pendente = match ($filtro_pendente) {
 };
 
 $texto_filtro_pessoas = match ($filtro_pessoas) {
-    'pacientes' => 'Pacientes',
+    'clientes' => 'clientes',
     'fornecedores' => 'Fornecedores',
     'funcionarios' => 'Funcionários',
     default => 'Todos'

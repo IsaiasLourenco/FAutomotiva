@@ -1,6 +1,6 @@
 <?php
 session_start();
-$tabela = 'pacientes';
+$tabela = 'clientes';
 require_once("../../../conexao.php");
 
 // Verifica se está logado
@@ -45,54 +45,65 @@ if (isset($_FILES['foto']) && $_FILES['foto']['error'] === UPLOAD_ERR_OK && !emp
     $extensao = strtolower(pathinfo($_FILES['foto']['name'], PATHINFO_EXTENSION));
 
     if (in_array($extensao, $extensoes_permitidas)) {
-        // Nome único: evita conflito entre pacientes
-        $foto_nome = 'paciente_' . time() . '_' . bin2hex(random_bytes(4)) . '.' . $extensao;
-        $pasta_destino = realpath(__DIR__ . '/../../images/pacientes/');
+        // Nome único: evita conflito entre clientes
+        $foto_nome = 'cliente_' . time() . '_' . bin2hex(random_bytes(4)) . '.' . $extensao;
+
+        // ✅ CAMINHO CORRIGIDO (adicionada a barra /)
+        $pasta_destino = realpath(__DIR__ . '/../../images/clientes/');
+
+        // Se a pasta não existir, tenta criá-la
+        if (!$pasta_destino || !is_dir($pasta_destino)) {
+            $pasta_destino = __DIR__ . '/../../images/clientes/';
+            if (!file_exists($pasta_destino)) {
+                mkdir($pasta_destino, 0755, true);
+            }
+            $pasta_destino = realpath($pasta_destino);
+        }
 
         if ($pasta_destino && is_dir($pasta_destino)) {
             $caminho_destino = $pasta_destino . DIRECTORY_SEPARATOR . $foto_nome;
             if (!move_uploaded_file($_FILES['foto']['tmp_name'], $caminho_destino)) {
-                echo "Erro ao salvar a foto!";
+                echo "Erro ao salvar a foto! Verifique as permissões da pasta.";
                 exit;
             }
         } else {
-            echo "Pasta de upload não encontrada!";
+            echo "Pasta de upload não encontrada e não pôde ser criada!";
             exit;
         }
     } else {
-        echo "Formato de imagem não permitido!";
+        echo "Formato de imagem não permitido! Use JPG, PNG ou GIF.";
         exit;
     }
 }
 
 try {
     if (!empty($id) && $id != 0) {
-        // ✅ UPDATE: Atualizar paciente existente
+        // ✅ UPDATE: Atualizar cliente existente
         if (!empty($foto_nome)) {
             // Com nova foto
-            $query = $pdo->prepare("UPDATE $tabela SET 
+            $query = $pdo->prepare("UPDATE $tabela SET
                 nome = :nome, email = :email, telefone = :telefone, cpf = :cpf,
                 cep = :cep, rua = :rua, numero = :numero, bairro = :bairro,
-                cidade = :cidade, estado = :estado, foto = :foto 
+                cidade = :cidade, estado = :estado, foto = :foto
                 WHERE id = :id");
             $query->bindValue(":foto", $foto_nome);
         } else {
             // Sem nova foto (mantém a atual)
-            $query = $pdo->prepare("UPDATE $tabela SET 
+            $query = $pdo->prepare("UPDATE $tabela SET
                 nome = :nome, email = :email, telefone = :telefone, cpf = :cpf,
                 cep = :cep, rua = :rua, numero = :numero, bairro = :bairro,
-                cidade = :cidade, estado = :estado 
+                cidade = :cidade, estado = :estado
                 WHERE id = :id");
         }
         $query->bindValue(":id", $id, PDO::PARAM_INT);
-        
+
     } else {
-        // ✅ INSERT: Cadastrar novo paciente
+        // ✅ INSERT: Cadastrar novo cliente
         $foto_final = empty($foto_nome) ? "sem-foto.jpg" : $foto_nome;
-        
-        $query = $pdo->prepare("INSERT INTO $tabela 
-            (nome, email, cpf, telefone, cep, rua, numero, bairro, cidade, estado, foto) 
-            VALUES 
+
+        $query = $pdo->prepare("INSERT INTO $tabela
+            (nome, email, cpf, telefone, cep, rua, numero, bairro, cidade, estado, foto)
+            VALUES
             (:nome, :email, :cpf, :telefone, :cep, :rua, :numero, :bairro, :cidade, :estado, :foto)");
         $query->bindValue(":foto", $foto_final);
     }
@@ -111,7 +122,7 @@ try {
 
     $query->execute();
     echo "Salvo com Sucesso";
-    
+
 } catch (Exception $e) {
     error_log("Erro salvar.php: " . $e->getMessage());
     echo "Erro ao salvar: " . $e->getMessage();

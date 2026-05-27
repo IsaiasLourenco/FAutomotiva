@@ -31,7 +31,7 @@ $obs             = htmlspecialchars($conta['obs'] ?? '');
 // ✅ Buscar nome do paciente
 $nome_paciente = 'Não informado';
 if ($paciente_id) {
-    $stmt_p = $pdo->prepare("SELECT nome FROM pacientes WHERE id = :id LIMIT 1");
+    $stmt_p = $pdo->prepare("SELECT nome FROM clientes WHERE id = :id LIMIT 1");
     $stmt_p->execute([':id' => $paciente_id]);
     $pac = $stmt_p->fetch(PDO::FETCH_ASSOC);
     $nome_paciente = $pac['nome'] ?? 'Não informado';

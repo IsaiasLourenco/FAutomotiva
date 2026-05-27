@@ -16,7 +16,7 @@ $perfil_modal       = 'ocultar';
 // grupo pessoas
 $menu_pessoas       = 'ocultar';
 $usuarios           = 'ocultar';
-$pacientes          = 'ocultar';
+$clientes          = 'ocultar';
 $fornecedores       = 'ocultar';
 
 //grupo cadastros
@@ -59,8 +59,8 @@ if ($total_permissoes > 0) {
                 $perfil_modal = '';  // ← Controla modal Perfil
             } else if ($chave_acesso == 'usuarios') {
                 $usuarios = '';
-            } else if ($chave_acesso == 'pacientes') {
-                $pacientes = '';
+            } else if ($chave_acesso == 'clientes') {
+                $clientes = '';
             } else if ($chave_acesso == 'fornecedores') {
                 $fornecedores = '';
             } else if ($chave_acesso == 'formas_pagamento') {
@@ -95,8 +95,8 @@ if ($home != 'ocultar') {
     $pag_inicial = 'perfil';
 } else if ($usuarios != 'ocultar') {
     $pag_inicial = 'usuarios';
-} else if ($pacientes != 'ocultar') {
-    $pag_inicial = 'pacientes';
+} else if ($clientes != 'ocultar') {
+    $pag_inicial = 'clientes';
 } else if ($fornecedores != 'ocultar') {
     $pag_inicial = 'fornecedores';
 } else if ($formas_pagamento != 'ocultar') {
@@ -126,7 +126,7 @@ if ($home != 'ocultar') {
 }
 
 // ✅ Define visibilidade do grupo PESSOAS
-if ($usuarios == 'ocultar' and $pacientes == 'ocultar' and $fornecedores == 'ocultar') {
+if ($usuarios == 'ocultar' and $clientes == 'ocultar' and $fornecedores == 'ocultar') {
     $menu_pessoas = 'ocultar';
 } else {
     $menu_pessoas = '';

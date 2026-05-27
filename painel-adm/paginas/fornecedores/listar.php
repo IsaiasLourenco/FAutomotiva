@@ -11,21 +11,21 @@ echo <<<HTML
 
 	<table class="table table-hover tabela-pequena" id="tabela">
 
-	    <thead> 
+	    <thead>
 
-	        <tr> 
+	        <tr>
 
-	            <th>Nome</th>	
-	            <th>Telefone</th>	    
-	            <th class="esc">Email</th>	
-	            <th>CNPJ</th>	
+	            <th>Nome</th>
+	            <th>Telefone</th>
+	            <th class="esc">Email</th>
+	            <th>CNPJ</th>
 	            <th>Ações</th>
 
-	        </tr> 
+	        </tr>
 
-	    </thead> 
+	    </thead>
 
-	    <tbody>	
+	    <tbody>
 
 HTML;
 
@@ -101,7 +101,7 @@ echo <<<HTML
 		                                </a>
 	                                </p>
                                 </div>
-		                    </li>										
+		                    </li>
 		                </ul>
                     </li>
 
@@ -122,7 +122,7 @@ echo <<<HTML
                     </a>
 
 
-                    <a href="#" onclick="ativar('{$id}', 
+                    <a href="#" onclick="ativar('{$id}',
                                                 '{$acao}')" title="{$titulo_link}">
                                                     <i class="fa {$icone} text-success ico-grande"></i>
                     </a>
@@ -137,7 +137,7 @@ echo <<<HTML
     </table>
 HTML;
 } else {
-    echo 'Nenhum Registro Encontrado!';
+    echo '<div class="centro-pequeno">Nenhum Registro Encontrado!</div>';
 }
 ?>
 

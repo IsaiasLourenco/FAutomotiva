@@ -36,8 +36,8 @@ $where_comum = "";
 
 // ✅ Filtro de período (SEM comparação com '0000-00-00')
 if (!empty($dataInicial) && !empty($dataFinal)) {
-    $where_comum .= " AND {$colunaData} IS NOT NULL 
-                      AND {$colunaData} >= :data_inicial 
+    $where_comum .= " AND {$colunaData} IS NOT NULL
+                      AND {$colunaData} >= :data_inicial
                       AND {$colunaData} <= :data_final";
     $params[':data_inicial'] = $dataInicial;
     $params[':data_final'] = $dataFinal;
@@ -56,12 +56,12 @@ if (!empty($filtro_lancamento)) {
 if ($filtro_pendente === 'pago') {
     $where_comum .= " AND r.data_pagamento IS NOT NULL";
 } elseif ($filtro_pendente === 'pendente') {
-    $where_comum .= " AND r.data_pagamento IS NULL 
+    $where_comum .= " AND r.data_pagamento IS NULL
                       AND (r.data_vencimento IS NULL OR r.data_vencimento >= :hoje)";
     $params[':hoje'] = $hoje;
 } elseif ($filtro_pendente === 'vencidas') {
-    $where_comum .= " AND r.data_pagamento IS NULL 
-                      AND r.data_vencimento IS NOT NULL 
+    $where_comum .= " AND r.data_pagamento IS NULL
+                      AND r.data_vencimento IS NOT NULL
                       AND r.data_vencimento < :hoje";
     $params[':hoje'] = $hoje;
 }
@@ -77,23 +77,23 @@ if (empty($filtro_tipo)) {
     $tipo_movimento = 'Entradas e Saídas';
     $cor_destaque = '#2980b9';
     $cor_fundo = '#d6eaf8';
-    
-    $sql_receber = "SELECT r.id, r.descricao, r.valor, r.subtotal, r.data_vencimento, 
+
+    $sql_receber = "SELECT r.id, r.descricao, r.valor, r.subtotal, r.data_vencimento,
                            r.data_pagamento, r.data_lancamento, r.forma_pagamento,
                            r.referencia, r.frequencia, r.obs, r.arquivo,
-                           r.usuario_lanc, r.usuario_pgto, r.multa, r.juros, 
+                           r.usuario_lanc, r.usuario_pgto, r.multa, r.juros,
                            r.desconto, r.taxa,
                            p.nome as pessoa_nome, fp.nome as forma_nome,
                            'receber' as tipo_tabela, 'Paciente' as label_pessoa
                     FROM receber r
-                    LEFT JOIN pacientes p ON r.paciente = p.id
+                    LEFT JOIN clientes p ON r.paciente = p.id
                     LEFT JOIN forma_pagamento fp ON r.forma_pagamento = fp.id
                     WHERE 1=1 {$where_comum}";
-    
-    $sql_pagar = "SELECT r.id, r.descricao, r.valor, r.subtotal, r.data_vencimento, 
+
+    $sql_pagar = "SELECT r.id, r.descricao, r.valor, r.subtotal, r.data_vencimento,
                          r.data_pagamento, r.data_lancamento, r.forma_pagamento,
                          r.referencia, r.frequencia, r.obs, r.arquivo,
-                         r.usuario_lanc, r.usuario_pgto, r.multa, r.juros, 
+                         r.usuario_lanc, r.usuario_pgto, r.multa, r.juros,
                          r.desconto, r.taxa,
                          p.nome as pessoa_nome, fp.nome as forma_nome,
                          'pagar' as tipo_tabela, 'Fornecedor' as label_pessoa
@@ -101,9 +101,9 @@ if (empty($filtro_tipo)) {
                   LEFT JOIN fornecedores p ON r.fornecedor = p.id
                   LEFT JOIN forma_pagamento fp ON r.forma_pagamento = fp.id
                   WHERE 1=1 {$where_comum}";
-    
+
     $sql = "({$sql_receber}) UNION ALL ({$sql_pagar}) ORDER BY {$colunaData} DESC";
-    
+
 } else {
     // ✅ Query simples para uma tabela só
     if ($filtro_tipo === 'pagar') {
@@ -116,14 +116,14 @@ if (empty($filtro_tipo)) {
     } else {
         $tabela = 'receber';
         $campo_pessoa = 'paciente';
-        $tabela_pessoa = 'pacientes';
+        $tabela_pessoa = 'clientes';
         $tipo_movimento = 'Entradas / Ganhos';
         $cor_destaque = '#27ae60';
         $cor_fundo = '#d5f4e6';
     }
-    
-    $sql = "SELECT r.*, p.nome as pessoa_nome, fp.nome as forma_nome, 
-                   '{$tabela}' as tipo_tabela, 
+
+    $sql = "SELECT r.*, p.nome as pessoa_nome, fp.nome as forma_nome,
+                   '{$tabela}' as tipo_tabela,
                    '{$campo_pessoa}' as label_pessoa
             FROM {$tabela} r
             LEFT JOIN {$tabela_pessoa} p ON r.{$campo_pessoa} = p.id
@@ -158,15 +158,15 @@ foreach ($contas as $c) {
     $valorBase = (!empty($c['subtotal']) && $c['subtotal'] > 0) ? $c['subtotal'] : ($c['valor'] ?? 0);
     $data_pagamento = $c['data_pagamento'] ?? null;
     $data_vencimento = $c['data_vencimento'] ?? null;
-    
+
     // ✅ Validar datas no PHP (ignora '0000-00-00' e strings inválidas)
-    $data_pagamento_valida = $data_pagamento 
-        && $data_pagamento != '0000-00-00' 
+    $data_pagamento_valida = $data_pagamento
+        && $data_pagamento != '0000-00-00'
         && strtotime($data_pagamento) !== false;
-    $data_vencimento_valida = $data_vencimento 
-        && $data_vencimento != '0000-00-00' 
+    $data_vencimento_valida = $data_vencimento
+        && $data_vencimento != '0000-00-00'
         && strtotime($data_vencimento) !== false;
-    
+
     if ($data_pagamento_valida) {
         $total_pago += $valorBase;
         $qtd_pago++;

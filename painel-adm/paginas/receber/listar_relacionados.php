@@ -8,8 +8,8 @@ $resumo = $_POST['resumo'] ?? 'nao';
 // Se a conta tem id_referencia, ela é parcela/resíduo → buscar a principal
 // Se não tem, ela É a principal
 $stmt_principal = $pdo->prepare("
-    SELECT id, descricao, valor, subtotal, paciente, referencia, id_referencia 
-    FROM receber 
+    SELECT id, descricao, valor, subtotal, paciente, referencia, id_referencia
+    FROM receber
     WHERE id = :id LIMIT 1
 ");
 $stmt_principal->execute([':id' => $id_original]);
@@ -27,9 +27,9 @@ $id_principal = !empty($conta_original['id_referencia']) && $conta_original['id_
 
 // ✅ 2. Buscar dados da conta principal (para exibir no topo)
 $stmt_info = $pdo->prepare("
-    SELECT r.*, p.nome as paciente_nome 
-    FROM receber r 
-    LEFT JOIN pacientes p ON r.paciente = p.id 
+    SELECT r.*, p.nome as paciente_nome
+    FROM receber r
+    LEFT JOIN clientes p ON r.paciente = p.id
     WHERE r.id = :id LIMIT 1
 ");
 $stmt_info->execute([':id' => $id_principal]);
@@ -37,10 +37,10 @@ $info_principal = $stmt_info->fetch(PDO::FETCH_ASSOC);
 
 // ✅ 3. Buscar TODAS as contas relacionadas (parcelas + resíduos)
 $stmt_rel = $pdo->prepare("
-    SELECT r.*, p.nome as paciente_nome, fp.nome as forma_nome 
-    FROM receber r 
-    LEFT JOIN pacientes p ON r.paciente = p.id 
-    LEFT JOIN forma_pagamento fp ON r.forma_pagamento = fp.id 
+    SELECT r.*, p.nome as paciente_nome, fp.nome as forma_nome
+    FROM receber r
+    LEFT JOIN clientes p ON r.paciente = p.id
+    LEFT JOIN forma_pagamento fp ON r.forma_pagamento = fp.id
     WHERE r.id_referencia = :id_principal OR r.id = :id_principal
     ORDER BY r.data_vencimento ASC, r.id ASC
 ");
@@ -87,7 +87,7 @@ if ($resumo === 'sim') {
             <div class="col-md-3"><strong>Paciente:</strong> <?php echo htmlspecialchars($info_principal['paciente_nome']); ?></div>
             <div class="col-md-2"><strong>Valor Original:</strong> R$ <?php echo number_format($valor_original, 2, ',', '.'); ?></div>
             <div class="col-md-3">
-                <strong>Vencimento:</strong> 
+                <strong>Vencimento:</strong>
                     <?php echo !empty($info_principal['data_vencimento']) && $info_principal['data_vencimento'] != '0000-00-00' ? date('d/m/Y', strtotime($info_principal['data_vencimento'])) : '-'; ?></div>
         </div>
     </div>

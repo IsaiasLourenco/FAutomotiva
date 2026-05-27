@@ -400,7 +400,7 @@ $contas = [];
 
                     // ✅ Query base neutra
                     $sql = "SELECT r.*, p.nome as paciente_nome, fp.nome as forma_nome FROM receber r
-                                                                                       LEFT JOIN pacientes p ON r.paciente = p.id
+                                                                                       LEFT JOIN clientes p ON r.paciente = p.id
                                                                                        LEFT JOIN forma_pagamento fp ON r.forma_pagamento = fp.id
                                                                                        WHERE 1=1";
 
@@ -408,8 +408,8 @@ $contas = [];
 
                     // ✅ Só adiciona filtro de período se tiver datas preenchidas
                     if (!empty($dataInicial) && !empty($dataFinal)) {
-                        $sql .= " AND $coluna IS NOT NULL 
-                                                                               AND $coluna >= :ini 
+                        $sql .= " AND $coluna IS NOT NULL
+                                                                               AND $coluna >= :ini
                                                                                AND $coluna <= :fim";
                         $params[':ini'] = $dataInicial;
                         $params[':fim'] = $dataFinal;
@@ -421,8 +421,8 @@ $contas = [];
                     } elseif ($pago === 'pendentes') {
                         $sql .= " AND r.data_pagamento IS NULL";
                     } elseif ($pago === 'vencidas') {
-                        $sql .= " AND r.data_vencimento IS NOT NULL 
-                                AND r.data_vencimento < :hoje 
+                        $sql .= " AND r.data_vencimento IS NOT NULL
+                                AND r.data_vencimento < :hoje
                                 AND r.data_pagamento IS NULL";
                         $params[':hoje'] = date('Y-m-d');
                     }

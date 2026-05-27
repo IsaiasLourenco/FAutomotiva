@@ -10,10 +10,10 @@ body {
 }
 
 /* ✅ Botão de voltar suave */
-.btn-voltar-pacientes {
+.btn-voltar-clientes {
     transition: all 0.2s ease;
 }
-.btn-voltar-pacientes:hover {
+.btn-voltar-clientes:hover {
     transform: translateX(-3px);
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
@@ -23,9 +23,9 @@ body {
 }
 
 .btn-imprime {
-   background:transparent; 
-   border:none; 
-   margin:0; 
+   background:transparent;
+   border:none;
+   margin:0;
    padding:0;
 }
 
