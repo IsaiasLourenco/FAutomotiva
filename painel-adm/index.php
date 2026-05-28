@@ -30,6 +30,10 @@ $menu_pessoas = '';
 $grupo_acessos = '';
 $acessos = '';
 $cargos = '';
+$pecas = '';
+$veiculos = '';
+$categorias_pecas = '';
+$marcas = '';
 $forma_pagamento = '';
 $frequencias = '';
 $menu_cadastros = '';
@@ -158,7 +162,7 @@ if ($linhas > 0) {
                             <li class="treeview <?php echo $home ?>"><a href="index.php"><i class="fa fa-home"></i>
                                     <span>Home</span></a></li>
                             <li class="treeview <?php echo $menu_orcamentos ?>">
-                                <a href="#"><i class="far fa-file-alt"></i><span>Orçamentos</span><i
+                                <a href="#"><i class="far fa-file-alt"></i><span> Orçamentos</span><i
                                         class="fa fa-angle-left pull-right"></i></a>
                                 <ul class="treeview-menu">
                                     <?php if ($usuarios != 'ocultar') { ?>
@@ -182,9 +186,21 @@ if ($linhas > 0) {
                                 </ul>
                             </li>
                             <li class="treeview <?php echo $menu_cadastros ?>">
-                                <a href="#"><i class="fa-solid fa-folder-plus"></i><span>Cadastros</span><i
+                                <a href="#"><i class="fa-solid fa-folder-plus"></i><span> Cadastros</span><i
                                         class="fa fa-angle-left pull-right"></i></a>
                                 <ul class="treeview-menu">
+                                    <?php if ($pecas != 'ocultar') { ?>
+                                        <li><a href="index.php?pagina=pecas"><i class="fa fa-angle-right"></i>
+                                                Peças</a></li><?php } ?>
+                                    <?php if ($veiculos != 'ocultar') { ?>
+                                        <li><a href="index.php?pagina=veiculos"><i class="fa fa-angle-right"></i>
+                                                Veículos</a></li><?php } ?>
+                                    <?php if ($categorias_pecas != 'ocultar') { ?>
+                                        <li><a href="index.php?pagina=categorias_pecas"><i class="fa fa-angle-right"></i>
+                                                Categorias de Peças</a></li><?php } ?>
+                                    <?php if ($marcas != 'ocultar') { ?>
+                                        <li><a href="index.php?pagina=marcas"><i class="fa fa-angle-right"></i>
+                                                Marcas</a></li><?php } ?>
                                     <?php if ($forma_pagamento != 'ocultar') { ?>
                                         <li><a href="index.php?pagina=forma_pagamento"><i class="fa fa-angle-right"></i>
                                                 Formas Pagto</a></li><?php } ?>
@@ -198,12 +214,14 @@ if ($linhas > 0) {
                                         <li><a href="index.php?pagina=grupo_acessos"><i class="fa fa-angle-right"></i>
                                                 Grupos</a></li><?php } ?>
                                     <?php if ($acessos != 'ocultar') { ?>
-                                        <li><a href="index.php?pagina=acessos"><i class="fa fa-angle-right"></i> Acessos</a>
-                                        </li><?php } ?>
+                                        <li>
+                                            <a href="index.php?pagina=acessos"><i class="fa fa-angle-right"></i> Acessos</a>
+                                        </li>
+                                    <?php } ?>
                                 </ul>
                             </li>
                             <li class="treeview <?php echo $menu_financeiro ?>">
-                                <a href="#"><i class="fa-solid fa-dollar-sign"></i><span>Financeiro</span><i
+                                <a href="#"><i class="fa-solid fa-dollar-sign"></i><span> Financeiro</span><i
                                         class="fa fa-angle-left pull-right"></i></a>
                                 <ul class="treeview-menu">
                                     <?php if ($receber != 'ocultar') { ?>
@@ -527,10 +545,11 @@ if ($linhas > 0) {
 <div class="modal fade" id="modalConfig" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <div class="modal-header bg-success" style="color: black;">
-                <h4 class="modal-title" id="exampleModalLabel"><i class="fas fa-cog"></i> Editar Configurações</h4>
-                <button id="btn-fechar-config" type="button" class="close mg-t--20" data-dismiss="modal"
-                    aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <div class="modal-header">
+                <h4 class="modal-title" id="exampleModalLabel">Editar Configurações</h4>
+                <button id="btn-fechar-config" type="button" class="close mg-t--20" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
             <form id="form-config">
                 <div class="modal-body">
@@ -551,109 +570,199 @@ if ($linhas > 0) {
                     <div class="row">
                         <div class="col-md-4">
                             <label for="cnpj_sistema">CNPJ</label>
-                            <input type="text" class="form-control cnpj" id="cnpj_sistema" name="cnpj_sistema" value="<?php echo $cnpj_sistema ?>" required>
+                            <input type="text" class="form-control cnpj" name="cnpj" value="<?php echo $cnpj_sistema ?>" required>
                         </div>
                         <div class="col-md-4">
                             <label for="telefone_fixo">Telefone Fixo</label>
                             <input type="text" class="form-control" id="telefone_fixo" name="telefone_fixo" value="<?php echo $telefone_fixo ?>" required>
                         </div>
                         <div class="col-md-4">
-                            <label for="cep_sistema">CEP</label>
-                            <input type="text" class="form-control" id="cep-sistema" name="cep_sistema" value="<?php echo $cep_sistema ?>" required>
+                            <label for="cep-sistema">CEP</label>
+                            <input type="text" class="form-control" id="cep-sistema" name="cep-sistema" value="<?php echo $cep_sistema ?>" required>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-5">
-                            <label for="rua_sistema">Rua</label>
-                            <input type="text" class="form-control" id="rua_sistema" name="rua_sistema" value="<?php echo $rua_sistema ?>" readonly>
+                            <label for="rua-sistema">Rua</label>
+                            <input type="text" class="form-control" id="rua-sistema" name="rua-sistema" value="<?php echo $rua_sistema ?>" readonly>
                         </div>
                         <div class="col-md-2">
-                            <label for="numero_sistema">Número</label>
-                            <input type="text" class="form-control" id="numero_sistema" name="numero_sistema" value="<?php echo $numero_sistema ?>" required>
+                            <label for="numero-sistema">Número</label>
+                            <input type="text" class="form-control" id="numero-sistema" name="numero-sistema" value="<?php echo $numero_sistema ?>" required>
                         </div>
                         <div class="col-md-5">
-                            <label for="bairro_sistema">Bairro</label>
-                            <input type="text" class="form-control" id="bairro_sistema" name="bairro_sistema" value="<?php echo $bairro_sistema ?>" readonly>
+                            <label for="bairro-sistema">Bairro</label>
+                            <input type="text" class="form-control" id="bairro-sistema" name="bairro-sistema" value="<?php echo $bairro_sistema ?>" readonly>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-5">
-                            <label for="cidade_sistema">Cidade</label>
-                            <input type="text" class="form-control" id="cidade_sistema" name="cidade_sistema" value="<?php echo $cidade_sistema ?>" readonly>
+                            <label for="cidade">Cidade</label>
+                            <input type="text" class="form-control" id="cidade-sistema" name="cidade-sistema" value="<?php echo $cidade_sistema ?>" readonly>
                         </div>
                         <div class="col-md-2">
-                            <label for="estado_sistema">Estado</label>
-                            <input type="text" class="form-control" id="estado_sistema" name="estado_sistema"
-                                value="<?php echo $estado_sistema ?>" readonly></div>
-                        <div class="col-md-5"><label for="instagram">Instagram</label><input type="text"
-                                class="form-control" id="instagram" name="instagram"
-                                value="<?php echo $instagram_sistema ?>"></div>
+                            <label for="estado-sistema">Estado</label>
+                            <input type="text" class="form-control" id="estado-sistema" name="estado_sistema" value="<?php echo $estado_sistema ?>" readonly>
+                        </div>
+                        <div class="col-md-5">
+                            <label for="instagram">Instagram</label>
+                            <input type="text" class="form-control" id="instagram" name="instagram" value="<?php echo $instagram_sistema ?>">
+                        </div>
                     </div>
+
+                    <!-- ✅ NOVOS CAMPOS: Multa e Juros Padrão -->
+                    <div class="row border-top pt-3 mt-3">
+                        <div class="col-md-4">
+                            <label for="multa_padrao">Multa Padrão (%)</label>
+                            <input type="text" class="form-control moeda" id="multa_padrao" name="multa_padrao"
+                                value="<?php echo isset($multa_padrao) ? number_format($multa_padrao, 2, ',', '.') : '0,00'; ?>"
+                                placeholder="0,00" maxlength="5">
+                            <small class="text-muted">Ex: 2,00 para 2%</small>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="juros_padrao">Juros Padrão (% ao mês)</label>
+                            <input type="text" class="form-control moeda" id="juros_padrao" name="juros_padrao"
+                                value="<?php echo isset($juros_padrao) ? number_format($juros_padrao, 2, ',', '.') : '0,00'; ?>"
+                                placeholder="0,00" maxlength="5">
+                            <small class="text-muted">Ex: 0,33 para 0,33% a.m.</small>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="marcadagua">Marca d'Água(Rel)</label>
+                            <select name="marcadagua" id="marcadagua" class="form-control">
+                                <option value="sim">Sim</option>
+                                <option value="nao">Não</option>
+                            </select>
+                        </div>
+                    </div>
+
                     <div class="row">
-                        <div class="col-md-3"><label for="tipoRel">Tipo Relatório</label><select class="form-control"
-                                name="tipoRel">
-                                <option value="PDF" <?php if ($tipo_relatorio == 'PDF') { ?> selected <?php } ?>>PDF
-                                </option>
-                                <option value="HTML" <?php if ($tipo_relatorio == 'HTML') { ?> selected <?php } ?>>HTML
-                                </option>
-                            </select></div>
-                        <div class="col-md-3"><label for="pedidos">Contato Whatsapp</label><select class="form-control"
-                                name="contatoZap">
+                        <div class="col-md-3">
+                            <label for="tipoRel">Tipo Relatório</label>
+                            <select class="form-control" name="tipoRel">
+                                <option value="PDF" <?php if ($tipo_relatorio == 'PDF') { ?> selected <?php } ?>>PDF</option>
+                                <option value="HTML" <?php if ($tipo_relatorio == 'HTML') { ?> selected <?php } ?>>HTML</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="pedidos">Contato Whatsapp</label>
+                            <select class="form-control" name="contatoZap">
                                 <option value="Sim" <?php if ($contatoZap == 'Sim') { ?> selected <?php } ?>>Sim</option>
                                 <option value="Não" <?php if ($contatoZap == 'Não') { ?> selected <?php } ?>>Não</option>
-                            </select></div>
-                        <div class="col-md-3"><label for="dev">Desenvolvedor</label><input type="text"
-                                class="form-control" id="dev" name="dev" value="<?php echo $desenvolvedor ?>"></div>
-                        <div class="col-md-3"><label for="site">Site</label><input type="text" class="form-control"
-                                id="site" name="site" value="<?php echo $site_dev ?>"></div>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="dev">Desenvolvedor</label>
+                            <input type="text" class="form-control" id="dev" name="dev" value="<?php echo $desenvolvedor ?>">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="site">Site</label>
+                            <input type="text" class="form-control" id="site" name="site" value="<?php echo $site_dev ?>">
+                        </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-4"><label for="url_sistema">URL para Relatório</label><input type="text"
-                                class="form-control" id="url_sistema" name="url_sistema"
-                                value="<?php echo $url_sistema ?>"></div>
-                        <div class="col-md-4"><label for="chave_pix">Chave PIX</label><input type="text"
-                                class="form-control" id="chave_pix" name="chave_pix" value="<?php echo $chave_pix ?>">
+                        <div class="col-md-4">
+                            <label for="url_sistema">URL para Relatório</label>
+                            <input type="text" class="form-control" id="url_sistema" name="url_sistema"
+                                value="<?php echo $url_sistema ?>">
                         </div>
-                        <div class="col-md-2"><label for="tipo_chave">Tipo Chave</label><select class="form-control"
-                                name="tipo_chave">
-                                <option value="CNPJ" <?php if ($tipo_chave == 'CNPJ') { ?> selected <?php } ?>>CNPJ
-                                </option>
+                        <div class="col-md-4">
+                            <label for="chave_pix">Chave PIX</label>
+                            <input type="text" class="form-control" id="chave_pix" name="chave_pix"
+                                value="<?php echo $chave_pix ?>">
+                        </div>
+                        <div class="col-md-2">
+                            <label for="tipo_chave">Tipo Chave</label>
+                            <select class="form-control" name="tipo_chave">
+                                <option value="CNPJ" <?php if ($tipo_chave == 'CNPJ') { ?> selected <?php } ?>>CNPJ</option>
                                 <option value="CPF" <?php if ($tipo_chave == 'CPF') { ?> selected <?php } ?>>CPF</option>
-                                <option value="Email" <?php if ($tipo_chave == 'Email') { ?> selected <?php } ?>>Email
-                                </option>
-                                <option value="Telefone" <?php if ($tipo_chave == 'Telefone') { ?> selected <?php } ?>>
-                                    Telefone</option>
-                                <option value="Codigo" <?php if ($tipo_chave == 'Codigo') { ?> selected <?php } ?>>Codigo
-                                </option>
-                            </select></div>
+                                <option value="Email" <?php if ($tipo_chave == 'Email') { ?> selected <?php } ?>>Email</option>
+                                <option value="Telefone" <?php if ($tipo_chave == 'Telefone') { ?> selected <?php } ?>>Telefone</option>
+                                <option value="Codigo" <?php if ($tipo_chave == 'Codigo') { ?> selected <?php } ?>>Codigo</option>
+                            </select>
+                        </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-4"><label for="logotipo">Logotipo(*.png)</label><input type="file"
-                                class="form-control" id="logotipo" name="logotipo" onchange="carregarImgLogotipo()">
+                        <div class="col-md-3">
+                            <label for="api_whatsapp">API Whatsapp
+                                <a href="#" onclick="testarAPIWhatsapp()" title="Testar disparo API">
+                                    <i class="fab fa-whatsapp text-success"></i>
+                                </a>
+                            </label>
+                            <select name="api_whatsapp" id="api_whatsapp" class="form-control">
+                                <option value="Não" <?php if ($api_whatsapp == 'Não') { ?> selected <?php } ?>>Não</option>
+                                <option value="menuia" <?php if ($api_whatsapp == 'menuia') { ?> selected <?php } ?>>Menuia</option>
+                                <option value="wm" <?php if ($api_whatsapp == 'wm') { ?> selected <?php } ?>>WordMessages</option>
+                            </select>
                         </div>
-                        <div class="col-md-2"><img src="../../img/<?php echo $logotipo; ?>" alt="Logotipo"
-                                style="width: 80px;" id="target-logo"></div>
-                        <div class="col-md-4"><label for="icone">Ícone(*.png)</label><input type="file"
-                                class="form-control" id="icone" name="icone" onchange="carregarImgIcone()"></div>
-                        <div class="col-md-2"><img src="../../img/<?php echo $icone ?>" alt="Icone" style="width: 80px;"
-                                id="target-ico"></div>
+                        <div class="col-md-3">
+                            <label for="horas_confirmacao">Horas Confirmação</label>
+                            <input type="number" class="form-control" id="horas_confirmacao" name="horas_confirmacao" value="<?php echo $horas_confirmacao?>">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="token_whatsapp">Token(AppKey)</label>
+                            <input type="text" class="form-control" id="token_whatsapp" name="token_whatsapp" value="<?php echo $token_whatsapp?>">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="instancia_whatsapp">Instância(AuthKey)</label>
+                            <input type="text" class="form-control" id="instancia_whatsapp" name="instancia_whatsapp" value="<?php echo $instancia_whatsapp?>">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <label for="ocultar_mobile">Ocultar Itens Mobile</label>
+                            <select name="ocultar_mobile" id="ocultar_mobile" class="form-control">
+                                <option value="Sim" <?php if ($ocultar_mobile == 'Sim') { ?> selected <?php } ?>>Sim</option>
+                                <option value="Não" <?php if ($ocultar_mobile == 'Não') { ?> selected <?php } ?>>Não</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="alterar_acessos">Alterar Acessos</label>
+                            <select name="alterar_acessos" id="alterar_acessos" class="form-control">
+                                <option value="Sim" <?php if ($alterar_acessos == 'Sim') { ?> selected <?php } ?>>Sim</option>
+                                <option value="Não" <?php if ($alterar_acessos == 'Não') { ?> selected <?php } ?>>Não</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label for="logotipo">Logotipo(*.png)</label>
+                            <input type="file" class="form-control" id="logotipo" name="logotipo" onchange="carregarImgLogotipo()">
+                        </div>
+                        <div class="col-md-2">
+                            <img src="../../img/<?php echo $logotipo; ?>" alt="Logotipo" style="width: 80px;" id="target-logo">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="icone">Ícone(*.png)</label>
+                            <input type="file" class="form-control" id="icone" name="icone" onchange="carregarImgIcone()">
+                        </div>
+                        <div class="col-md-2">
+                            <img src="../../img/<?php echo $icone ?>" alt="Icone" style="width: 80px;" id="target-ico">
+                        </div>
                         <input type="hidden" name="id">
                     </div>
                     <div class="row">
-                        <div class="col-md-4"><label for="logo_rel">Logotipo Relatório(*.jpg)</label><input type="file"
-                                class="form-control" id="logo-rel" name="logo_rel" onchange="carregarImgLogoRel()">
+                        <div class="col-md-4">
+                            <label for="logo_rel">Logotipo Relatório(*.jpg)</label>
+                            <input type="file" class="form-control" id="logo-rel" name="logo_rel" onchange="carregarImgLogoRel()">
                         </div>
-                        <div class="col-md-2"><img src="../../img/<?php echo $logo_rel; ?>" alt="Logotipo do Relatório"
-                                style="width: 80px;" id="target-logo-rel"></div>
-                        <div class="col-md-4"><label for="assinatura">Assinatura(*.jpg)</label><input type="file"
-                                class="form-control" id="assinatura" name="assinatura"
-                                onchange="carregarImgAssinatura()"></div>
-                        <div class="col-md-2"><img src="../../img/<?php echo $assinatura; ?>" alt="Assinatura"
-                                style="width: 80px;" id="target-assinatura"></div>
+                        <div class="col-md-2">
+                            <img src="../../img/<?php echo $logo_rel; ?>" alt="Logotipo do Relatório" style="width: 80px;"
+                                id="target-logo-rel">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="assinatura">Assinatura(*.jpg)</label>
+                            <input type="file" class="form-control" id="assinatura" name="assinatura" onchange="carregarImgAssinatura()">
+                        </div>
+                        <div class="col-md-2">
+                            <img src="../../img/<?php echo $assinatura; ?>" alt="Assinatura" style="width: 80px;"
+                                id="target-assinatura">
+                        </div>
                     </div>
                     <div id="msg-config" class="centro"></div>
                 </div>
-                <div class="modal-footer centro"><button type="submit" class="btn btn-primary">Salvar</button></div>
+                <div class="modal-footer centro">
+                    <button type="submit" class="btn btn-primary btn-sm">Salvar</button>
+                </div>
             </form>
         </div>
     </div>

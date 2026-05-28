@@ -1,6 +1,6 @@
 <?php
 session_start();
-$tabela = 'forma_pagamento';
+$tabela = 'marcas';
 require_once("../../../conexao.php");
 
 // Verifica se está logado
@@ -10,19 +10,21 @@ if (!isset($_SESSION['id_user'])) {
 }
 
 // Recebe os dados do formulário
-$id = @$_POST['id'] ?? '';
-$nome = $_POST['nome'] ?? '';
-$taxa = $_POST['taxa'] ?? '';
-
-// ✅ Converte "2,99" ou "2.99" para float correto
-$taxa = str_replace(',', '.', $taxa);  // Troca vírgula por ponto
-$taxa = floatval($taxa);               // Converte para número
+$id             = $_POST['id'] ?? '';
+$nome           = trim($_POST['nome'] ?? '');
+$nota_qualidade = $_POST['nota_qualidade'] ?? 5;
+$ativo          = $_POST['ativo'] ?? 1;
 
 // Validações básicas
 if (empty($nome)) {
-    echo "Preencha os campos obrigatórios!";
+    echo "Preencha o nome da marca!";
     exit;
 }
+
+// Valida nota entre 0 e 10
+$nota_qualidade = intval($nota_qualidade);
+if ($nota_qualidade < 0) $nota_qualidade = 0;
+if ($nota_qualidade > 10) $nota_qualidade = 10;
 
 // Validação: nome único (exceto o próprio registro)
 if (!empty($id) && $id != 0) {
@@ -35,23 +37,23 @@ if (!empty($id) && $id != 0) {
 }
 $nome_buscado->execute();
 if ($nome_buscado->rowCount() > 0) {
-    echo "Este Nome já está cadastrado!";
+    echo "Esta marca já está cadastrada!";
     exit;
 }
 
 try {
     if (!empty($id) && $id != 0) {
-        // UPDATE - Atualizar registro existente
-        $query = $pdo->prepare("UPDATE $tabela SET nome = :nome, taxa = :taxa WHERE id = :id");
-        $query->bindValue(":nome", $nome);
-        $query->bindValue(":taxa", $taxa);
+        // UPDATE
+        $query = $pdo->prepare("UPDATE $tabela SET nome = :nome, nota_qualidade = :nota, ativo = :ativo WHERE id = :id");
         $query->bindValue(":id", $id, PDO::PARAM_INT);
     } else {
-        // INSERT - Cadastrar novo registro
-        $query = $pdo->prepare("INSERT INTO $tabela (nome, taxa) VALUES (:nome, :taxa)");
-        $query->bindValue(":nome", $nome);
-        $query->bindValue(":taxa", $taxa);
+        // INSERT
+        $query = $pdo->prepare("INSERT INTO $tabela (nome, nota_qualidade, ativo) VALUES (:nome, :nota, :ativo)");
     }
+
+    $query->bindValue(":nome", $nome);
+    $query->bindValue(":nota", $nota_qualidade, PDO::PARAM_INT);
+    $query->bindValue(":ativo", $ativo, PDO::PARAM_INT);
 
     $query->execute();
 
@@ -61,4 +63,3 @@ try {
     echo "Erro ao salvar: " . $e->getMessage();
 }
 ?>
-

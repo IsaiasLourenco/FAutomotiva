@@ -21,6 +21,10 @@ $fornecedores       = 'ocultar';
 
 //grupo cadastros
 $menu_cadastros     = 'ocultar';
+$pecas              = 'ocultar';
+$veiculos           = 'ocultar';
+$categorias_pecas   = 'ocultar';
+$marcas             = 'ocultar';
 $formas_pagamento   = 'ocultar';
 $frequencias        = 'ocultar';
 $cargos             = 'ocultar';
@@ -63,6 +67,14 @@ if ($total_permissoes > 0) {
                 $clientes = '';
             } else if ($chave_acesso == 'fornecedores') {
                 $fornecedores = '';
+            } else if ($chave_acesso == 'categorias_pecas') {
+                $categorias_pecas = '';
+            } else if ($chave_acesso == 'marcas') {
+                $marcas = '';
+            } else if ($chave_acesso == 'pecas') {
+                $pecas = '';
+            } else if ($chave_acesso == 'veiculos') {
+                $veiculos = '';
             } else if ($chave_acesso == 'formas_pagamento') {
                 $formas_pagamento = '';
             } else if ($chave_acesso == 'frequencias') {
@@ -99,6 +111,14 @@ if ($home != 'ocultar') {
     $pag_inicial = 'clientes';
 } else if ($fornecedores != 'ocultar') {
     $pag_inicial = 'fornecedores';
+} else if ($pecas != 'ocultar') {
+    $pag_inicial = 'pecas';
+} else if ($veiculos != 'ocultar') {
+    $pag_inicial = 'veiculos';
+} else if ($categorias_pecas != 'ocultar') {
+    $pag_inicial = 'categorias_pecas';
+} else if ($marcas != 'ocultar') {
+    $pag_inicial = 'marcas';
 } else if ($formas_pagamento != 'ocultar') {
     $pag_inicial = 'formas_pagamento';
 } else if ($frequencias != 'ocultar') {
@@ -134,7 +154,11 @@ if ($usuarios == 'ocultar' and $clientes == 'ocultar' and $fornecedores == 'ocul
 
 // ✅ Define visibilidade do grupo CADASTROS (CORREÇÃO: inclui todos os itens)
 if (
-    $formas_pagamento == 'ocultar'
+    $pecas == 'ocultar'
+    and $veiculos == 'ocultar'
+    and $categorias_pecas == 'ocultar'
+    and $marcas == 'ocultar'
+    and $formas_pagamento == 'ocultar'
     and $frequencias == 'ocultar'
     and $cargos == 'ocultar'
     and $grupo_acessos == 'ocultar'

@@ -20,7 +20,7 @@ $pag = 'clientes';
 <body>
     <div class="main-page margin-mobile">
         <a onclick="inserir()" href="#" type="button" class="btn btn-primary btn-sm">
-            <span class="fa fa-plus"></span>
+            <span class="fas fa-user-friends"></span>
             Cliente
         </a>
 
@@ -63,7 +63,10 @@ $pag = 'clientes';
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header bg-success" style="color: black;">
-                <h4 class="modal-title"><span id="titulo_inserir"></span></h4>
+                <h4 class="modal-title">
+                    <i class="fas fa-user-friends"></i>
+                    <span id="titulo_inserir"></span>
+                </h4>
                 <button id="btn-fechar" type="button" class="close mg-t--20" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -145,7 +148,7 @@ $pag = 'clientes';
 <div class="modal fade" id="modalDados" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
-            <div class="modal-header bg-success text-white">
+            <div class="modal-header bg-success" style="color: black;">
                 <h4 class="modal-title">
                     <span id="nome_dados-paciente"></span>
                 </h4>

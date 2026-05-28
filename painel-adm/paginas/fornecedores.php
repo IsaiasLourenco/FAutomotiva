@@ -57,7 +57,7 @@ $pag = 'fornecedores';
 <div class="modal fade" id="modalForm" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
-            <div class="modal-header bg-success texto-preto">
+            <div class="modal-header bg-success" style="color: black;">
                 <h4 class="modal-title">
                     <i class="fas fa-truck"></i>&nbsp;<span id="titulo_inserir"></span>
                 </h4>
@@ -146,7 +146,7 @@ $pag = 'fornecedores';
 <div class="modal fade" id="modalDados" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
-            <div class="modal-header bg-success texto-preto">
+            <div class="modal-header bg-success" style="color: black;">
                 <h4 class="modal-title">
                     <i class="fas fa-truck"></i>&nbsp;<span id="nome_dados-for"></span>
                 </h4>

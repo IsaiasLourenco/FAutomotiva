@@ -166,7 +166,12 @@ $pecas_cadastradas = $pdo->query("SELECT COUNT(*) FROM pecas WHERE ativo = 1")->
 
 <!-- JS do módulo de orçamento -->
 <script>
-const FORNECEDORES = ['Loja A', 'Loja B', 'Loja C', 'Loja D', 'Loja E'];
+// ✅ Fornecedores dinâmicos do banco (passados via PHP)
+const FORNECEDORES = [<?php
+    foreach ($fornecedores as $f) {
+        echo "'" . addslashes($f['nome']) . "',";
+    }
+?>].slice(0, -1); // Remove última vírgula
 let itens = [];
 let pecaSelecionada = null;
 let clienteSelecionado = null;
@@ -176,7 +181,7 @@ let veiculoSelecionado = null;
 $('#busca_cliente').on('input', function() {
     const val = $(this).val().trim();
     if (val.length < 2) { $('#autocomplete-clientes').remove(); return; }
-    $.get('../api/buscar_clientes.php', { q: val }, function(data) {
+    $.get('api/buscar_clientes.php', { q: val }, function(data) {
         let lista = $('#autocomplete-clientes');
         if (!lista.length) {
             lista = $('<div id="autocomplete-clientes" class="autocomplete-list"></div>');
@@ -199,7 +204,7 @@ $('#busca_cliente').on('input', function() {
 $('#busca_placa').on('input', function() {
     const val = $(this).val().trim().toUpperCase();
     if (val.length < 3) { $('#autocomplete-veiculos').remove(); return; }
-    $.get('../api/buscar_veiculos.php', { q: val }, function(data) {
+    $.get('api/buscar_veiculos.php', { q: val }, function(data) {
         let lista = $('#autocomplete-veiculos');
         if (!lista.length) {
             lista = $('<div id="autocomplete-veiculos" class="autocomplete-list"></div>');
@@ -222,7 +227,7 @@ $('#busca_placa').on('input', function() {
 $('#busca_peca').on('input', function() {
     const val = $(this).val().trim();
     if (val.length < 2) { $('#autocomplete-pecas').empty(); return; }
-    $.get('../api/buscar_pecas.php', { q: val }, function(data) {
+    $.get('api/buscar_pecas.php', { q: val }, function(data) {
         const lista = $('#autocomplete-pecas').empty();
         data.forEach(p => {
             const item = $(`<div class="autocomplete-item">${p.nome_padrao}</div>`);
@@ -267,9 +272,9 @@ function renderizarTabela() {
             <td><strong>${item.nome}</strong></td>
             <td><input type="number" class="form-control form-control-sm" value="${item.qtd}" min="1" onchange="itens[${idx}].qtd=parseInt(this.value)||1; recalcular()"></td>
             <td><input type="text" class="form-control form-control-sm" value="${item.obs}" onchange="itens[${idx}].obs=this.value"></td>`;
-        FORNECEDORES.forEach((loja, i) => {
-            tr += `<td><input type="text" class="form-control form-control-sm moeda" value="0,00" onchange="itens[${idx}].precos[${i}]=limparMoeda(this.value)||0; recalcular()"></td>`;
-        });
+            <?php foreach ($fornecedores as $fornecedor): ?>
+                <th style="width:<?php echo $largura_fornecedor; ?>%;"><?php echo htmlspecialchars($fornecedor['nome']); ?></th>
+            <?php endforeach; ?>
         tr += `<td id="melhor_${idx}" class="text-center fw-bold">-</td>
             <td class="text-center"><button class="btn btn-sm btn-danger" onclick="removerItem(${idx})"><i class="fa fa-trash"></i></button></td>
         </tr>`;
@@ -316,7 +321,7 @@ function salvarOrcamento() {
     if (!itens.length) { alert('Adicione pelo menos uma peça'); return; }
 
     $.ajax({
-        url: '../api/salvar_orcamento.php',
+        url: 'api/salvar_orcamento.php',
         method: 'POST',
         data: {
             cliente_id: cid, veiculo_id: vid,
