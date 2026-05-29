@@ -325,7 +325,7 @@ $largura_fornecedor = $num_fornecedores > 0 ? max(12, 55 / $num_fornecedores) : 
             const val = $(this).val().trim().toUpperCase();
             const cid = $('#cliente_id').val();
             if (val.length < 3 && !cid) { $('#autocomplete-veiculos').empty().hide(); return; }
-            $.get('buscar_veiculos.php', { q: val, cliente_id: cid }, function (data) {
+            $.get('api/buscar_veiculos.php', { q: val, cliente_id: cid }, function (data) {
                 const lista = $('#autocomplete-veiculos').empty();
                 if (data.length === 0) { lista.hide(); return; }
                 data.forEach(v => {

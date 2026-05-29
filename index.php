@@ -13,7 +13,7 @@ require_once("conexao.php");
     <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     <!-- Icone -->
-    <link rel="shortcut icon" href="img/icone.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="img/ico.png" type="image/x-icon">
     <!-- CSS -->
     <link rel="stylesheet" href="css/login.css">
 </head>
@@ -52,10 +52,6 @@ require_once("conexao.php");
                 class="btn btn-recuperar text-white w-100 mb-2">
                 <i class="bi bi-key"></i> Recuperar senha
             </button>
-            <!-- VOLTAR -->
-            <a href="index.html" class="btn btn-outline-secondary w-100">
-                <i class="bi bi-arrow-left"></i> Voltar para o site
-            </a>
         </div>
     </div>
     <!-- MODAL -->

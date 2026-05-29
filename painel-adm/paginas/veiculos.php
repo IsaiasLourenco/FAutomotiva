@@ -98,11 +98,15 @@ $pag = 'veiculos';
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <label for="motor">Motor</label>
                             <input type="text" class="form-control" id="motor" name="motor" maxlength="50">
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-4">
+                            <label for="cor">Cor</label>
+                            <input type="text" class="form-control" id="cor" name="cor" maxlength="30" placeholder="Ex: Prata">
+                        </div>
+                        <div class="col-md-4">
                             <label for="km_atual">KM Atual</label>
                             <input type="number" class="form-control" id="km_atual" name="km_atual" min="0">
                         </div>
@@ -147,11 +151,12 @@ $pag = 'veiculos';
                 <div class="row br-btt">
                     <div class="col-md-4"><b>Marca: </b><span id="marca_dados-vei"></span></div>
                     <div class="col-md-4"><b>Ano: </b><span id="ano_dados-vei"></span></div>
-                    <div class="col-md-4"><b>Motor: </b><span id="motor_dados-vei"></span></div>
+                    <div class="col-md-4"><b>Cor: </b><span id="cor_dados-vei"></span></div>
                 </div>
                 <div class="row br-btt">
-                    <div class="col-md-6"><b>KM Atual: </b><span id="km_dados-vei"></span></div>
-                    <div class="col-md-6"><b>Cadastro: </b><span id="data_dados-vei"></span></div>
+                    <div class="col-md-4"><b>Motor: </b><span id="motor_dados-vei"></span></div>
+                    <div class="col-md-4"><b>KM Atual: </b><span id="km_dados-vei"></span></div>
+                    <div class="col-md-4"><b>Cadastro: </b><span id="data_dados-vei"></span></div>
                 </div>
                 <div class="row">
                     <div class="col-md-12"><b>Observações: </b><span id="obs_dados-vei"></span></div>
@@ -173,14 +178,14 @@ $(document).ready(function() {
         if (placa.length >= 6) {
             $.getJSON('api/buscar_veiculo_por_placa.php', { placa }, function(data) {
                 if (data.encontrado) {
-                    // Preenche os campos automaticamente
                     if (confirm('Veículo encontrado!\n' + data.modelo + ' - ' + data.cliente_nome + '\nDeseja preencher os dados?')) {
-                        $('#id').val(data.id); // Se for edição, usa o ID existente
+                        $('#id').val(data.id);
                         $('#cliente_id').val(data.cliente_id);
                         $('#marca').val(data.marca);
                         $('#modelo').val(data.modelo);
                         $('#ano').val(data.ano);
                         $('#motor').val(data.motor);
+                        $('#cor').val(data.cor || '');  // ✅ Cor adicionada
                         $('#km_atual').val(data.km_atual);
                         $('#observacoes').val(data.observacoes);
                     }
@@ -189,7 +194,7 @@ $(document).ready(function() {
         }
     });
 
-    // ✅ Também busca no autocomplete do orçamento (se houver campo #veiculo_placa)
+    // ✅ Também busca no autocomplete do orçamento
     if ($('#veiculo_placa').length) {
         $('#veiculo_placa').on('blur', function() {
             const placa = $(this).val().replace(/[^A-Z0-9]/g, '');
@@ -201,8 +206,8 @@ $(document).ready(function() {
                         $('#veiculo_modelo').val(data.modelo);
                         $('#veiculo_ano').val(data.ano);
                         $('#veiculo_motor').val(data.motor);
+                        $('#veiculo_cor').val(data.cor || '');  // ✅ Cor adicionada
                         $('#veiculo_km').val(data.km_atual);
-                        // Se tiver campo de cliente, preenche também
                         if ($('#cliente_id').length && data.cliente_id) {
                             $('#cliente_id').val(data.cliente_id);
                         }

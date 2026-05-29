@@ -9,7 +9,7 @@ if ($linhas > 0) {
 
 echo <<<HTML
 
-	<table class="table table-hover tabela-pequena" id="tabela">
+	<table class="table table-hover tabela_pequena" id="tabela">
 
 	    <thead>
 

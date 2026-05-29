@@ -11,65 +11,65 @@ if (!isset($_SESSION['id_user'])) {
 
 // Recebe os dados do formulário
 $id           = @$_POST['id'];
-$nome         = $_POST['nome'] ?? '';
-$email        = $_POST['email'] ?? '';
-$cnpj         = $_POST['cnpj'] ?? '';
-$telefone     = $_POST['telefone'] ?? '';
-$cep          = $_POST['cep'] ?? '';
-$rua          = $_POST['rua'] ?? '';
-$numero       = $_POST['numero'] ?? '';
-$bairro       = $_POST['bairro'] ?? '';
-$cidade       = $_POST['cidade'] ?? '';
-$estado       = $_POST['estado'] ?? '';
-$ativo        = $_POST['ativo'] ?? '1';
-$observacoes  = $_POST['obs'] ?? '';
+$nome         = trim($_POST['nome'] ?? '');
+$email        = trim($_POST['email'] ?? '');
+$cnpj         = trim($_POST['cnpj'] ?? '');
+$telefone     = trim($_POST['telefone'] ?? '');
+$cep          = trim($_POST['cep'] ?? '');
+$rua          = trim($_POST['rua'] ?? '');
+$numero       = trim($_POST['numero'] ?? '');
+$bairro       = trim($_POST['bairro'] ?? '');
+$cidade       = trim($_POST['cidade'] ?? '');
+$estado       = trim($_POST['estado'] ?? '');
+$ativo        = $_POST['ativo'] ?? 'Sim';
+$observacoes  = trim($_POST['observacoes'] ?? '');
 
 // Validações básicas
-if (empty($nome) || empty($cnpj) || empty($ativo)) {
-    echo "Preencha os campos obrigatórios!";
+if (empty($nome) || empty($cnpj)) {
+    echo "Preencha Nome e CNPJ!";
     exit;
 }
 
-// ✅ Validação de CNPJ único (CNPJ é o identificador único, não email)
-$cnpj_buscado = $pdo->prepare("SELECT id FROM $tabela WHERE cnpj = :cnpj");
-$cnpj_buscado->bindValue(":cnpj", $cnpj);
-$cnpj_buscado->execute();
-$resultado_cnpj = $cnpj_buscado->fetch(PDO::FETCH_ASSOC);
-
-if ($resultado_cnpj && $resultado_cnpj['id'] != $id) {
+// Validação: CNPJ único (exceto o próprio registro)
+if (!empty($id) && $id != 0) {
+    $stmt = $pdo->prepare("SELECT id FROM $tabela WHERE cnpj = :cnpj AND id != :id");
+    $stmt->execute(['cnpj' => $cnpj, 'id' => $id]);
+} else {
+    $stmt = $pdo->prepare("SELECT id FROM $tabela WHERE cnpj = :cnpj");
+    $stmt->execute(['cnpj' => $cnpj]);
+}
+if ($stmt->rowCount() > 0) {
     echo "Este CNPJ já está cadastrado!";
     exit;
 }
 
 try {
     if (!empty($id) && $id != 0) {
-        // ✅ UPDATE - Atualizar fornecedor existente
-        $query = $pdo->prepare("UPDATE $tabela SET 
-            nome = :nome, 
-            email = :email, 
-            cnpj = :cnpj, 
+        // UPDATE
+        $query = $pdo->prepare("UPDATE $tabela SET
+            nome = :nome,
+            email = :email,
+            cnpj = :cnpj,
             telefone = :telefone,
-            cep = :cep, 
-            rua = :rua, 
-            numero = :numero, 
+            cep = :cep,
+            rua = :rua,
+            numero = :numero,
             bairro = :bairro,
-            cidade = :cidade, 
-            estado = :estado, 
+            cidade = :cidade,
+            estado = :estado,
             ativo = :ativo,
             observacoes = :observacoes
             WHERE id = :id");
-        
         $query->bindValue(":id", $id, PDO::PARAM_INT);
-        
     } else {
-        // ✅ INSERT - Cadastrar novo fornecedor
-        $query = $pdo->prepare("INSERT INTO $tabela 
-            (nome, email, cnpj, telefone, cep, rua, numero, bairro, cidade, estado, ativo, observacoes, data_criacao) 
-            VALUES 
+        // INSERT
+        $query = $pdo->prepare("INSERT INTO $tabela
+            (nome, email, cnpj, telefone, cep, rua, numero, bairro, cidade, estado, ativo, observacoes, data_criacao)
+            VALUES
             (:nome, :email, :cnpj, :telefone, :cep, :rua, :numero, :bairro, :cidade, :estado, :ativo, :observacoes, NOW())");
     }
 
-    // ✅ Bind dos campos (COMUNS para INSERT e UPDATE)
+    // Bind dos campos
     $query->bindValue(":nome", $nome);
     $query->bindValue(":email", $email);
     $query->bindValue(":cnpj", $cnpj);
@@ -84,9 +84,8 @@ try {
     $query->bindValue(":observacoes", $observacoes);
 
     $query->execute();
-
     echo "Salvo com Sucesso";
-    
+
 } catch (Exception $e) {
     echo "Erro ao salvar: " . $e->getMessage();
 }
