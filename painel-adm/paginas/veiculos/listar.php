@@ -17,6 +17,7 @@ echo <<<HTML
 	            <th>Placa</th>
 	            <th>Modelo</th>
 	            <th>Marca</th>
+	            <th>Cor</th>
 	            <th>Ano</th>
 	            <th>Cliente</th>
 	            <th>Ações</th>
@@ -30,12 +31,10 @@ HTML;
         $placa = $res[$i]['placa'];
         $modelo = $res[$i]['modelo'] ?? '-';
         $marca = $res[$i]['marca'] ?? '-';
+        $cor = $res[$i]['cor'] ?? '-';  // ✅ Captura cor
         $ano = $res[$i]['ano'] ?? '-';
-
-        // ✅ CAPTURAR AS VARIÁVEIS CORRETAS
         $cliente_id = $res[$i]['cliente_id'] ?? '';
         $cliente_nome = $res[$i]['cliente_nome'] ?? 'Não vinculado';
-
         $motor = $res[$i]['motor'] ?? '-';
         $km = $res[$i]['km_atual'] ?? '-';
         $obs = $res[$i]['observacoes'] ?? '-';
@@ -48,10 +47,11 @@ echo <<<HTML
                 </td>
                 <td>{$modelo}</td>
                 <td>{$marca}</td>
+                <td>{$cor}</td>  <!-- ✅ Exibe cor -->
                 <td>{$ano}</td>
                 <td>{$cliente_nome}</td>
                 <td>
-                    <a href="#" onclick="editar('{$id}','{$placa}','{$cliente_id}','{$cliente_nome}','{$marca}','{$modelo}','{$ano}','{$motor}','{$km}','{$obs}')" title="Editar">
+                    <a href="#" onclick="editar('{$id}','{$placa}','{$cliente_id}','{$cliente_nome}','{$marca}','{$modelo}','{$ano}','{$cor}','{$motor}','{$km}','{$obs}')" title="Editar">
                         <i class="fa fa-edit text-primary ico-grande"></i>
                     </a>
                     <li class="dropdown head-dpdn2" style="display: inline-block;">
@@ -68,7 +68,7 @@ echo <<<HTML
                             </li>
                         </ul>
                     </li>
-                    <a href="#" onclick="mostrar('{$placa}','{$cliente_nome}','{$marca}','{$modelo}','{$ano}','{$motor}','{$km}','{$obs}')" title="Ver Detalhes">
+                    <a href="#" onclick="mostrar('{$placa}','{$cliente_nome}','{$marca}','{$modelo}','{$ano}','{$cor}','{$motor}','{$km}','{$obs}')" title="Ver Detalhes">
                         <i class="fa fa-info-circle text-dark ico-grande"></i>
                     </a>
                 </td>
@@ -99,30 +99,29 @@ HTML;
 </script>
 
 <script type="text/javascript">
-    function editar(id, placa, cliente_id, cliente_nome, marca, modelo, ano, motor, km, obs) {
+    function editar(id, placa, cliente_id, cliente_nome, marca, modelo, ano, cor, motor, km, obs) {
         $('#mensagem').text('');
         $('#titulo_inserir').text('Editar Veículo');
         $('#id').val(id);
         $('#placa').val(placa);
-
-        // ✅ Seleciona pelo ID no select
         $('#cliente_id').val(cliente_id !== '' ? cliente_id : '');
-
         $('#marca').val(marca !== '-' ? marca : '');
         $('#modelo').val(modelo !== '-' ? modelo : '');
         $('#ano').val(ano !== '-' ? ano : '');
+        $('#cor').val(cor !== '-' ? cor : '');  // ✅ Preenche cor
         $('#motor').val(motor !== '-' ? motor : '');
         $('#km_atual').val(km !== '-' ? km : '');
         $('#observacoes').val(obs !== '-' ? obs : '');
         $('#modalForm').modal('show');
     }
 
-    function mostrar(placa, cliente_nome, marca, modelo, ano, motor, km, obs) {
+    function mostrar(placa, cliente_nome, marca, modelo, ano, cor, motor, km, obs) {
         $('#placa_dados-vei').text(placa);
         $('#cliente_dados-vei').text(cliente_nome !== 'Não vinculado' ? cliente_nome : 'Não informado');
         $('#marca_dados-vei').text(marca !== '-' ? marca : 'Não informado');
         $('#modelo_dados-vei').text(modelo !== '-' ? modelo : 'Não informado');
         $('#ano_dados-vei').text(ano !== '-' ? ano : 'Não informado');
+        $('#cor_dados-vei').text(cor !== '-' ? cor : 'Não informado');  // ✅ Exibe cor
         $('#motor_dados-vei').text(motor !== '-' ? motor : 'Não informado');
         $('#km_dados-vei').text(km !== '-' ? km + ' km' : 'Não informado');
         $('#obs_dados-vei').text(obs !== '-' ? obs : 'Nenhuma');
@@ -136,6 +135,7 @@ HTML;
         $('#marca').val('');
         $('#modelo').val('');
         $('#ano').val('');
+        $('#cor').val('');  // ✅ Limpa cor
         $('#motor').val('');
         $('#km_atual').val('');
         $('#observacoes').val('');

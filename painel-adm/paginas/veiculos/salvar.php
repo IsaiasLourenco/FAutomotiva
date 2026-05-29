@@ -11,14 +11,14 @@ $placa         = strtoupper(trim($_POST['placa'] ?? ''));
 $marca         = trim($_POST['marca'] ?? '');
 $modelo        = trim($_POST['modelo'] ?? '');
 $ano           = trim($_POST['ano'] ?? '');
+$cor           = trim($_POST['cor'] ?? '');  // ✅ Recebe cor
 $motor         = trim($_POST['motor'] ?? '');
 $km_atual      = $_POST['km_atual'] ?? null;
 $observacoes   = trim($_POST['observacoes'] ?? '');
 
-// Validações básicas
 if (empty($cliente_id) || empty($placa)) { echo "Preencha cliente e placa!"; exit; }
 
-// Validação: placa única (exceto o próprio)
+// Validação: placa única
 if (!empty($id) && $id != 0) {
     $stmt = $pdo->prepare("SELECT id FROM $tabela WHERE placa = :placa AND id != :id");
     $stmt->execute(['placa' => $placa, 'id' => $id]);
@@ -37,6 +37,7 @@ try {
             marca = :marca,
             modelo = :modelo,
             ano = :ano,
+            cor = :cor,
             motor = :motor,
             km_atual = :km,
             observacoes = :obs
@@ -45,9 +46,9 @@ try {
     } else {
         // INSERT
         $query = $pdo->prepare("INSERT INTO $tabela
-            (cliente_id, placa, marca, modelo, ano, motor, km_atual, observacoes)
+            (cliente_id, placa, marca, modelo, ano, cor, motor, km_atual, observacoes)
             VALUES
-            (:cliente, :placa, :marca, :modelo, :ano, :motor, :km, :obs)");
+            (:cliente, :placa, :marca, :modelo, :ano, :cor, :motor, :km, :obs)");
     }
 
     $query->bindValue(':cliente', $cliente_id, PDO::PARAM_INT);
@@ -55,6 +56,7 @@ try {
     $query->bindValue(':marca', $marca ?: null);
     $query->bindValue(':modelo', $modelo ?: null);
     $query->bindValue(':ano', $ano ?: null);
+    $query->bindValue(':cor', $cor ?: null);  // ✅ Salva cor
     $query->bindValue(':motor', $motor ?: null);
     $query->bindValue(':km', $km_atual ?: null, $km_atual ? PDO::PARAM_INT : PDO::PARAM_NULL);
     $query->bindValue(':obs', $observacoes ?: null);
